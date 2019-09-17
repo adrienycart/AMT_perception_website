@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - AMT Listening test</title>
+      {% else %}
+      <title>AMT Listening test</title>
+      {% endif %}
+
+    </head>
+    <body>
+        <div>Automatic Music Transcription Listening Test</div><br>
+        <a href="{{ url_for('index') }}">Home</a>
+        {% if current_user.is_anonymous %}
+        <a href="{{ url_for('login') }}">Log In</a>
+        <a href="{{ url_for('login') }}">Sign In</a>
+        {% else %}
+        <a href="{{ url_for('user', username=current_user.username) }}">Profile</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+
+
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+
+        {% block content %}{% endblock %}
+    </body>
+</html>

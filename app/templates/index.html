@@ -1,10 +1,21 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>AMT listening test - Question {{ question.number }} </title>
-    </head>
-    <body>
-        <h1> Question {{ question.number }}: </h1>
-        <h2>Do you prefer {{ question.systems[0] }} or {{ question.systems[1] }} ?</h2>
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% if not current_user.is_anonymous %}
+    <h1> Welcome back {{current_user.username}} ! </h1>
+    {% else %}
+    <h1>Welcome !</h1>
+    {%endif%}
+
+    <p> Welcome message </p>
+
+    {% if current_user.is_anonymous %}
+    <a href="{{ url_for('register') }}" > New participant </a>
+    <a href="{{ url_for('login') }}">Returning participant</a>
+    {% else %}
+    <a href="{{ url_for('logout') }}">Logout</a>
+    {% endif %}
+
+
+{% endblock %}
