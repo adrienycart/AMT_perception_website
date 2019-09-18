@@ -11,14 +11,19 @@
     <p> Welcome message </p>
 
     {% if not current_user.is_anonymous %}
-    <a href="{{ url_for('instructions') }}" > Start!</a>
+      {% if not current_user.gold_msi_completed %}
+      <a href="{{ url_for('music_background') }}" > Start!</a>
+      {% else %}
+      <a href="{{ url_for('instructions') }}" > Start!</a>
+      {%endif%}
     {%endif%}
+
+    <br>
 
     {% if current_user.is_anonymous %}
     <a href="{{ url_for('register') }}" > New participant </a>
     <a href="{{ url_for('login') }}">Returning participant</a>
-    {% else %}
-    <a href="{{ url_for('logout') }}">Logout</a>
+
     {% endif %}
 
     <hr>

@@ -2,6 +2,16 @@
 
 {% block content %}
 
+    {% if not current_user.gold_msi_completed %}
+    <h1> {{current_user.username}}, you did not tell us about your musical background ! </h1>
+
+    <p> Please do so by clicking on the link below</p>
+    <br>
+
+    <a href="{{ url_for('music_background') }}" > Music Background Questionaire</a>
+
+    {% else %}
+
     <h1> Get ready {{current_user.username}} ! </h1>
 
 
@@ -9,6 +19,6 @@
 
     <a href="{{ url_for('question') }}" > Start!</a>
 
-
+    {% endif %}
 
 {% endblock %}

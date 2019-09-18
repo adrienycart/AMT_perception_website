@@ -60,7 +60,7 @@ def user(username):
         current_user.username = form.username.data
         db.session.commit()
         flash('Your changes have been saved.')
-        return redirect(url_for('user',username=username))
+        return redirect(url_for('user',username=current_user.username))
     elif request.method == 'GET':
         form.username.data = current_user.username
 
@@ -83,6 +83,9 @@ def question():
 
     if form.validate_on_submit():
         flash('Your answered:'+str(form.choice.data)+' to question :'+str(current_question.id))
+        answer = current_question.answer(form.choice.data,current_user)
+        db.session.add(answer)
+        db.session.commit()
         session['question_id'] = current_user.next_question()
         return redirect(url_for('question'))
 
@@ -127,12 +130,12 @@ def music_background():
                 form.all_choices.append_entry()
 
     if form.validate_on_submit():
-        flash('You completed the test')
-        flash([entry.data[u'choice'] for entry in form.all_choices.entries])
+        flash('You completed the test!')
         current_user.gold_msi_answers = ';'.join([str(entry.data[u'choice']) for entry in form.all_choices.entries])
         current_user.gold_msi_completed = True
         db.session.commit()
-        return redirect(url_for('index'))
+
+        return redirect(url_for('instructions'))
 
 
     return render_template('music_background.html',form=form,questions_labels=zip(questions,choice_labels))

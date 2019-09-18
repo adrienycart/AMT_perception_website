@@ -46,10 +46,6 @@ class User(UserMixin,db.Model):
     def has_answered(self,question):
         return self.answers.filter(Answer.question_id == question.id).count()>0
 
-    # def has_answered_gold_msi(self,question):
-    #     return self.gold_msi_answers.filter(GoldMSIAnswer.question_id == question.id).count()>0
-
-
     def next_question(self):
         n_questions = Question.query.count()
         return random.randint(1,n_questions)

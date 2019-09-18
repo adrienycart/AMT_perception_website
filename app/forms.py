@@ -52,7 +52,7 @@ class GoldMSIAnswerForm(FlaskForm):
 
 class GoldMSIForm(FlaskForm):
     all_choices = FieldList(FormField(GoldMSIAnswerForm))
-    submit = SubmitField('Submit')
+    submit = SubmitField('Submit and start experiment')
 
     def validate_all_choices(self,all_choices):
         for i,entry in enumerate(all_choices.entries):
