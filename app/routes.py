@@ -82,15 +82,15 @@ def question():
     current_question = Question.query.get(question_id)
 
     if form.validate_on_submit():
-        flash('Your answered:'+str(form.choice.data)+' to question :'+str(current_question.id))
-        answer = current_question.answer(form.choice.data,current_user)
+        # flash('Your answered:'+str(form.choice.data)+' to question :'+str(current_question.id)+' known '+str(form.known.data))
+        answer = current_question.answer(form.choice.data,current_user,recognised=form.known.data)
         db.session.add(answer)
         db.session.commit()
         session['question_id'] = current_user.next_question()
         return redirect(url_for('question'))
 
-    flash(str([current_question.id, question_id]))
-    return render_template('question.html', number=n_question+1,question=current_question, form=form)
+    # flash(str([current_question.id, question_id]))
+    return render_template('question.html', number=n_question+1,filepaths = current_question.get_filepaths(), form=form)
 
 @app.route('/music_background',methods=['GET','POST'])
 @login_required

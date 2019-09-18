@@ -20,7 +20,7 @@ class Answer(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Answer {}>'.format(self.choice)
+        return '<Answer {},known {}>'.format(self.choice,self.recognised)
 
 
 class User(UserMixin,db.Model):
@@ -43,6 +43,14 @@ class User(UserMixin,db.Model):
     def answered_questions(self):
         return Question.query.join(Answer, Answer.question_id==Question.id).filter(Answer.user_id==self.id).all()
 
+    def answered_questions_with_answers(self):
+        answers = self.answers
+        questions = []
+        for answer in answers:
+            questions += [answer.question]
+        return zip(questions, answers)
+
+
     def has_answered(self,question):
         return self.answers.filter(Answer.question_id == question.id).count()>0
 
@@ -62,8 +70,8 @@ class Question(db.Model):
                             backref='question',
                             lazy='dynamic')
 
-    def answer(self,choice,user):
-        answer = Answer(choice=choice,user_id=user.id,question_id=self.id)
+    def answer(self,choice,user,recognised):
+        answer = Answer(choice=choice,user_id=user.id,question_id=self.id,recognised=recognised)
         return answer
 
     def number_answers(self):

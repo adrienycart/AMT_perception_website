@@ -10,8 +10,8 @@
 
     Questions answered: Total {{user.number_answers()}}
     <ul>
-      {% for question in user.answered_questions() %}
-      <li> {{question}}
+      {% for question,answer in user.answered_questions_with_answers() %}
+      <li> {{question, answer}}
       {% endfor %}
     </ul>
 

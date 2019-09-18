@@ -4,7 +4,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 MAX_ANSWERS = 3
-DATA_PATH = '../data/all_mp3_cut'
+DATA_PATH = 'data/all_mp3_cut'
 
 
 class Config(object):

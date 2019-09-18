@@ -10,6 +10,7 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
+
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
@@ -19,6 +20,7 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
             raise ValidationError('Username already in use! Please choose another name')
+
 
 
 class EditProfileForm(FlaskForm):
@@ -38,11 +40,13 @@ class EditProfileForm(FlaskForm):
 
 class AnswerForm(FlaskForm):
     choice = RadioField('Select your answer:',choices=[(0,'A'),(1,'B')],coerce=int)
+    known = BooleanField("I know this piece")
     submit = SubmitField('Submit')
 
     def validate_choice(self,choice):
         if choice.data is None:
             raise ValidationError('Please select an answer!')
+
 
 class GoldMSIAnswerForm(FlaskForm):
     choice = RadioField(choices=[(1,'A'),(2,'B'),(3,'C'),(4,'D'),(5,'E'),(6,'F'),(7,'G')],coerce=int)
