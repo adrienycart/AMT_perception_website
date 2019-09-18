@@ -1,9 +1,14 @@
 from flask import Flask
-from config import Config
+from config import Config, DATA_PATH
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from logging.handlers import RotatingFileHandler
+
+
+
+
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -11,6 +16,8 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
+
+
 
 if not app.debug:
 
@@ -27,3 +34,21 @@ if not app.debug:
     app.logger.info('Website AMT perception startup')
 
 from app import routes, models, errors
+
+db.create_all()
+if models.Question.query.first() is None:
+    import os
+    print('Populate database...')
+
+    all_folders = [path for path in os.listdir(DATA_PATH) if os.path.isdir(os.path.join(DATA_PATH,path))]
+
+    for folder in all_folders:
+        example = folder
+        folder_path = os.path.join(DATA_PATH,folder)
+        for system1 in os.listdir(folder_path):
+            if system1.endswith('.mp3') and not system1.startswith('.') and not 'target' in system1:
+                for system2 in os.listdir(folder_path):
+                    if system2.endswith('.mp3') and not system2.startswith('.') and not 'target' in system2 and not system1==system2:
+                        question = models.Question(example=example,system1=os.path.splitext(system1)[0],system2=os.path.splitext(system2)[0])
+                        db.session.add(question)
+    db.session.commit()

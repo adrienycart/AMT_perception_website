@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SubmitField, RadioField
 from wtforms.validators import ValidationError, DataRequired
 from app.models import User
 
@@ -34,3 +34,12 @@ class EditProfileForm(FlaskForm):
             user = User.query.filter_by(username=self.username.data).first()
             if user is not None:
                 raise ValidationError('Username already in use! Please choose another name')
+
+
+class AnswerForm(FlaskForm):
+    choice = RadioField('Select your answer:',choices=[(0,'A'),(1,'B')],coerce=int)
+    submit = SubmitField('Submit')
+
+    def validate_choice(self,choice):
+        if choice.data is None:
+            raise ValidationError('Please select an answer!')

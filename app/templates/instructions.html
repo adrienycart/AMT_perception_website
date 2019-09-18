@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1> Get ready {{current_user.username}} ! </h1>
+
+
+    <p> Instructions </p>
+
+    <a href="{{ url_for('question') }}" > Start!</a>
+
+
+
+{% endblock %}

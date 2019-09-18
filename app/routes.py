@@ -1,10 +1,12 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, session
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
-from app.models import User
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, AnswerForm
+from app.models import User, Question
 from datetime import datetime
+from sqlalchemy import func
+
 
 
 @app.route('/')
@@ -23,10 +25,7 @@ def login():
             flash('Unknown username!')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
-        return redirect(next_page)
+        return redirect('index')
     return render_template('login.html', title='Returning participant', form=form)
 
 @app.route('/logout')
@@ -65,6 +64,31 @@ def user(username):
         form.username.data = current_user.username
 
     return render_template('user.html', user=user, form=form)
+
+
+
+@app.route('/instructions')
+def instructions():
+    session['question_id'] = current_user.next_question()
+    return render_template('instructions.html')
+
+@app.route('/question',methods=['GET','POST'])
+@login_required
+def question():
+    n_question = current_user.number_answers()
+    form = AnswerForm()
+    question_id = session['question_id']
+    current_question = Question.query.get(question_id)
+
+    if form.validate_on_submit():
+        flash('Your answered:'+str(form.choice.data)+' to question :'+str(current_question.id))
+        session['question_id'] = current_user.next_question()
+        return redirect(url_for('question'))
+
+    flash(str([current_question.id, question_id]))
+    return render_template('question.html', number=n_question+1,question=current_question, form=form)
+
+
 
 @app.before_request
 def before_request():

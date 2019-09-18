@@ -1,0 +1,24 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Question {{number}}</h1>
+
+    <h2>{{question.id}} {{question.example}} {{question.system1}} {{question.system2}} </h2>
+
+    <p> What do you prefer ? </p>
+
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+          {% for subfield in form.choice %}
+            {{subfield.label}}{{subfield}}
+          {% endfor %}
+          {% for error in form.choice.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+
+    </form>
+{% endblock %}

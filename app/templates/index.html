@@ -10,6 +10,12 @@
 
     <p> Welcome message </p>
 
+    {% if not current_user.is_anonymous %}
+    <a href="{{ url_for('instructions') }}" > Start!</a>
+    {%endif%}
+
+    <hr>
+
     {% if current_user.is_anonymous %}
     <a href="{{ url_for('register') }}" > New participant </a>
     <a href="{{ url_for('login') }}">Returning participant</a>
