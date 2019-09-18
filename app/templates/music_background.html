@@ -1,0 +1,38 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Tell us about your music background</h1>
+
+
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+
+          {% for entry,(question, choice_label) in form.all_choices.entries|zip(questions_labels) %}
+            {{ entry.hidden_tag() }}
+            {% for error in entry.choice.errors %}
+            <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+            {{question}} <br>
+            <table>
+            <tr>
+            {% for label in choice_label %}
+              <td>{{label}}</td>
+            {% endfor %}
+            </tr>
+            <tr>
+            {% for subfield in entry.choice %}
+              <td>{{subfield}}</td>
+            {% endfor %}
+            </tr>
+            </table>
+
+            <br>
+          {% endfor %}
+
+        </p>
+        <p>{{ form.submit() }}</p>
+
+    </form>
+{% endblock %}

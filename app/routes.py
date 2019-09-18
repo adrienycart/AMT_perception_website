@@ -2,10 +2,11 @@ from flask import render_template, flash, redirect, url_for, request, session
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, AnswerForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, AnswerForm, GoldMSIForm
 from app.models import User, Question
 from datetime import datetime
 from sqlalchemy import func
+from wtforms import Label
 
 
 
@@ -88,6 +89,53 @@ def question():
     flash(str([current_question.id, question_id]))
     return render_template('question.html', number=n_question+1,question=current_question, form=form)
 
+@app.route('/music_background',methods=['GET','POST'])
+@login_required
+def music_background():
+
+    questions = [
+        "I have never been complimented for my talents as a musical performer.",
+        "I would not consider myself a musician.",
+        "I engaged in regular, daily practice of a musical instrument (including voice) for ___ years. ",
+        "At the peak of my interest, I practiced ___ hours per day on my primary instrument.",
+        "I have had formal training in music theory for __ years",
+        "I have had __ years of formal training on a musical instrument (including voice) during my lifetime. ",
+        "I can play ___ musical instruments",
+        ]
+    choice_labels = [
+        "Agreement Scale",
+        "Agreement Scale",
+        "0;1;2;3;4-5;6-9;10 or more",
+        "0;0.5;1;1.5;2;3-4;5 or more",
+        "0;0.5;1;2;3;4-6;7 or more",
+        "0;0.5;1;2;3-5;6-9;10 or more",
+        "0;1;2;3;4;5;6 or more",
+        ]
+
+    choice_labels = [['Completely disagree','Strongly disagree','Disagree','Neither agree or disagree','Agree','Strongly agree','Completely agree'] if elt == 'Agreement Scale' else elt.split(';')  for elt in choice_labels]
+
+
+    form = GoldMSIForm()
+
+    if len(form.all_choices.entries) ==0:
+        if current_user.gold_msi_completed:
+            answers = current_user.gold_msi_answers.split(';')
+            for answer in answers:
+                form.all_choices.append_entry({'choice':answer})
+        else:
+            for i in range(len(questions)):
+                form.all_choices.append_entry()
+
+    if form.validate_on_submit():
+        flash('You completed the test')
+        flash([entry.data[u'choice'] for entry in form.all_choices.entries])
+        current_user.gold_msi_answers = ';'.join([str(entry.data[u'choice']) for entry in form.all_choices.entries])
+        current_user.gold_msi_completed = True
+        db.session.commit()
+        return redirect(url_for('index'))
+
+
+    return render_template('music_background.html',form=form,questions_labels=zip(questions,choice_labels))
 
 
 @app.before_request

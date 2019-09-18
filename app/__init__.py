@@ -17,6 +17,7 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 
+app.jinja_env.filters['zip'] = zip
 
 
 if not app.debug:
