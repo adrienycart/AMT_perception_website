@@ -41,11 +41,11 @@ if models.Question.query.first() is None:
     import os
     print('Populate database...')
 
-    all_folders = [path for path in os.listdir(DATA_PATH) if os.path.isdir(os.path.join(DATA_PATH,path))]
-
+    data_path = os.path.join('app/static',DATA_PATH)
+    all_folders = [path for path in os.listdir(data_path) if os.path.isdir(os.path.join(data_path,path))]
     for folder in all_folders:
         example = folder
-        folder_path = os.path.join(DATA_PATH,folder)
+        folder_path = os.path.join(data_path,folder)
         for system1 in os.listdir(folder_path):
             if system1.endswith('.mp3') and not system1.startswith('.') and not 'target' in system1:
                 for system2 in os.listdir(folder_path):

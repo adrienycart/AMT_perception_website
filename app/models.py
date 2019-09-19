@@ -4,8 +4,8 @@ from datetime import datetime
 from flask_login import UserMixin
 import random
 import os
-from config import DATA_PATH
-# from  sqlalchemy.sql.expression import func
+from config import DATA_PATH, MAX_ANSWERS
+from  sqlalchemy.sql.expression import func
 
 
 
@@ -43,6 +43,7 @@ class User(UserMixin,db.Model):
     def answered_questions(self):
         return Question.query.join(Answer, Answer.question_id==Question.id).filter(Answer.user_id==self.id).all()
 
+
     def answered_questions_with_answers(self):
         answers = self.answers
         questions = []
@@ -55,8 +56,29 @@ class User(UserMixin,db.Model):
         return self.answers.filter(Answer.question_id == question.id).count()>0
 
     def next_question(self):
-        n_questions = Question.query.count()
-        return random.randint(1,n_questions)
+
+        previously_seen_examples = [q.example for q in self.answered_questions()]
+        # Choose a question whose example was never seen by the user and that is not fully answered
+        candidates = Question.query.filter(db.not_(Question.example.in_(previously_seen_examples)))
+        # print(candidates.all())
+        print(Question.query.first().n_answers)
+
+        # Among these, choose a question that was already answers, but still lacks some:
+        candidate = candidates.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
+
+        # If no question fullfills that criterion, choose a question such that
+        # its example was already evaluated for some other systems (still not previously seen)
+        if candidate is None:
+            print("Trying to find a partially-filled example")
+            partial_examples=[q.example for q in candidates.filter(Question.n_answers==MAX_ANSWERS) ]
+            candidate = candidates.filter(Question.example.in_(partial_examples)).filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
+            # If no question fullfills that criterion, choose any question with
+            # unseen example, and lacking answers (it should be an example seen by no-one yet)
+            if candidate is None:
+                print("Picking new example")
+                candidate = candidates.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
+
+        return candidate.id
 
 
 
@@ -66,13 +88,18 @@ class Question(db.Model):
     system1 = db.Column(db.String(140))
     system2 = db.Column(db.String(140))
 
+    n_answers = db.Column(db.Integer,default=0)
+
     answers = db.relationship('Answer',
                             backref='question',
                             lazy='dynamic')
 
     def answer(self,choice,user,recognised):
         answer = Answer(choice=choice,user_id=user.id,question_id=self.id,recognised=recognised)
-        return answer
+        db.session.add(answer)
+        self.n_answers += 1
+        db.session.commit()
+        return
 
     def number_answers(self):
         return self.answers.count()
