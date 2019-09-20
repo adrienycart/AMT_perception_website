@@ -8,25 +8,34 @@
     <h1>Welcome !</h1>
     {%endif%}
 
-    <p> Welcome message </p>
+    <p> Thank you very much for considering taking part in this study!
+      By taking part, you will help assessing the perceptual quality of some
+      automatic music transcription systems.</p>
 
     {% if not current_user.is_anonymous %}
-      {% if not current_user.gold_msi_completed %}
-      <a href="{{ url_for('music_background') }}" > Start!</a>
+      <p> Whenever you are ready, please click Start. </p>
+
+      {% if not current_user.ethics_approved %}
+      <a href="{{ url_for('information_sheet') }}" > Start!</a>
       {% else %}
-      <a href="{{ url_for('instructions') }}" > Start!</a>
+        {% if not current_user.gold_msi_completed %}
+        <a href="{{ url_for('music_background') }}" > Start!</a>
+        {% else %}
+        <a href="{{ url_for('instructions') }}" > Start!</a>
+        {%endif%}
       {%endif%}
-    {%endif%}
-
-    <br>
-
-    {% if current_user.is_anonymous %}
+    {%else%}
+    <p> To start, please log in, or create an account. </p>
+    <hr>
     <a href="{{ url_for('register') }}" > New participant </a>
     <a href="{{ url_for('login') }}">Returning participant</a>
+    {%endif%}
 
-    {% endif %}
 
-    <hr>
+
+
+
+
 
 
 {% endblock %}

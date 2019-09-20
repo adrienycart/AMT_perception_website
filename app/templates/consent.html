@@ -1,0 +1,50 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Before going any further, we need your consent</h1>
+
+    <p>
+    Please complete this form after you have read the Information Sheet and/or listened to an explanation about the research.
+    </p>
+    <p>
+    <b>Title of Study:</b> Listening Tests on the Quality of Automatic Music Transcription<br>
+    <b>Queen Mary Ethics of Research Committee Ref:</b> 2066<br>
+    </p>
+
+    <p>
+    Thank you for considering taking part in this research.
+    Make sure you have read carefully the
+    <a href="{{url_for('information_sheet')}}"> Information Sheet <a> before you agree to take part.
+    If you have any questions arising from the Information Sheet or explanation
+    already given to you, please ask the researcher before you decide whether
+    to join in. If you are willing to participate in this study, please
+    tick the appropriate responses underneath.
+    </p>
+    <p>
+      You can find this information at any time in you Profile section.
+    </p>
+
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+
+          {% for error in form.consent.errors %}
+          <span style="color: red;">[{{ error }}]</span><br>
+          {% endfor %}
+          <table>
+          {% for entry,consent_point in form.consent.entries|zip(consent_points) %}
+            <tr>
+              <td>{{entry}}</td> <td>{{consent_point}}</td>
+            </tr>
+          {% endfor %}
+          </table>
+
+            <br>
+
+
+        </p>
+        <p>{{ form.submit() }}</p>
+
+    </form>
+{% endblock %}

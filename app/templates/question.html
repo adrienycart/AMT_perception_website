@@ -3,6 +3,13 @@
 
 {% block content %}
 
+{%if not current_user.ethics_approved %}
+  <h1> {{current_user.username}}, you did not give us your consent! </h1>
+  <p> Please do so by clicking on the link below</p>
+  <br>
+  <a href="{{ url_for('information_sheet') }}" > Information sheet and consent form </a>
+{% else %}
+
     {% if not current_user.gold_msi_completed %}
     <h1> {{current_user.username}}, you did not tell us about your musical background ! </h1>
 
@@ -20,7 +27,7 @@
     <audio src="{{url_for('static',filename=filepaths[0])}}" controls></audio>
     {{ form.known() }} {{ form.known.label }}
 
-    <p> What do you prefer ? </p>
+    <p> Which transcription sounds most similar to the reference? </p>
 
         {{ form.hidden_tag() }}
         <p>
@@ -45,5 +52,5 @@
     </form>
 
     {% endif %}
-
+  {% endif %}
 {% endblock %}

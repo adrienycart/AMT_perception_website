@@ -4,10 +4,25 @@
 {% block content %}
     <h1>Tell us about your music background</h1>
 
+    <h2>Do not worry, you do not have to be a musician to take part in this study!</h2>
+
 
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
+          {% for error in form.gender.errors %}
+          <span style="color: red;">[{{ error }}]</span><br>
+          {% endfor %}
+          {% for subfield in form.gender %}
+          {{ subfield.label }}{{ subfield}}
+          {% endfor %}
+          <br>
+          {% for error in form.age.errors %}
+          <span style="color: red;">[{{ error }}]</span><br>
+          {% endfor %}
+          {{ form.age.label }}{{ form.age(size=3)}}
+          <br>
+          {{ form.disability.label }}{{ form.disability}}<br>
 
           {% for entry,(question, choice_label) in form.all_choices.entries|zip(questions_labels) %}
             {{ entry.hidden_tag() }}

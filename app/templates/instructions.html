@@ -2,6 +2,13 @@
 
 {% block content %}
 
+  {%if not current_user.ethics_approved %}
+    <h1> {{current_user.username}}, you did not give us your consent! </h1>
+    <p> Please do so by clicking on the link below</p>
+    <br>
+    <a href="{{ url_for('information_sheet') }}" > Information sheet and consent form </a>
+  {% else %}
+
     {% if not current_user.gold_msi_completed %}
     <h1> {{current_user.username}}, you did not tell us about your musical background ! </h1>
 
@@ -12,13 +19,22 @@
 
     {% else %}
 
+
+
     <h1> Get ready {{current_user.username}} ! </h1>
 
-
-    <p> Instructions </p>
-
+    <h2> Instructions </h2>
+    <ul>
+    <li> Make sure you are in a quiet environment, and you are using good headphones.
+    <li> Make sure the sound volume of your computer is adequate
+    <li> Please try to listen to each example only once. We are interested in your overall judgement, not in analytical answers.
+    <li> If you recognise the reference piece, please tick the box "I know this piece".
+    <li> You can stop at any time, any submitted answers will still be recorded.
+    <li> We would love to have your feedback! Give us any comments in your profile (link in header).
+    </ul>
     <a href="{{ url_for('question') }}" > Start!</a>
 
     {% endif %}
+  {% endif %}
 
 {% endblock %}

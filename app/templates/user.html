@@ -8,13 +8,12 @@
 
     {% if user.last_seen %}<p>Last seen on: {{ user.last_seen }}</p>{% endif %}
 
-    Questions answered: Total {{user.number_answers()}}
+    Questions answered: {{user.number_answers()}}
     <ul>
       {% for question,answer in user.answered_questions_with_answers() %}
       <li> {{question, answer}}
       {% endfor %}
     </ul>
-
 
     <hr>
 
@@ -31,11 +30,24 @@
             {% endfor %}
         </p>
 
+        <p>
+            {% for error in form.comments.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            {{form.comments.label}}<br>
+            What strategy (if any) did you use to make your decision?<br>
+            What was important to you when making your decision? <br>
+            Any comments? <br>
+            {{form.comments(cols=100,rows=10)}}
+        </p>
+
         <p>{{ form.submit() }}</p>
     </form>
     <br>
 
-    <a href="{{ url_for('music_background') }}">Change music background answers</a>
+    <a href="{{ url_for('music_background') }}">Change music background answers</a><br>
+    <a href="{{ url_for('information_sheet') }}">See information sheet</a><br>
+    <a href="{{ url_for('consent') }}">See consent form</a><br>
 
     {% endif %}
 

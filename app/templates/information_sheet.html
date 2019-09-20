@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h1> Information sheet </h1>
+  <h2> Research study: Listening Tests on the Quality of Automatic Music Transcription </h2>
+
+  <p>
+  We would like to invite you to be part of this research project, if you would
+  like to.  You should only agree to take part if you want to; it is entirely
+  up to you. If you choose not to take part there won’t be any disadvantages
+  for you and you will hear no more about it.
+  </p>
+  <p>
+Please read the following information carefully before you decide to take part;
+this will tell you why the research is being done and what you will be asked to
+do if you take part. Please contact the researcher if there is anything that is not clear or if you
+would like more information.
+</p>
+<p>
+If you decide to take part you will be asked to confirm in an online form
+that you agree.
+</p>
+<p>
+You are still free to withdraw at any time and without giving a reason.
+</p>
+<p>
+This project aims to assess and compare the perceptual quality of various
+automatic music transcription systems. Automatic music transcription is the
+act of detecting what music notes were played in an audio file, and when.
+The goal of this project is to compare various systems, and to determine
+which one gives transcriptions that sound most similar to the original piece.
+</p>
+<p>
+As part of this study, you will be presented with a pair of automatic
+transcriptions and the  original piece, all rendered as audio (you do
+NOT need to be able to read music notation to participate). You will
+be asked to choose which of the pair sounds most similar to the original
+ piece. You can compare as many or as little pairs as you want; you can
+ stop at any time, and you answers so far will be recorded. For completeness,
+ additional demographic information will be collected as part of the
+ questionnaire, including years of music studies, and music listening
+ habits. You do NOT need to have music training to participate.
+</p>
+<p>
+Please read <a href="http://www.arcs.qmul.ac.uk/media/arcs/policyzone/Privacy-Notice-for-Research-Participants.pdf"> Queen Mary’s privacy notice for research participants </a>
+for important information about your personal data and your rights in this respect.
+</p>
+<p>
+If you have any questions or concerns about the manner in which the study
+was conducted, please, in the first instance, contact the researcher
+responsible for the study.  If this is unsuccessful, or not appropriate,
+please contact the Secretary at the Queen Mary Ethics of Research Committee,
+Room W104, Queens’ Building, Mile End Campus, Mile End Road, London, E1 4NS
+or research-ethics@qmul.ac.uk. If you have any questions relating to data
+protection, please contact Data Protection Officer, Queens’ Building, Mile
+End Road, London, E1 4NS or data-protection@qmul.ac.uk
+</p>
+
+{% if not current_user.ethics_approved %}
+<a href="{{url_for('consent')}}"> Next </a>
+{% else %}
+<a href="{{url_for('index')}}"> Home </a>
+{% endif %}
+
+{% endblock %}

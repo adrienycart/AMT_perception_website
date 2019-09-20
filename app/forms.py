@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import FormField, FieldList, StringField, TextAreaField, PasswordField, BooleanField, SubmitField, RadioField
-from wtforms.validators import ValidationError, DataRequired
+from wtforms import IntegerField, FormField, FieldList, StringField, TextAreaField, PasswordField, BooleanField, SubmitField, RadioField
+from wtforms.validators import ValidationError, DataRequired, Length
 from app.models import User
 
 
@@ -25,6 +25,7 @@ class RegistrationForm(FlaskForm):
 
 class EditProfileForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
+    comments = TextAreaField('Tell us what you think!', validators=[Length(min=0, max=1000)])
     submit = SubmitField('Submit')
 
     def __init__(self, original_username, *args, **kwargs):
@@ -55,11 +56,26 @@ class GoldMSIAnswerForm(FlaskForm):
             raise ValidationError('Please select an answer!')
 
 class GoldMSIForm(FlaskForm):
+
+    gender = RadioField(choices=[('male','Male'),('female','Female'),('other','Non-binary')],coerce=str)
+    age = IntegerField(label='Age')
+
+    disability = BooleanField('I have a hearing disability')
+
     all_choices = FieldList(FormField(GoldMSIAnswerForm))
     submit = SubmitField('Submit and start experiment')
 
     def validate_all_choices(self,all_choices):
         for i,entry in enumerate(all_choices.entries):
-            print(i, entry.data)
             if entry.data is None:
                 raise ValidationError('Please select an answer for question '+str(i)+'!')
+
+
+class ConsentForm(FlaskForm):
+    consent = FieldList(BooleanField())
+    submit = SubmitField('Submit')
+
+
+    def validate_consent(self,consent):
+        if len(consent.entries)<4 or not all([entry.data for entry in consent.entries]):
+            raise ValidationError('Please accept all!')

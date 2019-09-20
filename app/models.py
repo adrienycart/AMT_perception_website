@@ -27,12 +27,14 @@ class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    ethics_approved = db.Column(db.Boolean, default=False)
     gold_msi_completed = db.Column(db.Boolean, default=False)
     answers = db.relationship('Answer',
                             backref='user',
                             lazy='dynamic')
     # gold_msi_answers = db.relationship('GoldMSIAnswer',backref='user',lazy='dynamic')
-    gold_msi_answers = db.Column(db.String(40))
+    gold_msi_answers = db.Column(db.String(50))
+    comments = db.Column(db.String(1000))
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -59,7 +61,7 @@ class User(UserMixin,db.Model):
 
         previously_seen_examples = [q.example for q in self.answered_questions()]
         # Choose a question whose example was never seen by the user and that is not fully answered
-        candidates = Question.query.filter(db.not_(Question.example.in_(previously_seen_examples)))
+        candidates = Question.query.filter(db.not_(Question.example.in_(previously_seen_examples))).order_by(func.random())
         # print(candidates.all())
         print(Question.query.first().n_answers)
 
