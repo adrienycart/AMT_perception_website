@@ -3,3 +3,4 @@ venv_flask/
 *.pyc
 app.db
 app/static/data/
+logs/
