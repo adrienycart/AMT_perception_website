@@ -14,7 +14,6 @@
 
     {% if not current_user.is_anonymous %}
       <p> Whenever you are ready, please click Start. </p>
-
       {% if not current_user.ethics_approved %}
       <a class="btn btn-primary" role="button"  href="{{ url_for('information_sheet') }}" > Start!</a>
       {% else %}
@@ -24,6 +23,7 @@
         <a class="btn btn-primary" role="button"  href="{{ url_for('instructions') }}" > Start!</a>
         {%endif%}
       {%endif%}
+      <a class="btn btn-outline-secondary" role="button"  href="{{ url_for('user', username=current_user.username) }}">View Profile</a>
     {%else%}
     <p> To start, please log in, or create an account. </p>
     <hr>

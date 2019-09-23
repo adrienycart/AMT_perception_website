@@ -9,12 +9,14 @@
     {% if user.last_seen %}<p>Last seen on: {{ user.last_seen }}</p>{% endif %}
 
     Questions answered: {{user.number_answers()}}
+
+    {% if debug %}
     <ul>
       {% for question,answer in user.answered_questions_with_answers() %}
       <li> {{question, answer}}
       {% endfor %}
     </ul>
-
+    {% endif %}
     <hr>
 
 

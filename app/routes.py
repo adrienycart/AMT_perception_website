@@ -66,7 +66,7 @@ def user(username):
         form.username.data = current_user.username
         form.comments.data = current_user.comments
 
-    return render_template('user.html', user=user, form=form)
+    return render_template('user.html', user=user, form=form, debug=app.debug)
 
 
 
