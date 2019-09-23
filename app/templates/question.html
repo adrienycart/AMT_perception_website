@@ -1,7 +1,7 @@
 
 {% extends "base.html" %}
 
-{% block content %}
+{% block app_content %}
 
 {%if not current_user.ethics_approved %}
   <h1> {{current_user.username}}, you did not give us your consent! </h1>
@@ -23,11 +23,14 @@
     <h1>Question {{number}}</h1>
 
     <form action="" method="post" novalidate>
-    <h2>Reference:</h2>
+    <h3>Reference:</h3>
     <audio src="{{url_for('static',filename=filepaths[0])}}" controls></audio>
+
     {{ form.known() }} {{ form.known.label }}
 
-    <p> Which transcription sounds most similar to the reference? </p>
+    <hr>
+
+    <h4> Which transcription sounds most similar to the reference? </h4>
 
         {{ form.hidden_tag() }}
         <p>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block app_content %}
 
     {% if not current_user.is_anonymous %}
     <h1> Welcome back {{current_user.username}} ! </h1>
@@ -16,19 +16,19 @@
       <p> Whenever you are ready, please click Start. </p>
 
       {% if not current_user.ethics_approved %}
-      <a href="{{ url_for('information_sheet') }}" > Start!</a>
+      <a class="btn btn-primary" role="button"  href="{{ url_for('information_sheet') }}" > Start!</a>
       {% else %}
         {% if not current_user.gold_msi_completed %}
-        <a href="{{ url_for('music_background') }}" > Start!</a>
+        <a class="btn btn-primary" role="button"  href="{{ url_for('music_background') }}" > Start!</a>
         {% else %}
-        <a href="{{ url_for('instructions') }}" > Start!</a>
+        <a class="btn btn-primary" role="button"  href="{{ url_for('instructions') }}" > Start!</a>
         {%endif%}
       {%endif%}
     {%else%}
     <p> To start, please log in, or create an account. </p>
     <hr>
-    <a href="{{ url_for('register') }}" > New participant </a>
-    <a href="{{ url_for('login') }}">Returning participant</a>
+    <a class="btn btn-primary" role="button" href="{{ url_for('register') }}" > New participant </a>
+    <a class="btn btn-primary" role="button" href="{{ url_for('login') }}">Returning participant</a>
     {%endif%}
 
 

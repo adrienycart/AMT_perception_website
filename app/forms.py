@@ -42,7 +42,7 @@ class EditProfileForm(FlaskForm):
 class AnswerForm(FlaskForm):
     choice = RadioField('Select your answer:',choices=[(0,'A'),(1,'B')],coerce=int)
     known = BooleanField("I know this piece")
-    submit = SubmitField('Submit')
+    submit = SubmitField('Next question')
 
     def validate_choice(self,choice):
         if choice.data is None:

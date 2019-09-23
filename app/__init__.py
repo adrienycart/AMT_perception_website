@@ -3,7 +3,9 @@ from config import Config, DATA_PATH
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_bootstrap import Bootstrap
 from logging.handlers import RotatingFileHandler
+import os
 
 
 
@@ -16,6 +18,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
+bootstrap = Bootstrap(app)
 
 app.jinja_env.filters['zip'] = zip
 
@@ -38,7 +41,6 @@ from app import routes, models, errors
 
 db.create_all()
 if models.Question.query.first() is None:
-    import os
     print('Populate database...')
 
     data_path = os.path.join('app/static',DATA_PATH)

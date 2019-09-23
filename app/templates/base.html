@@ -1,38 +1,62 @@
-<!DOCTYPE html>
+{% extends 'bootstrap/base.html' %}
 
-<html>
-    <head>
+{% block title %}
+
       {% if title %}
-      <title>{{ title }} - AMT Listening test</title>
+      {{ title }} - AMT Listening test
       {% else %}
-      <title>AMT Listening test</title>
+      AMT Listening test
       {% endif %}
 
-    </head>
-    <body>
-        <div>Automatic Music Transcription Listening Test</div><br>
-        <a href="{{ url_for('index') }}">Home</a>
-        {% if current_user.is_anonymous %}
-        <a href="{{ url_for('login') }}">Log In</a>
-        <a href="{{ url_for('register') }}">Register</a>
-        {% else %}
-        <a href="{{ url_for('user', username=current_user.username) }}">Profile</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
-        {% endif %}
+{% endblock %}
 
+{% block navbar %}
 
-        <hr>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <ul>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        {% endwith %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="brand navbar-brand" href="{{ url_for('index') }}">AMT Listening test</a>
 
+  <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="nav navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ url_for('index') }}">Home <span class="sr-only"></span></a>
+      </li>
+      {% if current_user.is_anonymous %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('login') }}">Log In</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('user', username=current_user.username) }}">Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+      </li>
+      {% endif %}
 
-        {% block content %}{% endblock %}
-    </body>
-</html>
+    </ul>
+    <span class="navbar-text navbar-right" style="width: 300px;">
+      Any questions? Contact Adrien Ycart
+    </span>
+  </div>
+</nav>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-info" role="alert">{{ message }}</div>
+      {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  {# application content needs to be provided in the app_content block #}
+  {% block app_content %}{% endblock %}
+</div>
+{% endblock %}

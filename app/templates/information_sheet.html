@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block app_content %}
 
   <h1> Information sheet </h1>
   <h2> Research study: Listening Tests on the Quality of Automatic Music Transcription </h2>
@@ -58,9 +58,9 @@ End Road, London, E1 4NS or data-protection@qmul.ac.uk
 </p>
 
 {% if not current_user.ethics_approved %}
-<a href="{{url_for('consent')}}"> Next </a>
+<a class="btn btn-primary" role="button"  href="{{url_for('consent')}}"> Next </a>
 {% else %}
-<a href="{{url_for('index')}}"> Home </a>
+<a class="btn btn-primary" role="button"  href="{{url_for('index')}}"> Home </a>
 {% endif %}
 
 {% endblock %}
