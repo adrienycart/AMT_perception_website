@@ -96,46 +96,51 @@ def question():
 @login_required
 def music_background():
 
-    gold_msi_questions = [
-        "I am able to judge whether someone is a good singer or not.",
-        "I usually know when I'm hearing a song for the first time.",
-        "I find it difficult to spot mistakes in a performance of a song even if I know the tune.",
-        "I can compare and discuss differences between two performances or versions of the same piece of music.",
-        "I have trouble recognizing a familiar song when played in a different way or by a different performer.",
-        "I can tell when people sing or play out of time with the beat.",
-        "I can tell when people sing or play out of tune.",
-        "When I sing, I have no idea whether I'm in tune or not.",
-        "When I hear a music I can usually identify its genre.",
-        "I have never been complimented for my talents as a musical performer.",
-        "I would not consider myself a musician.",
-        "I engaged in regular, daily practice of a musical instrument (including voice) for ___ years. ",
-        "At the peak of my interest, I practiced __ hours per day on my primary instrument.",
-        "I have had formal training in music theory for __ years",
-        "I have had __ years of formal training on a musical instrument (including voice) during my lifetime. ",
-        "I can play __ musical instruments",
-        "I listen attentively to classical music for __ minutes per day",
-        "At the peak of my interest, I played classical music for __ hours per day (performance and/or practice)",
-        ]
-    choice_labels = [
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "Agreement Scale",
-        "0;1;2;3;4-5;6-9;10 or more",
-        "0;0.5;1;1.5;2;3-4;5 or more",
-        "0;0.5;1;2;3;4-6;7 or more",
-        "0;0.5;1;2;3-5;6-9;10 or more",
-        "0;1;2;3;4;5;6 or more",
-        "0-15;15-30;30-60;60-90;2hrs;2-3hrs;4hrs or more",
-        "0;0.5;1;1.5;2;3-4;5 or more",
-        ]
+    if app.debug :
+        gold_msi_questions = ["salu sa va?"]
+        choice_labels = ["Agreement Scale"]
+    else:
+        gold_msi_questions = [
+            "I am able to judge whether someone is a good singer or not.",
+            "I usually know when I'm hearing a song for the first time.",
+            "I find it difficult to spot mistakes in a performance of a song even if I know the tune.",
+            "I can compare and discuss differences between two performances or versions of the same piece of music.",
+            "I have trouble recognizing a familiar song when played in a different way or by a different performer.",
+            "I can tell when people sing or play out of time with the beat.",
+            "I can tell when people sing or play out of tune.",
+            "When I sing, I have no idea whether I'm in tune or not.",
+            "When I hear a music I can usually identify its genre.",
+            "I have never been complimented for my talents as a musical performer.",
+            "I would not consider myself a musician.",
+            "I engaged in regular, daily practice of a musical instrument (including voice) for ___ years. ",
+            "At the peak of my interest, I practiced __ hours per day on my primary instrument.",
+            "I have had formal training in music theory for __ years",
+            "I have had __ years of formal training on a musical instrument (including voice) during my lifetime. ",
+            "I can play __ musical instruments",
+            "I listen attentively to classical music for __ minutes per day",
+            "At the peak of my interest, I played classical music for __ hours per day (performance and/or practice)",
+            ]
+        choice_labels = [
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "Agreement Scale",
+            "0;1;2;3;4-5;6-9;10 or more",
+            "0;0.5;1;1.5;2;3-4;5 or more",
+            "0;0.5;1;2;3;4-6;7 or more",
+            "0;0.5;1;2;3-5;6-9;10 or more",
+            "0;1;2;3;4;5;6 or more",
+            "0-15;15-30;30-60;60-90;2hrs;2-3hrs;4hrs or more",
+            "0;0.5;1;1.5;2;3-4;5 or more",
+            ]
+
 
     choice_labels = [['Completely disagree','Strongly disagree','Disagree','Neither agree or disagree','Agree','Strongly agree','Completely agree'] if elt == 'Agreement Scale' else elt.split(';')  for elt in choice_labels]
 
@@ -174,12 +179,15 @@ def music_background():
 @login_required
 def consent():
 
-    consent_points = [
-                "I agree that the research project named above has been explained to me to my satisfaction",
-                "I understand that if I decide at any other time during the research that I no longer wish to participate in this project, I can notify the researchers involved and be withdrawn from it immediately",
-                "I have read both the notes written above and the Information Sheet about the project, and understand what the research study involves",
-                "I agree to take part in the study, which will include use of my personal data",
-                ]
+    if app.debug:
+        consent_points = ['azy clik fdp']
+    else:
+        consent_points = [
+                    "I agree that the research project named above has been explained to me to my satisfaction",
+                    "I understand that if I decide at any other time during the research that I no longer wish to participate in this project, I can notify the researchers involved and be withdrawn from it immediately",
+                    "I have read both the notes written above and the Information Sheet about the project, and understand what the research study involves",
+                    "I agree to take part in the study, which will include use of my personal data",
+                    ]
 
 
     form = ConsentForm()
