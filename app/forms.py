@@ -44,16 +44,16 @@ class AnswerForm(FlaskForm):
     known = BooleanField("I know this piece")
     submit = SubmitField('Next question')
 
-    def validate_choice(self,choice):
-        if choice.data is None:
-            raise ValidationError('Please select an answer!')
+    # def validate_choice(self,choice):
+    #     if choice.data is None:
+    #         raise ValidationError('Please select an answer!')
 
 
 class GoldMSIAnswerForm(FlaskForm):
     choice = RadioField(choices=[(1,'A'),(2,'B'),(3,'C'),(4,'D'),(5,'E'),(6,'F'),(7,'G')],coerce=int)
-    def validate_choice(self,choice):
-        if choice.data is None:
-            raise ValidationError('Please select an answer!')
+    # def validate_choice(self,choice):
+    #     if choice.data is None:
+    #         raise ValidationError('Please select an answer!')
 
 class GoldMSIForm(FlaskForm):
 

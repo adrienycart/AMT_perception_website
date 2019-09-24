@@ -1,36 +1,57 @@
 
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
     <h1>Tell us about your music background</h1>
 
-    <h2>Do not worry, you do not have to be a musician to take part in this study!</h2>
+    <h3>Do not worry, you do not have to be a musician to take part in this study!</h3>
 
-
+    <br>
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
           {% for error in form.gender.errors %}
-          <span style="color: red;">[{{ error }}]</span><br>
+          <div class="alert alert-danger" role="alert">
+              {{ error }}
+          </div>
           {% endfor %}
-          {% for subfield in form.gender %}
-          {{ subfield.label }}{{ subfield}}
-          {% endfor %}
-          <br>
-          {% for error in form.age.errors %}
-          <span style="color: red;">[{{ error }}]</span><br>
-          {% endfor %}
-          {{ form.age.label }}{{ form.age(size=3)}}
-          <br>
-          {{ form.disability.label }}{{ form.disability}}<br>
 
+
+
+          <div class="col-md-4">
+          <table class="table table-sm">
+          <tr class='text-left'> <b> Gender: </b> </tr>
+          <tr>
+          {% for subfield in form.gender %}
+          <td class='text-right'> {{ subfield.label }} </td><td class='text-left'> {{ subfield}} </td>
+          {% endfor %}
+          </tr>
+          </table>
+
+          {% for error in form.age.errors %}
+          <div class="alert alert-danger" role="alert">
+              {{ error }}
+          </div>
+          {% endfor %}
+          {{ form.age.label }} {{ form.age(size=3)}}
+          <br>
+          {{ form.disability.label }} {{ form.disability}}<br>
+          <br>
+        </div>
+
+          <div class="col-md-9">
+          <h4> Please answer the following questions: </h4><br>
           {% for entry,(question, choice_label) in form.all_choices.entries|zip(questions_labels) %}
             {{ entry.hidden_tag() }}
+
             {% for error in entry.choice.errors %}
-            <span style="color: red;">[{{ error }}]</span><br>
+                <div class="alert alert-danger" role="alert">
+                {{ error }}<br>
+              </div>
             {% endfor %}
-            {{question}} <br>
-            <table>
+            <b>{{question}}</b> <br>
+            <table class='table text-center'>
             <tr>
             {% for label in choice_label %}
               <td>{{label}}</td>
@@ -47,7 +68,8 @@
           {% endfor %}
 
         </p>
-        <p>{{ form.submit() }}</p>
+        <p>{{ wtf.form_field(form.submit, button_map={'submit':'primary'}) }}</p>
+        </div>
 
     </form>
 {% endblock %}

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
 
@@ -43,13 +44,13 @@
             {{form.comments(cols=100,rows=10)}}
         </p>
 
-        <p>{{ form.submit() }}</p>
+        <p>{{ wtf.form_field(form.submit, button_map={'submit':'primary'}) }}</p>
     </form>
     <br>
 
-    <a class="btn btn-primary" role="button" href="{{ url_for('music_background') }}">Change music background answers</a>
-    <a class="btn btn-primary" role="button" href="{{ url_for('information_sheet') }}">See information sheet</a>
-    <a class="btn btn-primary" role="button" href="{{ url_for('consent') }}">See consent form</a>
+    <a class="btn btn-secondary" role="button" href="{{ url_for('music_background') }}">Change music background answers</a>
+    <a class="btn btn-secondary" role="button" href="{{ url_for('information_sheet') }}">See information sheet</a>
+    <a class="btn btn-secondary" role="button" href="{{ url_for('consent') }}">See consent form</a>
 
     {% endif %}
 

@@ -1,5 +1,6 @@
 
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
     <h1>Before going any further, we need your consent</h1>
@@ -22,17 +23,21 @@
     tick the appropriate responses underneath.
     </p>
     <p>
-      You can find this information at any time in you Profile section.
+      You can find this information at any time in your Profile section.
     </p>
 
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
 
+
           {% for error in form.consent.errors %}
-          <span style="color: red;">[{{ error }}]</span><br>
+          <div class="alert alert-danger" role="alert">
+              {{ error }}
+          </div>
           {% endfor %}
-          <table>
+
+          <table class='table'>
           {% for entry,consent_point in form.consent.entries|zip(consent_points) %}
             <tr>
               <td>{{entry}}</td> <td>{{consent_point}}</td>
@@ -44,7 +49,7 @@
 
 
         </p>
-        <p>{{ form.submit() }}</p>
+        <p>{{ wtf.form_field(form.submit, button_map={'submit':'primary'}) }}</p>
 
     </form>
 {% endblock %}

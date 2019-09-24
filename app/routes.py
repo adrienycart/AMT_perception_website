@@ -148,7 +148,6 @@ def music_background():
             form.gender.data = answers[0]
             form.age.data = int(answers[1])
             form.disability.data = answers[2]=='True'
-            print(str(answers[2]),bool(answers[2]))
             for answer in answers[3:]:
                 form.all_choices.append_entry({'choice':answer})
         else:
