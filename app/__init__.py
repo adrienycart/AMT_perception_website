@@ -4,7 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
+from flask_moment import Moment
 from logging.handlers import RotatingFileHandler
+
 import os
 
 
@@ -19,6 +21,7 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 bootstrap = Bootstrap(app)
+moment = Moment(app)
 
 app.jinja_env.filters['zip'] = zip
 
