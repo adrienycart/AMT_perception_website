@@ -3,7 +3,7 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-MAX_ANSWERS = 2
+MAX_ANSWERS = 4
 DATA_PATH = 'data/all_mp3_cut'
 
 

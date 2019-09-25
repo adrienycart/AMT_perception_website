@@ -65,6 +65,10 @@
 
     </form>
 
+    {% if debug %}
+    {{filepaths[1]}}, {{filepaths[2]}}
+    {% endif %}
+
     {% endif %}
   {% endif %}
 {% endblock %}

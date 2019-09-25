@@ -98,26 +98,29 @@ class Question(db.Model):
     system2 = db.Column(db.String(140))
 
     n_answers = db.Column(db.Integer,default=0)
+    reverse = db.Column(db.Boolean, default=False)
 
     answers = db.relationship('Answer',
                             backref='question',
                             lazy='dynamic')
 
     def answer(self,choice,user,recognised):
+        choice = 1-choice if self.reverse else choice
         answer = Answer(choice=choice,user_id=user.id,question_id=self.id,recognised=recognised)
         db.session.add(answer)
         self.n_answers += 1
+        self.reverse = not self.reverse
         db.session.commit()
         return
-
-    def number_answers(self):
-        return self.answers.count()
 
     def get_filepaths(self):
         target = os.path.join(DATA_PATH,self.example,'target.mp3')
         system1 = os.path.join(DATA_PATH,self.example,self.system1+'.mp3')
         system2 = os.path.join(DATA_PATH,self.example,self.system2+'.mp3')
-        return target, system1, system2
+        if self.reverse:
+            return target, system2, system1
+        else:
+            return target, system1, system2
 
     def __repr__(self):
         return '<Question {},{},{}>'.format(self.example,self.system1,self.system2)

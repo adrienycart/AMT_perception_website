@@ -51,10 +51,11 @@ if models.Question.query.first() is None:
     for folder in all_folders:
         example = folder
         folder_path = os.path.join(data_path,folder)
-        for system1 in os.listdir(folder_path):
-            if system1.endswith('.mp3') and not system1.startswith('.') and not 'target' in system1:
-                for system2 in os.listdir(folder_path):
-                    if system2.endswith('.mp3') and not system2.startswith('.') and not 'target' in system2 and not system1==system2:
-                        question = models.Question(example=example,system1=os.path.splitext(system1)[0],system2=os.path.splitext(system2)[0])
-                        db.session.add(question)
+        files = [elt for elt in os.listdir(folder_path) if elt.endswith('.mp3') and not elt.startswith('.') and not 'target' in elt]
+        n_files = len(files)
+        for i in range(n_files):
+            for j in range(i+1,n_files):
+                question = models.Question(example=example,system1=os.path.splitext(files[i])[0],system2=os.path.splitext(files[j])[0])
+                db.session.add(question)
+
     db.session.commit()

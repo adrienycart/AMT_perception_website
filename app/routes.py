@@ -71,6 +71,7 @@ def user(username):
 
 
 @app.route('/instructions')
+@login_required
 def instructions():
     session['question_id'] = current_user.next_question()
     return render_template('instructions.html')
@@ -90,7 +91,8 @@ def question():
         return redirect(url_for('question'))
 
     # flash(str([current_question.id, question_id]))
-    return render_template('question.html', number=n_question+1,filepaths = current_question.get_filepaths(), form=form)
+
+    return render_template('question.html', number=n_question+1,filepaths = current_question.get_filepaths(), form=form, debug=app.debug)
 
 @app.route('/music_background',methods=['GET','POST'])
 @login_required
@@ -179,15 +181,13 @@ def music_background():
 @login_required
 def consent():
 
-    if app.debug:
-        consent_points = ['azy clik fdp']
-    else:
-        consent_points = [
-                    "I agree that the research project named above has been explained to me to my satisfaction",
-                    "I understand that if I decide at any other time during the research that I no longer wish to participate in this project, I can notify the researchers involved and be withdrawn from it immediately",
-                    "I have read both the notes written above and the Information Sheet about the project, and understand what the research study involves",
-                    "I agree to take part in the study, which will include use of my personal data",
-                    ]
+
+    consent_points = [
+                "I agree that the research project named above has been explained to me to my satisfaction",
+                "I understand that if I decide at any other time during the research that I no longer wish to participate in this project, I can notify the researchers involved and be withdrawn from it immediately",
+                "I have read both the notes written above and the Information Sheet about the project, and understand what the research study involves",
+                "I agree to take part in the study, which will include use of my personal data",
+                ]
 
 
     form = ConsentForm()
