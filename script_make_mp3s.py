@@ -257,7 +257,7 @@ def save_midi(midi,dest):
 
 def synthesize_midi(midi):
     # Requires fluidsynth and pyFluidSynth installed!!!
-    return midi.fluidsynth(sf2_path="data/YDP-GrandPiano-SF2-20160804/YDP-GrandPiano-20160804.sf2")
+    return midi.fluidsynth(sf2_path="app/static/data/YDP-GrandPiano-SF2-20160804/YDP-GrandPiano-20160804.sf2")
 
 
 def write_sound(sound,filename):
@@ -384,11 +384,11 @@ def write_sound(sound,filename):
 #         save_midi(midi_data,os.path.join(dest_folder,filename.replace(".csv",".mid")))
 
 # ##############################################################
-# #### Prepare Li Su MIDI files
+# #### Prepare Li Su or Cheng MIDI files
 # ##############################################################
 
-# input_folder = 'data/lisu_csv'
-# dest_folder = 'data/lisu_outputs'
+# input_folder = 'app/static/data/cheng_csv'
+# dest_folder = 'app/static/data/cheng_outputs'
 #
 # for filename in os.listdir(input_folder):
 #     if filename.endswith('.csv') and not filename.startswith('.'):
@@ -400,9 +400,19 @@ def write_sound(sound,filename):
 #         piano = pm.Instrument(program=piano_program)
 #
 #         for (start,end,freq) in all_notes:
-#             note = pm.Note(
-#                 velocity=100, pitch=int(round(pm.hz_to_note_number(freq))), start=start, end=end)
-#             piano.notes.append(note)
+#             if 'cheng' in input_folder:
+#                 pitch = int(round(12*np.log2(freq/27.5)+1))
+#                 # print(pitch,int(round(pm.hz_to_note_number(freq))))
+#             elif "lisu" in input_folder:
+#                 pitch = int(round(pm.hz_to_note_number(freq)))
+#
+#
+#             if 0<=pitch < 128:
+#                 note = pm.Note(
+#                     velocity=100, pitch=pitch, start=start, end=end)
+#                 piano.notes.append(note)
+#             else:
+#                 print "Removed pitch", pitch, "freq", freq
 #         midi_data.instruments.append(piano)
 #
 #         dest_filename = os.path.join(dest_folder,filename).replace('.csv','.mid')
@@ -473,13 +483,13 @@ def write_sound(sound,filename):
 ##############################################################
 #### Cut A-MAPS MIDI files into segments
 ##############################################################
-#
-# MAPS_folder = "data/MAPS_wav"
-# AMAPS_folder = "data/A-MAPS_1.2"
-# MIDI_input_folders = ["data/lisu_outputs"]#,"data/onsets_and_frames_outputs"]
-# MIDI_names = ["lisu"]#,"google"]
-# csv_folder = 'data/cut_points'
-# dest_folder = 'data/all_midi_cut'
+
+# MAPS_folder = "app/static/data/MAPS_wav"
+# AMAPS_folder = "app/static/data/A-MAPS_1.2"
+# MIDI_input_folders = ["app/static/data/cheng_outputs"]#,"data/onsets_and_frames_outputs"]
+# MIDI_names = ["cheng"]#,"google"]
+# csv_folder = 'app/static/data/cut_points'
+# dest_folder = 'app/static/data/all_midi_cut'
 #
 # write_AMAPS = False
 #
@@ -532,10 +542,10 @@ def write_sound(sound,filename):
 # #### Convert MIDI files into mp3 files
 # ##############################################################
 
-midi_folder = 'data/all_midi_cut'
-dest_folder = 'data/all_mp3_cut'
-csv_folder = 'data/cut_points'
-AMAPS_folder = "data/A-MAPS_1.2"
+midi_folder = 'app/static/data/all_midi_cut'
+dest_folder = 'app/static/data/all_mp3_cut'
+csv_folder = 'app/static/data/cut_points'
+AMAPS_folder = "app/static/data/A-MAPS_1.2"
 
 for subfolder_name in os.listdir(midi_folder):
     subfolder = os.path.join(midi_folder,subfolder_name)
