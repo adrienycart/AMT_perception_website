@@ -12,9 +12,9 @@ To install the list of dependencies, run:
 ## Data
 
 All the audio examples should be placed in: `./app/static`
-They should be in a folder containing one folder per example, and inside this folder, one mp3 per system + a reference mp3 named `target.mp3`
+They should be in a folder containing one subfolder per example, and inside this subfolder, one mp3 per system + a reference mp3 named `target.mp3`
 
-You can set the relative path of your examples inside the `./app/static` by modifying the variable `DATA_PATH` in `./config.py`
+You can set the relative path of the parent of all the examples inside the `./app/static` folder by modifying the variable `DATA_PATH` in `./config.py`
 
 ## Running the website
 
