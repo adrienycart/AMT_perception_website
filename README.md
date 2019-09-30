@@ -1,6 +1,6 @@
-# AMT listening tests website
+# Automatic Music Transcription listening tests website
 
-This repository holds the code for the AMT listening tests website.
+This repository holds the code for the Automatic Music Transcription listening tests website.
 The website uses Flask. The database is manages using SQLAlchemy.
 
 ## Requirements
