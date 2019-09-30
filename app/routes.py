@@ -166,7 +166,7 @@ def music_background():
         flash('You completed the test!')
         all_answers = ';'.join([str(entry.data[u'choice']) for entry in form.all_choices.entries])
         all_answers = ';'.join([str(form.gender.data),str(form.age.data),str(form.disability.data),all_answers])
-        print all_answers
+        print(all_answers)
         current_user.gold_msi_answers = all_answers
         current_user.gold_msi_completed = True
         db.session.commit()
@@ -186,7 +186,7 @@ def consent():
                 "I agree that the research project named above has been explained to me to my satisfaction",
                 "I understand that if I decide at any other time during the research that I no longer wish to participate in this project, I can notify the researchers involved and be withdrawn from it immediately",
                 "I have read both the notes written above and the Information Sheet about the project, and understand what the research study involves",
-                "I agree to take part in the study, which will include use of my personal data",
+                "I agree to take part in the study, which will include use of my personal data (we will not be capturing sensitive or identifiable personal data)",
                 ]
 
 
@@ -216,7 +216,7 @@ def consent():
     return render_template('consent.html',form=form,consent_points=consent_points)
 
 @app.route('/information_sheet')
-@login_required
+# @login_required
 def information_sheet():
     return render_template('information_sheet.html')
 

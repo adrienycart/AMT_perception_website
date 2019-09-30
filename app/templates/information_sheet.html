@@ -14,8 +14,8 @@
   <p>
 Please read the following information carefully before you decide to take part;
 this will tell you why the research is being done and what you will be asked to
-do if you take part. Please contact the researcher if there is anything that is not clear or if you
-would like more information.
+do if you take part. Please contact Adrien Ycart (a[dot]ycart[at]qmul[dot]ac[dot]uk)
+ if there is anything that is not clear or if you would like more information.
 </p>
 <p>
 If you decide to take part you will be asked to confirm in an online form
@@ -49,7 +49,7 @@ for important information about your personal data and your rights in this respe
 <p>
 If you have any questions or concerns about the manner in which the study
 was conducted, please, in the first instance, contact the researcher
-responsible for the study.  If this is unsuccessful, or not appropriate,
+responsible for the study (Adrien Ycart, a[dot]ycart[at]qmul[dot]ac[dot]uk).  If this is unsuccessful, or not appropriate,
 please contact the Secretary at the Queen Mary Ethics of Research Committee,
 Room W104, Queens’ Building, Mile End Campus, Mile End Road, London, E1 4NS
 or research-ethics@qmul.ac.uk. If you have any questions relating to data
@@ -57,8 +57,8 @@ protection, please contact Data Protection Officer, Queens’ Building, Mile
 End Road, London, E1 4NS or data-protection@qmul.ac.uk
 </p>
 
-{% if not current_user.ethics_approved %}
-<a class="btn btn-primary" role="button"  href="{{url_for('consent')}}"> Next </a>
+{% if current_user.is_anonymous %}
+<a class="btn btn-primary" role="button"  href="{{url_for('register')}}"> I'm ready to register </a>
 {% else %}
 <a class="btn btn-primary" role="button"  href="{{url_for('index')}}"> Home </a>
 {% endif %}

@@ -6,7 +6,7 @@
     <h1> {{current_user.username}}, you did not give us your consent! </h1>
     <p> Please do so by clicking on the link below</p>
     <br>
-    <a class="btn btn-primary" role="button" href="{{ url_for('information_sheet') }}" > Information sheet and consent form </a>
+    <a class="btn btn-primary" role="button" href="{{ url_for('consent') }}" > Consent form </a>
   {% else %}
 
     {% if not current_user.gold_msi_completed %}
@@ -27,6 +27,7 @@
     <ul>
     <li> Make sure you are in a quiet environment, and you are using good headphones.
     <li> Make sure the sound volume of your computer is adequate
+    <li> You will be presented with 3 audio examples. Please listen to all three examples before making your decision.
     <li> Please try to listen to each example only once. We are interested in your overall judgement, not in analytical answers.
     <li> If you recognise the reference piece, please tick the box "I know this piece".
     <li> You can stop at any time, any submitted answers will still be recorded.

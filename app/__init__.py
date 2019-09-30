@@ -6,7 +6,7 @@ from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from logging.handlers import RotatingFileHandler
-
+import logging
 import os
 
 

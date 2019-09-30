@@ -3,9 +3,9 @@
 {% block title %}
 
       {% if title %}
-      {{ title }} - AMT Listening test
+      {{ title }} - Automatic Music Transcription Listening test
       {% else %}
-      AMT Listening test
+      Automatic Music Transcription Listening test
       {% endif %}
 
 {% endblock %}
@@ -13,7 +13,7 @@
 {% block navbar %}
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="brand navbar-brand" href="{{ url_for('index') }}">AMT Listening test</a>
+  <a class="brand navbar-brand" href="{{ url_for('index') }}">Automatic Music Transcription Listening test</a>
 
   <div class="collapse navbar-collapse" id="navbarText">
     <ul class="nav navbar-nav mr-auto">
@@ -25,7 +25,7 @@
         <a class="nav-link" href="{{ url_for('login') }}">Log In</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+        <a class="nav-link" href="{{ url_for('information_sheet') }}">Register</a>
       </li>
       {% else %}
       <li class="nav-item">

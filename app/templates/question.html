@@ -8,7 +8,7 @@
   <h1> {{current_user.username}}, you did not give us your consent! </h1>
   <p> Please do so by clicking on the link below</p>
   <br>
-  <a href="{{ url_for('information_sheet') }}" > Information sheet and consent form </a>
+  <a class="btn btn-primary" role="button" href="{{ url_for('consent') }}" > Consent form </a>
 {% else %}
 
     {% if not current_user.gold_msi_completed %}
@@ -17,7 +17,7 @@
     <p> Please do so by clicking on the link below</p>
     <br>
 
-    <a href="{{ url_for('music_background') }}" > Music Background Questionaire</a>
+    <a class="btn btn-primary" role="button" href="{{ url_for('music_background') }}" > Music Background Questionaire</a>
 
     {% else %}
 
