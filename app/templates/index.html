@@ -10,17 +10,21 @@
 
     <p> Thank you very much for considering taking part in this study!
       By taking part, you will help assessing the perceptual quality of some
-      automatic music transcription systems.</p>
+      automatic music transcription systems. Ultimately, your responses will help
+       define better perceptually-grounded evaluation metrics for automatic music transcription!</p>
 
-    <p> You will be asked to compare some automatic transcriptions of some
+    <p> In this study, you will be asked to compare some automatic transcriptions of some
       Western classical piano music pieces and choose the one you find most similar
       to the original piece. You do not need to be a musician to participate!</p>
 
-    <p>
-      If you have any questions, do not hesitate to contact Adrien Ycart (a[dot]ycart[at]qmul[dot]ac[dot]uk).
-    </p>
 
     {% if not current_user.is_anonymous %}
+
+    <p>
+      You can find more information in the <a href="{{url_for('information_sheet')}}"> Information Sheet </a>,
+      but if you have any questions, do not hesitate to contact Adrien Ycart (a[dot]ycart[at]qmul[dot]ac[dot]uk).
+    </p>
+
       <p> Whenever you are ready, please click Start. </p>
       {% if not current_user.ethics_approved %}
       <a class="btn btn-primary" role="button"  href="{{ url_for('consent') }}" > Start!</a>
@@ -33,6 +37,11 @@
       {%endif%}
       <a class="btn btn-outline-secondary" role="button"  href="{{ url_for('user', username=current_user.username) }}">View Profile</a>
     {%else%}
+
+    <p>
+      More information will be given to you later on, but if you have any questions, do not hesitate to contact Adrien Ycart (a[dot]ycart[at]qmul[dot]ac[dot]uk).
+    </p>
+
     <p> To start, please log in, or create an account. </p>
     <hr>
     <a class="btn btn-primary" role="button" href="{{ url_for('information_sheet') }}" > New participant </a>
