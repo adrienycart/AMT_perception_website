@@ -13,20 +13,8 @@ def count_answered_questions():
 
 
 def get_complete_questions():
-    # q_alias_1 = db.aliased(Question)
-    # q_alias_2 = db.aliased(Question)
-    # query_full_only = Question.query.join(q_alias,db.and_(q_alias.system1 == Question.system2,q_alias.system2 == Question.system1 ))
-    query_ordered = Question.query.filter(Question.system1 < Question.system2).filter(Question.n_answers==MAX_ANSWERS)
-    query_reverse = Question.query.filter(Question.system1 > Question.system2).filter(Question.n_answers==MAX_ANSWERS)
-    # s = query_reverse.subquery()
-    query_both = query_ordered.union(query_reverse)
-    q_alias_1 = db.aliased(query_both)
-    print query_both.join()
-    # all_complete = query_ordered.join(s, q_alias_1.example==s.columns.example).all()
-
-    # query_full_only = Question.query.filter(Question.n_answers == MAX_ANSWERS)
-    # questions_full = query_full_only.limit(100).all()
-    return query_both.all()
+    query = Question.query.filter(Question.n_answers==MAX_ANSWERS)
+    return query.all()
 
 def gather_examples(question_list):
     examples = set()
@@ -50,7 +38,7 @@ def count_full_examples():
     print "Complete examples: ", len(complete_examples)
 
 
-def gather_ratings(questions,engine,connection):
+def gather_ratings():
     # We adopt the convention: systems are always ordered in alphabetical order
 
     def make_key(question):
@@ -58,26 +46,25 @@ def gather_ratings(questions,engine,connection):
         return '_'.join([question.example]+systems_sorted)
 
     def get_rating(question):
-        reverse= question.system2 < question.system1
         total = 0
         for answer in question.answers:
-            if reverse:
-                total += 1-answer.choice
-            else:
-                total += answer.choice
+            print answer
+            total += answer.choice
         return total
 
 
-    query_full_only = Question.query.filter(questions.columns.n_answers == MAX_ANSWERS)
-    questions_full = query_full_only.all()
+
+    questions_full = get_complete_questions()
 
     ratings = {}
     for question in questions_full:
         rating = get_rating(question)
-        try:
-            ratings[example] += rating
-        except KeyError:
-            ratings[example] = rating
+        key = make_key(question)
+        ratings[key] = rating
+    return ratings
+
+
+
 
 
 
@@ -112,3 +99,5 @@ def gather_ratings(questions,engine,connection):
 # count_answered_questions()
 # count_full_examples()
 print(get_complete_questions())
+print(count_full_examples())
+print(gather_ratings())
