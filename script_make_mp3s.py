@@ -172,6 +172,90 @@ def cut_midi(midi_data,start,end):
         new_midi.instruments.append(new_instr)
     return new_midi
 
+def apply_sustain_control_changes(midi):
+    all_CCs = []
+    for instr in midi.instruments:
+        all_CCs += instr.control_changes
+    ccs_sorted = sorted(all_CCs,key=lambda x: x.time)
+    pedals_sorted = [cc for cc in ccs_sorted if cc.number==64]
+    #Add an extra pedal off at the end, just in case
+    pedals_sorted += [pm.ControlChange(64,0,midi.get_end_time())]
+
+
+
+    # Copy to keep time signatures and tempo changes, but remove notes and CCs
+    new_midi = copy.deepcopy(midi)
+    for instr in new_midi.instruments:
+        instr.notes = []
+        instr.control_changes = []
+
+
+    for instr in midi.instruments:
+        pedal_ON = False
+        new_instr = pm.Instrument(program=pm.instrument_name_to_program('Acoustic Grand Piano'),name=instr.name)
+        i_cc  = 0
+        i_n = 0
+
+        to_extend = np.empty([128],dtype=object)
+        for i in range(128):
+            to_extend[i] = []
+
+
+        while i_n < len(instr.notes):
+            # print i_n, i_cc
+            CC= pedals_sorted[i_cc]
+            note = instr.notes[i_n]
+            if note.start <= CC.time:
+                # If pedal is on or if it will be turned on while the note is on)
+                if pedal_ON or (CC.time<note.end and CC.value > 64) :
+                    to_extend[note.pitch] += [note]
+                else:
+                    new_instr.notes += [note]
+                i_n += 1
+            else:
+                #Only consider sustain pedal
+                if CC.number == 64:
+                    if pedal_ON and CC.value < 64:
+                        for note_list in to_extend:
+                            if note_list != []:
+                                note_list = sorted(note_list,key=lambda x: x.start)
+                                for note_1,note_2 in zip(note_list[:-1],note_list[1:]):
+                                    note_1.end = note_2.start
+                                    new_instr.notes += [note_1]
+                                last_note = note_list[-1]
+                                last_note.end = max(CC.time,last_note.end)
+                                new_instr.notes += [last_note]
+                        to_extend = np.empty([128],dtype=object)
+                        for i in range(128):
+                            to_extend[i] = []
+                        pedal_ON = False
+                    elif CC.value > 64:
+                        pedal_ON = True
+                i_cc += 1
+
+        if np.any(to_extend != []):
+            while i_cc < len(pedals_sorted):
+                CC= pedals_sorted[i_cc]
+                if CC.number == 64:
+                    if pedal_ON and CC.value < 64:
+                        for note_list in to_extend:
+                            if note_list != []:
+                                note_list = sorted(note_list,key=lambda x: x.start)
+                                for note_1,note_2 in zip(note_list[:-1],note_list[1:]):
+                                    note_1.end = note_2.start
+                                    new_instr.notes += [note_1]
+                                last_note = note_list[-1]
+                                last_note.end = max(CC.time,last_note.end)
+                                new_instr.notes += [last_note]
+                        break
+                i_cc+=1
+
+        new_midi.instruments.append(new_instr)
+
+    return new_midi
+
+
+
 def filter_short_gaps(data,thresh=1):
     #Removes all gaps shorter than thresh
     #thresh is in number of steps
@@ -419,66 +503,92 @@ def write_sound(sound,filename):
 #         midi_data.write(dest_filename)
 
 
+##############################################################
+#### Apply pedal to MIDI files
+##############################################################
 
+MAPS_folder = "app/static/data/MAPS_wav"
+AMAPS_folder = "app/static/data/A-MAPS_1.2"
+dest_folder = 'app/static/data/A-MAPS_1.2_with_pedal'
+
+for filename in os.listdir(MAPS_folder):
+    if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename and 'MAPS_MUS-schu_143_1_ENSTDkAm' in filename:
+        filename = filename.replace('.wav','.mid')
+        print(filename)
+
+        amaps_filename = os.path.join(AMAPS_folder,filename)
+
+        midi = pm.PrettyMIDI(amaps_filename)
+        new_midi = apply_sustain_control_changes(midi)
+
+        new_midi.write(os.path.join(dest_folder,filename))
 
 # ##############################################################
 # #### Verify segments
 # ##############################################################
 
-# MAPS_folder = "data/MAPS_wav"
-# AMAPS_folder = "data/A-MAPS_1.2"
-# PM_folder = "../MLM_decoding/data/piano-midi-ttv-20p/test"
-# csv_folder = 'data/cut_points'
-#
-# fd = open("data/data_OK.txt", "r")
-# OK_files = fd.read().splitlines()
-# # print(OK_files)
-# for filename in os.listdir(MAPS_folder):
-#     if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename and filename not in OK_files:# and 'mz_333_3_ENSTDkCl' in filename:
-#         print(filename)
-#         amaps_filename = os.path.join(AMAPS_folder,filename.replace('.wav','.mid'))
-#
-#         piece_name = get_name_from_maps(filename)
-#
-#         csv_filename = os.path.join(csv_folder,piece_name+'.csv')
-#         pm_filename = os.path.join(PM_folder,piece_name+'.mid')
-#
-#
-#         amaps_data = pm.PrettyMIDI(amaps_filename)
-#         pm_data = pm.PrettyMIDI(pm_filename)
-#
-#         cut_points = np.genfromtxt(csv_filename,dtype='str')
-#
-#         for start_str, end_str in cut_points:
-#             start_bar,start_beat,start_sub_beat = str_to_bar_beat(start_str)
-#             end_bar,end_beat,end_sub_beat = str_to_bar_beat(end_str)
-#
-#             pm_start_t = get_time(pm_data,start_bar,start_beat,start_sub_beat)
-#             pm_end_t = get_time(pm_data,end_bar,end_beat,end_sub_beat)
-#             pm_cut = cut_midi(pm_data,pm_start_t,pm_end_t)
-#
-#             amaps_start_t = get_time(amaps_data,start_bar,start_beat,start_sub_beat)
-#             amaps_end_t = get_time(amaps_data,end_bar,end_beat,end_sub_beat)
-#             amaps_cut = cut_midi(amaps_data,amaps_start_t,amaps_end_t)
-#
-#             pm_roll = (pm_cut.get_piano_roll()>0).astype(int)
-#             amaps_roll = (amaps_cut.get_piano_roll()>0).astype(int)
-#
-#             pm_roll, amaps_roll = even_up_rolls(pm_roll, amaps_roll)
-#
-#             F_measure = np.sum(2*pm_roll*amaps_roll)/(np.sum(2*pm_roll*amaps_roll+np.abs(pm_roll-amaps_roll))+1e-7)
-#
-#             if F_measure < 0.80:
-#                 print(filename,start_str,end_str ,F_measure)
-#                 print(pm_start_t, pm_end_t)
-#                 print(amaps_start_t, amaps_end_t)
-#                 fig,[ax1,ax2,ax3] = plt.subplots(3,1)
-#                 ax1.imshow(pm_roll,origin='lower',aspect='auto')
-#                 ax2.imshow(amaps_roll,origin='lower',aspect='auto')
-#                 ax3.imshow(amaps_roll-pm_roll,origin='lower',aspect='auto',cmap=plt.get_cmap('seismic'))
-#                 plt.show()
-#         f=open("data/data_OK.txt", "a+")
-#         f.write(filename+'\n')
+MAPS_folder = "app/static/data/MAPS_wav"
+AMAPS_folder = "app/static/data/A-MAPS_1.2_with_pedal"
+PM_folder = "../../MLM_decoding/data/piano-midi-ttv-20p/test"
+csv_folder = 'app/static/data/cut_points'
+
+fd = open("app/static/data/data_OK.txt", "r")
+OK_files = fd.read().splitlines()
+# print(OK_files)
+for filename in os.listdir(MAPS_folder):
+    if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename and filename not in OK_files:# and 'mz_333_3_ENSTDkCl' in filename:
+        print(filename)
+        amaps_filename = os.path.join(AMAPS_folder,filename.replace('.wav','.mid'))
+
+        piece_name = get_name_from_maps(filename)
+
+        csv_filename = os.path.join(csv_folder,piece_name+'.csv')
+        pm_filename = os.path.join(PM_folder,piece_name+'.mid')
+
+
+        amaps_data = pm.PrettyMIDI(amaps_filename)
+        pm_data = pm.PrettyMIDI(pm_filename)
+
+        cut_points = np.genfromtxt(csv_filename,dtype='str')
+
+        for i,(start_str, end_str) in enumerate(cut_points):
+            start_bar,start_beat,start_sub_beat = str_to_bar_beat(start_str)
+            end_bar,end_beat,end_sub_beat = str_to_bar_beat(end_str)
+
+            pm_start_t = get_time(pm_data,start_bar,start_beat,start_sub_beat)
+            pm_end_t = get_time(pm_data,end_bar,end_beat,end_sub_beat)
+            pm_cut = cut_midi(pm_data,pm_start_t,pm_end_t)
+
+            amaps_start_t = get_time(amaps_data,start_bar,start_beat,start_sub_beat)
+            amaps_end_t = get_time(amaps_data,end_bar,end_beat,end_sub_beat)
+            amaps_cut = cut_midi(amaps_data,amaps_start_t,amaps_end_t)
+
+            pm_roll = (pm_cut.get_piano_roll()>0).astype(int)
+            amaps_roll = (amaps_cut.get_piano_roll()>0).astype(int)
+
+            pm_roll, amaps_roll = even_up_rolls(pm_roll, amaps_roll)
+
+            F_measure = np.sum(2*pm_roll*amaps_roll)/(np.sum(2*pm_roll*amaps_roll+np.abs(pm_roll-amaps_roll))+1e-7)
+
+            if F_measure < 0.80:
+                print(filename,i,start_str,end_str ,F_measure)
+                print(pm_start_t, pm_end_t)
+                print(amaps_start_t, amaps_end_t)
+                fig,[ax1,ax2,ax3] = plt.subplots(3,1)
+                ax1.imshow(pm_roll,origin='lower',aspect='auto')
+                ax2.imshow(amaps_roll,origin='lower',aspect='auto')
+                for instr in pm_cut.instruments:
+                    for cc in instr.control_changes:
+                        if cc.number == 64:
+                            color = 'green' if cc.value > 64 else 'red'
+                            ax1.plot([int(round(cc.time*100)),int(round(cc.time*100))],[0,127],color=color)
+                ax3.imshow(amaps_roll-pm_roll,origin='lower',aspect='auto',cmap=plt.get_cmap('seismic'))
+                plt.show()
+        f=open("app/static/data/data_OK.txt", "a+")
+        f.write(filename+'\n')
+
+
+
 
 ##############################################################
 #### Cut A-MAPS MIDI files into segments
@@ -542,38 +652,38 @@ def write_sound(sound,filename):
 # #### Convert MIDI files into mp3 files
 # ##############################################################
 
-midi_folder = 'app/static/data/all_midi_cut'
-dest_folder = 'app/static/data/all_mp3_cut'
-csv_folder = 'app/static/data/cut_points'
-AMAPS_folder = "app/static/data/A-MAPS_1.2"
-
-for subfolder_name in os.listdir(midi_folder):
-    subfolder = os.path.join(midi_folder,subfolder_name)
-    if os.path.isdir(subfolder):# and 'MAPS_MUS-mz_331_2_ENSTDkCl_16' in subfolder:
-        print(subfolder)
-        dest_subfolder = os.path.join(dest_folder,subfolder_name)
-        safe_mkdir(dest_subfolder)
-
-        # #Retrieve duration of example
-        f=open(os.path.join(subfolder,"duration.txt"), "r")
-        dur_str = f.read()
-        duration = float(dur_str)
-
-        for midi_file in os.listdir(subfolder):
-            if midi_file.endswith('.mid') and not midi_file.startswith('.'):
-                wav_path = os.path.join(dest_subfolder,midi_file.replace('.mid','.wav'))
-                if not os.path.exists(wav_path.replace('.wav','.mp3')):
-
-                    data = pm.PrettyMIDI(os.path.join(subfolder,midi_file))
-                    # print midi_file
-                    # for instr in data.instruments:
-                    #     print instr.control_changes
-
-                    sound1 = synthesize_midi(data)
-                    sound1_trim = sound1[:int(duration*44100)]
-                    wav_path = os.path.join(dest_subfolder,midi_file.replace('.mid','.wav'))
-                    write_sound(sound1_trim,wav_path)
-
-                    sound2 = pydub.AudioSegment.from_wav(wav_path)
-                    sound2.export(wav_path.replace('.wav','.mp3'), format="mp3", bitrate="320k")
-                    os.remove(wav_path)
+# midi_folder = 'app/static/data/all_midi_cut'
+# dest_folder = 'app/static/data/all_mp3_cut'
+# csv_folder = 'app/static/data/cut_points'
+# AMAPS_folder = "app/static/data/A-MAPS_1.2"
+#
+# for subfolder_name in os.listdir(midi_folder):
+#     subfolder = os.path.join(midi_folder,subfolder_name)
+#     if os.path.isdir(subfolder):# and 'MAPS_MUS-mz_331_2_ENSTDkCl_16' in subfolder:
+#         print(subfolder)
+#         dest_subfolder = os.path.join(dest_folder,subfolder_name)
+#         safe_mkdir(dest_subfolder)
+#
+#         # #Retrieve duration of example
+#         f=open(os.path.join(subfolder,"duration.txt"), "r")
+#         dur_str = f.read()
+#         duration = float(dur_str)
+#
+#         for midi_file in os.listdir(subfolder):
+#             if midi_file.endswith('.mid') and not midi_file.startswith('.'):
+#                 wav_path = os.path.join(dest_subfolder,midi_file.replace('.mid','.wav'))
+#                 if not os.path.exists(wav_path.replace('.wav','.mp3')):
+#
+#                     data = pm.PrettyMIDI(os.path.join(subfolder,midi_file))
+#                     # print midi_file
+#                     # for instr in data.instruments:
+#                     #     print instr.control_changes
+#
+#                     sound1 = synthesize_midi(data)
+#                     sound1_trim = sound1[:int(duration*44100)]
+#                     wav_path = os.path.join(dest_subfolder,midi_file.replace('.mid','.wav'))
+#                     write_sound(sound1_trim,wav_path)
+#
+#                     sound2 = pydub.AudioSegment.from_wav(wav_path)
+#                     sound2.export(wav_path.replace('.wav','.mp3'), format="mp3", bitrate="320k")
+#                     os.remove(wav_path)
