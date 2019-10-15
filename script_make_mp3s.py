@@ -146,7 +146,7 @@ def cut_midi(midi_data,start,end):
                     pass
 
             if add_note:
-                new_note = pm.Note(note.velocity,note.pitch,max(0,note.start-start),min(end,note.end-start))
+                new_note = pm.Note(note.velocity,note.pitch,max(0,note.start-start),min(end-start,note.end-start))
                 new_instr.notes.append(new_note)
 
         ccs_sorted = sorted(instr.control_changes,key=lambda x: x.time)
@@ -170,6 +170,7 @@ def cut_midi(midi_data,start,end):
                     new_instr.control_changes.append(new_cc)
 
         new_midi.instruments.append(new_instr)
+
     return new_midi
 
 def apply_sustain_control_changes(midi):
@@ -496,21 +497,21 @@ def write_sound(sound,filename):
 #### Apply pedal to MIDI files
 ##############################################################
 
-MAPS_folder = "app/static/data/MAPS_wav"
-AMAPS_folder = "app/static/data/A-MAPS_1.2"
-dest_folder = 'app/static/data/A-MAPS_1.2_with_pedal'
-
-for filename in os.listdir(MAPS_folder):
-    if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename:# and 'MAPS_MUS-schu_143_1_ENSTDkAm' in filename:
-        filename = filename.replace('.wav','.mid')
-        print(filename)
-
-        amaps_filename = os.path.join(AMAPS_folder,filename)
-
-        midi = pm.PrettyMIDI(amaps_filename)
-        new_midi = apply_sustain_control_changes(midi)
-
-        new_midi.write(os.path.join(dest_folder,filename))
+# MAPS_folder = "app/static/data/MAPS_wav"
+# AMAPS_folder = "app/static/data/A-MAPS_1.2"
+# dest_folder = 'app/static/data/A-MAPS_1.2_with_pedal'
+#
+# for filename in os.listdir(MAPS_folder):
+#     if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename:# and 'MAPS_MUS-schu_143_1_ENSTDkAm' in filename:
+#         filename = filename.replace('.wav','.mid')
+#         print(filename)
+#
+#         amaps_filename = os.path.join(AMAPS_folder,filename)
+#
+#         midi = pm.PrettyMIDI(amaps_filename)
+#         new_midi = apply_sustain_control_changes(midi)
+#
+#         new_midi.write(os.path.join(dest_folder,filename))
 
 # ##############################################################
 # #### Verify segments
@@ -585,15 +586,20 @@ for filename in os.listdir(MAPS_folder):
 
 MAPS_folder = "app/static/data/MAPS_wav"
 AMAPS_folder = "app/static/data/A-MAPS_1.2_with_pedal"
-MIDI_input_folders = []#["app/static/data/cheng_outputs"]#,"data/onsets_and_frames_outputs"]
-MIDI_names = []#["cheng"]#,"google"]
+MIDI_input_folders = [
+                    "app/static/data/cheng_outputs",
+                    "app/static/data/onsets_and_frames_outputs",
+                    "app/static/data/kelz_outputs",
+                    "app/static/data/lisu_outputs"
+                    ]
+MIDI_names = ["cheng","google","kelz","lisu"]
 csv_folder = 'app/static/data/cut_points'
 dest_folder = 'app/static/data/all_midi_cut'
 
 write_AMAPS = True
 
 for filename in os.listdir(MAPS_folder):
-    if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename and 'MAPS_MUS-liz_rhap02_ENSTDkAm' in filename:
+    if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename:# and 'MAPS_MUS-liz_rhap02_ENSTDkAm' in filename:
 
         filename = filename.replace('.wav','.mid')
         print(filename)
