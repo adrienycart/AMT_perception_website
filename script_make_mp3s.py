@@ -147,7 +147,13 @@ def cut_midi(midi_data,start,end):
 
             if add_note:
                 new_note = pm.Note(note.velocity,note.pitch,max(0,note.start-start),min(end-start,note.end-start))
-                new_instr.notes.append(new_note)
+                if (new_note.start == 0 and new_note.end-new_note.start < 0.05) \
+                or (new_note.end == end-start and new_note.end-new_note.start < 0.05):
+                    # Do not add short notes at start or end of section
+                    # that are due to imprecision in cutting.
+                    pass
+                else:
+                    new_instr.notes.append(new_note)
 
         ccs_sorted = sorted(instr.control_changes,key=lambda x: x.time)
         cc64_on = False
