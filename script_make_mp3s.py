@@ -584,62 +584,62 @@ def write_sound(sound,filename):
 #### Cut A-MAPS MIDI files into segments
 ##############################################################
 
-MAPS_folder = "app/static/data/MAPS_wav"
-AMAPS_folder = "app/static/data/A-MAPS_1.2_with_pedal"
-MIDI_input_folders = [
-                    "app/static/data/cheng_outputs",
-                    "app/static/data/onsets_and_frames_outputs",
-                    "app/static/data/kelz_outputs",
-                    "app/static/data/lisu_outputs"
-                    ]
-MIDI_names = ["cheng","google","kelz","lisu"]
-csv_folder = 'app/static/data/cut_points'
-dest_folder = 'app/static/data/all_midi_cut'
-
-write_AMAPS = True
-
-for filename in os.listdir(MAPS_folder):
-    if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename:# and 'MAPS_MUS-liz_rhap02_ENSTDkAm' in filename:
-
-        filename = filename.replace('.wav','.mid')
-        print(filename)
-
-        piece_name = get_name_from_maps(filename)
-        csv_filename = os.path.join(csv_folder,piece_name+'.csv')
-        amaps_filename = os.path.join(AMAPS_folder,filename)
-
-        amaps_data = pm.PrettyMIDI(amaps_filename)
-        cut_points = np.genfromtxt(csv_filename,dtype='str')
-
-        midis = []
-        for input_folder in MIDI_input_folders:
-             midi = pm.PrettyMIDI(os.path.join(input_folder,filename))
-             midis += [midi]
-
-        for i, (start_str, end_str) in enumerate(cut_points):
-
-            save_folder = os.path.join(dest_folder,os.path.splitext(filename)[0]+'_'+str(i))
-            safe_mkdir(save_folder)
-
-            start_bar,start_beat,start_sub_beat = str_to_bar_beat(start_str)
-            end_bar,end_beat,end_sub_beat = str_to_bar_beat(end_str)
-
-            start_t = get_time(amaps_data,start_bar,start_beat,start_sub_beat)
-            end_t = get_time(amaps_data,end_bar,end_beat,end_sub_beat)
-
-            assert start_t < end_t
-
-            if write_AMAPS:
-                amaps_data_cut = cut_midi(amaps_data,start_t,end_t)
-                amaps_data_cut.write(os.path.join(save_folder,'target.mid'))
-
-            for midi,name in zip(midis,MIDI_names):
-                midi_cut = cut_midi(midi,start_t,end_t)
-                midi_cut.write(os.path.join(save_folder,name+'.mid'))
-
-            f= open(os.path.join(save_folder,"duration.txt"),"w+")
-            f.write(str(end_t-start_t))
-            f.close()
+# MAPS_folder = "app/static/data/MAPS_wav"
+# AMAPS_folder = "app/static/data/A-MAPS_1.2_with_pedal"
+# MIDI_input_folders = [
+#                     "app/static/data/cheng_outputs",
+#                     "app/static/data/onsets_and_frames_outputs",
+#                     "app/static/data/kelz_outputs",
+#                     "app/static/data/lisu_outputs"
+#                     ]
+# MIDI_names = ["cheng","google","kelz","lisu"]
+# csv_folder = 'app/static/data/cut_points'
+# dest_folder = 'app/static/data/all_midi_cut'
+#
+# write_AMAPS = True
+#
+# for filename in os.listdir(MAPS_folder):
+#     if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename:# and 'MAPS_MUS-liz_rhap02_ENSTDkAm' in filename:
+#
+#         filename = filename.replace('.wav','.mid')
+#         print(filename)
+#
+#         piece_name = get_name_from_maps(filename)
+#         csv_filename = os.path.join(csv_folder,piece_name+'.csv')
+#         amaps_filename = os.path.join(AMAPS_folder,filename)
+#
+#         amaps_data = pm.PrettyMIDI(amaps_filename)
+#         cut_points = np.genfromtxt(csv_filename,dtype='str')
+#
+#         midis = []
+#         for input_folder in MIDI_input_folders:
+#              midi = pm.PrettyMIDI(os.path.join(input_folder,filename))
+#              midis += [midi]
+#
+#         for i, (start_str, end_str) in enumerate(cut_points):
+#
+#             save_folder = os.path.join(dest_folder,os.path.splitext(filename)[0]+'_'+str(i))
+#             safe_mkdir(save_folder)
+#
+#             start_bar,start_beat,start_sub_beat = str_to_bar_beat(start_str)
+#             end_bar,end_beat,end_sub_beat = str_to_bar_beat(end_str)
+#
+#             start_t = get_time(amaps_data,start_bar,start_beat,start_sub_beat)
+#             end_t = get_time(amaps_data,end_bar,end_beat,end_sub_beat)
+#
+#             assert start_t < end_t
+#
+#             if write_AMAPS:
+#                 amaps_data_cut = cut_midi(amaps_data,start_t,end_t)
+#                 amaps_data_cut.write(os.path.join(save_folder,'target.mid'))
+#
+#             for midi,name in zip(midis,MIDI_names):
+#                 midi_cut = cut_midi(midi,start_t,end_t)
+#                 midi_cut.write(os.path.join(save_folder,name+'.mid'))
+#
+#             f= open(os.path.join(save_folder,"duration.txt"),"w+")
+#             f.write(str(end_t-start_t))
+#             f.close()
 
 
 
