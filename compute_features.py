@@ -141,8 +141,7 @@ def framewise_lowest(output, target):
 ### Notewise highest and lowest voice
 ########################################
 
-def make_note_index_matrix(notes,intervals):
-    fs = 100
+def make_note_index_matrix(notes,intervals,fs=100):
     end_time = np.max(intervals[:,1])
     # Allocate a matrix of zeros - we will add in as we go
     matrix = -np.ones((128, int(fs*end_time)))
@@ -312,7 +311,7 @@ def false_negative_loudness(match,vel_target):
             unmatched_vels = vel_target[unmatched_targets]
             avg_unmatched = np.mean(unmatched_vels)
 
-        return avg_unmatched - avg_vel
+        return avg_unmatched / float(avg_vel)
 
 
 ########################################
@@ -416,7 +415,9 @@ def out_key_errors_binary_mask(notes_output,match,mask,mask_thresh=0.1):
 ### Repeated/merged notes
 ########################################
 
-def repeated_notes(intervals_target,notes_output,intervals_output,match_on):
+def repeated_notes_WITH_CORRECT_ONSET_ONLY(intervals_target,notes_output,intervals_output,match_on):
+    # Here, a repeated note is counted if and only if there is a correctly detected note before (onset-only)
+
     if len(match_on) == 0:
         # No matches, return zero
         return 0.0,0.0
@@ -473,6 +474,95 @@ def repeated_notes(intervals_target,notes_output,intervals_output,match_on):
             print n_repeat, tot_err, tot_notes
 
             return n_repeat/tot_err, n_repeat/tot_notes, repeated
+
+
+def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
+    # Here, any note that is a false positive an overlaps with a ground truth note for more
+    # than tol percent of its duration is considered a repeated note
+
+    if len(match) == 0:
+        return 0.0, 0.0, 0.0
+    else:
+        fs = 500
+
+        matched_targets, matched_outputs = zip(*match_on)
+        matched_targets = np.array(matched_targets)
+        matched_outputs = list(matched_outputs)
+        unmatched_outputs= list(set(range(len(notes_output)))-set(matched_outputs))
+
+        if len(unmatched_outputs)==0:
+            # No false positives, return zero
+            return 0.0,0.0,[]
+        else:
+
+            repeated = []
+
+            target_refs = make_note_index_matrix(notes_target,intervals_target,fs)
+            output_refs = make_note_index_matrix(notes_output,intervals_output,fs)
+            target_refs,output_refs = even_up_rolls(target_refs,output_refs,pad_value=-1)
+
+            roll_target = (target_refs!=-1).astype(int)
+            roll_output = (output_refs!=-1).astype(int)
+
+            for idx in unmatched_outputs:
+                roll_idx = output_refs==idx
+                overlap = np.sum(roll_target[roll_idx])/float(fs)
+                note_duration = intervals_output[idx][1] -  intervals_output[idx][0]
+                if overlap/note_duration > tol:
+                    repeated += [idx]
+
+
+            n_repeat = float(len(repeated))
+            tot_err = len(unmatched_outputs)
+            tot_notes = len(notes_output)
+
+            print n_repeat, tot_err, tot_notes
+
+            return n_repeat/tot_err, n_repeat/tot_notes
+
+def merged_notes(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
+    # Here, any note that is a false positive an overlaps with a ground truth note for more
+    # than tol percent of its duration is considered a repeated note
+
+    if len(match) == 0:
+        return 0.0, 0.0, 0.0
+    else:
+        fs = 500
+
+        matched_targets, matched_outputs = zip(*match_on)
+        matched_targets = np.array(matched_targets)
+        unmatched_targets= list(set(range(len(notes_target)))-set(matched_targets))
+
+        if len(unmatched_targets)==0:
+            # No false positives, return zero
+            return 0.0,0.0,[]
+        else:
+
+            repeated = []
+
+            target_refs = make_note_index_matrix(notes_target,intervals_target,fs)
+            output_refs = make_note_index_matrix(notes_output,intervals_output,fs)
+            target_refs,output_refs = even_up_rolls(target_refs,output_refs,pad_value=-1)
+
+            roll_target = (target_refs!=-1).astype(int)
+            roll_output = (output_refs!=-1).astype(int)
+
+            for idx in unmatched_targets:
+                roll_idx = target_refs==idx
+                overlap = np.sum(roll_output[roll_idx])/float(fs)
+                note_duration = intervals_target[idx][1] -  intervals_target[idx][0]
+                if overlap/note_duration > tol:
+                    repeated += [idx]
+
+
+            n_repeat = float(len(repeated))
+            tot_err = len(unmatched_targets)
+            tot_notes = len(notes_output)
+
+            print n_repeat, tot_err, tot_notes
+
+            return n_repeat/tot_err, n_repeat/tot_notes
+
 
 
 
