@@ -19,7 +19,8 @@ def specific_pitch_framewise(output,target,fs,n_semitones,down_only=False,delta=
     match_up = FPs*target_shift_down # correspond to when an output is matched with a target n_semitones above
 
     delta_steps = int(round(delta*fs))
-    continuation_mask = np.concatenate([np.concatenate([target[:,i:],np.zeros([target.shape[0],i])],,axis=1)[:,:,None] for i in range(delta_steps)],axis=2)
+    delta_steps = min(delta_steps, target.shape[1])  # limit delta_steps within segment length
+    continuation_mask = np.concatenate([np.concatenate([target[:,i:],np.zeros([target.shape[0],i])],axis=1)[:,:,None] for i in range(delta_steps)],axis=2)
 
     match_past = FPs*np.all(continuation_mask==0,axis=2).astype(int)
 

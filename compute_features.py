@@ -2,12 +2,12 @@ import os
 import numpy as np
 import pretty_midi as pm
 import mir_eval
-import utils
-from benchmark import framewise
-from high_low_voice import framewise_highest, framewise_lowest,notewise_highest, notewise_lowest,
-from loudness import false_negative_loudness
-from out_key import out_key_errors, out_key_errors_binary_mask
-from repeat_merge import repeated_notes, merged_notes
+import features.utils as utils
+from features.benchmark import framewise
+from features.high_low_voice import framewise_highest, framewise_lowest,notewise_highest, notewise_lowest
+from features.loudness import false_negative_loudness
+from features.out_key import out_key_errors, out_key_errors_binary_mask
+from features.repeat_merge import repeated_notes, merged_notes
 
 
 
@@ -31,7 +31,7 @@ for example in os.listdir(MIDI_path)[0:10]:
             target_pr = (target_data.get_piano_roll()>0).astype(int)
             system_pr = (system_data.get_piano_roll()>0).astype(int)
 
-            target_pr,system_pr= even_up_rolls(target_pr,system_pr)
+            target_pr,system_pr= utils.even_up_rolls(target_pr,system_pr)
 
             P_f,R_f,F_f = framewise(system_pr,target_pr)
             print("Frame P,R,F:", P_f,R_f,F_f)
@@ -55,7 +55,7 @@ for example in os.listdir(MIDI_path)[0:10]:
 
             # notewise_highest(notes_system,intervals_system,notes_targ            mask = make_key_mask(target_pr)et,intervals_target,match_onoff)
 
-            _,_,repeated = repeat_merge.repeated_notes(intervals_target,notes_system,intervals_system,match_on)
+            _,_,repeated = repeated_notes(intervals_target,notes_system,intervals_system,match_on)
 
             if len(repeated)>0 or True:
                 import matplotlib.pyplot as plt
