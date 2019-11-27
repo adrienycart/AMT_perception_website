@@ -1,8 +1,9 @@
 import os
 import datetime
+from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
+load_dotenv(os.path.join(basedir, '.env'))
 
 MAX_ANSWERS = 4
 DATA_PATH = 'data/all_mp3_cut'
