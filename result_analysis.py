@@ -2,6 +2,18 @@ from app import db
 from config import MAX_ANSWERS
 from app.models import Question, User, Answer
 
+def compute_statistics():
+    n_all = Question.query.count()
+
+    n_partial = Question.query.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
+
+    n_full_questions =  Question.query.filter(Question.n_answers == MAX_ANSWERS).count()
+
+    n_full_examples = count_full_examples()
+
+    print "Full examples", n_full_examples
+    print "Full questions: ", n_full_questions
+    print "Partial questiions:", n_partial
 
 
 def count_answered_questions():
@@ -18,8 +30,10 @@ def get_users():
         n_answers = user.number_answers()
         comment = user.comments
         print 'User:', username, " n. answers:", n_answers
+        # print user.gold_msi_answers
         if comment is not None:
-            print comment
+            print '    ', comment
+
         user_answers += [[username,n_answers]]
     return user_answers
 
@@ -44,9 +58,10 @@ def count_full_examples():
         if n == 0:
             complete_examples += [example]
         else:
-            print example, n
+            # print example, n
 
-    print "Complete examples: ", len(complete_examples)
+    # print "Complete examples: ", len(complete_examples)
+    return len(complete_examples)
 
 
 
