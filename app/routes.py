@@ -4,9 +4,10 @@ from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import ConsentForm, LoginForm, RegistrationForm, EditProfileForm, AnswerForm, GoldMSIForm
 from app.models import User, Question
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import func
 from wtforms import Label
+from config import LOCK_TIME, MIN_DATE
 
 
 
@@ -74,6 +75,9 @@ def user(username):
 @login_required
 def instructions():
     session['question_id'] = current_user.next_question()
+    Question.query.get(session['question_id']).ongoing_since = datetime.utcnow()
+    Question.query.get(session['question_id']).ongoing_user = current_user.id
+    db.session.commit()
     return render_template('instructions.html')
 
 @app.route('/question',methods=['GET','POST'])
@@ -86,11 +90,26 @@ def question():
 
     if form.validate_on_submit():
         # flash('Your answered:'+str(form.choice.data)+' to question :'+str(current_question.id)+' known '+str(form.known.data))
-        answer = current_question.answer(form.choice.data,current_user,recognised=form.known.data)
+        if Question.query.get(question_id).ongoing_user == current_user.id and datetime.utcnow()-current_question.ongoing_since > LOCK_TIME:
+            flash('You took too long to answer! Here is a new example.')
+            current_question.ongoing_since = MIN_DATE
+            current_question.ongoing_user = -1
+            db.session.commit()
+        else:
+            answer = current_question.answer(form.choice.data,current_user,recognised=form.known.data)
+
         session['question_id'] = current_user.next_question()
+        Question.query.get(session['question_id']).ongoing_since = datetime.utcnow()
+        Question.query.get(session['question_id']).ongoing_user = current_user.id
+        db.session.commit()
         return redirect(url_for('question'))
 
     # flash(str([current_question.id, question_id]))
+    # import datetime as dt
+    # all_questions = Question.query.filter(Question.ongoing_since>datetime.utcnow()-LOCK_TIME).all()
+    # print "current_user",current_user.id
+    # for question in all_questions:
+    #     print question, question.ongoing_since, question.ongoing_user
 
     return render_template('question.html', number=n_question+1,filepaths = current_question.get_filepaths(), form=form, debug=app.debug)
 
