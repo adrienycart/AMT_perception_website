@@ -5,15 +5,20 @@ from app.models import Question, User, Answer
 def compute_statistics():
     n_all = Question.query.count()
 
-    n_partial = Question.query.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).count()
+    n_partial_query = Question.query.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS))
+    n_partial = n_partial_query.count()
+    n_answers_array = [0, 0, 0]
+    all_partial = n_partial_query.all()
+    for question in all_partial:
+        n_answers_array[question.n_answers] += 1
 
     n_full_questions =  Question.query.filter(Question.n_answers == MAX_ANSWERS).count()
 
     n_full_examples = count_full_examples()
 
-    print "Full examples", n_full_examples
+    print "Full examples:", n_full_examples
     print "Full questions: ", n_full_questions
-    print "Partial questiions:", n_partial
+    print "Partial questions:", n_partial, 'distribution:', n_answers_array
 
 
 def count_answered_questions():
