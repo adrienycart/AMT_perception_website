@@ -10,7 +10,7 @@ def compute_statistics():
     n_answers_array = [0, 0, 0]
     all_partial = n_partial_query.all()
     for question in all_partial:
-        n_answers_array[question.n_answers] += 1
+        n_answers_array[question.n_answers+1] += 1
 
     n_full_questions =  Question.query.filter(Question.n_answers == MAX_ANSWERS).count()
 
@@ -18,7 +18,7 @@ def compute_statistics():
 
     print "Full examples:", n_full_examples
     print "Full questions: ", n_full_questions
-    print "Partial questions:", n_partial, 'distribution:', n_answers_array
+    print "Partial questions:", n_partial, 'distribution:', zip([1,2,3],n_answers_array)
 
 
 def count_answered_questions():
