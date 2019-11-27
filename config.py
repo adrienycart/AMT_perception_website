@@ -7,7 +7,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 MAX_ANSWERS = 4
 DATA_PATH = 'data/all_mp3_cut'
 MIN_DATE = datetime.datetime(datetime.MINYEAR,1,1,0,0)
-LOCK_TIME = datetime.timedelta(minutes=1) #Amount of timeor which other users cannot access the same question.
+LOCK_TIME = datetime.timedelta(minutes=2) #Amount of timeor which other users cannot access the same question.
 
 
 class Config(object):
