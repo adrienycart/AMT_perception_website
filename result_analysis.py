@@ -5,7 +5,7 @@ from app.models import Question, User, Answer
 def compute_statistics():
     n_all = Question.query.count()
 
-    n_partial = Question.query.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
+    n_partial = Question.query.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).count()
 
     n_full_questions =  Question.query.filter(Question.n_answers == MAX_ANSWERS).count()
 
