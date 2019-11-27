@@ -1,10 +1,10 @@
 from app import db
 from app import login
-import datetime
-from flask_login import UserMixin, current_user
+from datetime import datetime
+from flask_login import UserMixin
 import random
 import os
-from config import DATA_PATH, MAX_ANSWERS, MIN_DATE, LOCK_TIME
+from config import DATA_PATH, MAX_ANSWERS
 from  sqlalchemy.sql.expression import func
 
 
@@ -17,7 +17,7 @@ class Answer(db.Model):
 
     choice = db.Column(db.Integer)
     recognised = db.Column(db.Boolean)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     def __repr__(self):
         return '<Answer {},known {}>'.format(self.choice,self.recognised)
@@ -26,7 +26,7 @@ class Answer(db.Model):
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
-    last_seen = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     ethics_approved = db.Column(db.Boolean, default=False)
     gold_msi_completed = db.Column(db.Boolean, default=False)
     answers = db.relationship('Answer',
@@ -64,27 +64,18 @@ class User(UserMixin,db.Model):
             previously_seen_examples.add(q.example)
         previously_seen_examples = list(previously_seen_examples)
 
-        # Only consider questions that are not being answered right now
-        now = datetime.datetime.utcnow()
-        candidates = Question.query.filter(db.or_(Question.ongoing_since<now-LOCK_TIME,Question.ongoing_user==current_user.id))
-        # print(candidates.all())
-
-        # print Question.query.filter(Question.ongoing_since>now-LOCK_TIME).all()
-        # print Question.query.filter(Question.ongoing_user==current_user.id).all()
-
         # Choose a question whose example was never seen by the user and that is not fully answered
-        candidates = candidates.filter(db.not_(Question.example.in_(previously_seen_examples))).order_by(func.random())
+        candidates = Question.query.filter(db.not_(Question.example.in_(previously_seen_examples))).order_by(func.random())
         # print(candidates.all())
         # print(Question.query.first().n_answers)
 
         # Among these, choose a question that was already answers, but still lacks some:
         candidate = candidates.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
 
-
         # If no question fullfills that criterion, choose a question such that
         # its example was already evaluated for some other systems (still not previously seen)
         if candidate is None:
-            # print("Trying to find a partially-filled example")
+            print("Trying to find a partially-filled example")
             partial_examples = set()
             for q in candidates.filter(Question.n_answers==MAX_ANSWERS):
                 partial_examples.add(q.example)
@@ -93,7 +84,7 @@ class User(UserMixin,db.Model):
             # If no question fullfills that criterion, choose any question with
             # unseen example, and lacking answers (it should be an example seen by no-one yet)
             if candidate is None:
-                # print("Picking new example")
+                print("Picking new example")
                 candidate = candidates.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
 
         return candidate.id
@@ -108,8 +99,6 @@ class Question(db.Model):
 
     n_answers = db.Column(db.Integer,default=0)
     reverse = db.Column(db.Boolean, default=False)
-    ongoing_user = db.Column(db.Integer,default=-1)
-    ongoing_since = db.Column(db.DateTime,default=MIN_DATE)
 
     answers = db.relationship('Answer',
                             backref='question',
@@ -121,8 +110,6 @@ class Question(db.Model):
         db.session.add(answer)
         self.n_answers += 1
         self.reverse = not self.reverse
-        self.ongoing_since = MIN_DATE
-        self.ongoing_user = -1
         db.session.commit()
         return
 
@@ -147,7 +134,7 @@ class Question(db.Model):
 #     question_id = db.Column(db.Integer, db.ForeignKey('gold_msi_question.id'))
 #
 #     choice = db.Column(db.Integer)
-#     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
+#     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 #
 #     def __repr__(self):
 #         return '<GoldMSIAnswer {}>'.format(self.choice)
