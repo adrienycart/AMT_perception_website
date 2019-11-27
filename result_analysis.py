@@ -58,7 +58,7 @@ def count_full_examples():
         if n == 0:
             complete_examples += [example]
         else:
-            # print example, n
+            print example, n
 
     # print "Complete examples: ", len(complete_examples)
     return len(complete_examples)
@@ -120,10 +120,11 @@ def gather_ratings():
 
 
 
-print(Answer.query.all())
-print(count_answered_questions())
-# count_full_examples()
-print(get_complete_questions())
-print(count_full_examples())
-print(gather_ratings())
+# print(Answer.query.all())
+# print(count_answered_questions())
+# # count_full_examples()
+# print(get_complete_questions())
+# print(count_full_examples())
+# print(gather_ratings())
+compute_statistics()
 get_users()
