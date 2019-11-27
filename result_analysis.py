@@ -10,7 +10,18 @@ def count_answered_questions():
 
     print "Full answers: ", n_full, " (total:",n_all,')'
 
-
+def get_users():
+    all_users = User.query.all()
+    user_answers = []
+    for user in all_users:
+        username = user.username
+        n_answers = user.number_answers()
+        comment = user.comments
+        print 'User:', username, " n. answers:", n_answers
+        if comment is not None:
+            print comment
+        user_answers += [[username,n_answers]]
+    return user_answers
 
 def get_complete_questions():
     query = Question.query.filter(Question.n_answers==MAX_ANSWERS)
@@ -36,6 +47,7 @@ def count_full_examples():
             print example, n
 
     print "Complete examples: ", len(complete_examples)
+
 
 
 def gather_ratings():
@@ -67,8 +79,6 @@ def gather_ratings():
 
 
 
-
-
 # engine = db.create_engine('sqlite:///app.db')
 # connection = engine.connect()
 #
@@ -95,9 +105,10 @@ def gather_ratings():
 
 
 
-
-# count_answered_questions()
+print(Answer.query.all())
+print(count_answered_questions())
 # count_full_examples()
 print(get_complete_questions())
 print(count_full_examples())
 print(gather_ratings())
+get_users()
