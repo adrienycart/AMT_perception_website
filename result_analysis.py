@@ -16,6 +16,7 @@ def compute_statistics():
 
     n_full_examples = count_full_examples()
 
+    print "Total", n_all
     print "Full examples:", n_full_examples
     print "Full questions: ", n_full_questions
     print "Partial questions:", n_partial, ', distribution:', zip(['1 answer:','2 answers:','3 answers:'],n_answers_array)
