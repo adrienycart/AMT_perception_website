@@ -46,11 +46,13 @@
           <table class='table-borderless text-center'>
           <tr>
             <td>  <audio src="{{url_for('static',filename=filepaths[1])}}" controls></audio> </td>
+            <td width="50" />
             <td>  <audio src="{{url_for('static',filename=filepaths[2])}}" controls></audio> </td>
           </tr>
           <tr>
           {% for subfield in form.choice %}
             <td>{{subfield}}</td>
+            <td width="50" />
           {% endfor %}
           </tr>
           </table>
