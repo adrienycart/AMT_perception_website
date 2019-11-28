@@ -56,7 +56,7 @@ if models.Question.query.first() is None:
         for i in range(n_files):
             for j in range(i+1,n_files):
                 system1,system2 = sorted([os.path.splitext(files[i])[0],os.path.splitext(files[j])[0]])
-                question = models.Question(example=example,system1=os.path.splitext(files[i])[0],system2=os.path.splitext(files[j])[0])
+                question = models.Question(example=example,system1=system1,system2=system2)
                 db.session.add(question)
 
     db.session.commit()
