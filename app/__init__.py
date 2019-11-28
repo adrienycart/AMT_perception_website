@@ -60,3 +60,4 @@ if models.Question.query.first() is None:
                 db.session.add(question)
 
     db.session.commit()
+    print('Done.')
