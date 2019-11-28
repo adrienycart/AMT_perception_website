@@ -82,7 +82,11 @@ for key, val in dict_answers.items():
     # print example,system1,system2
     system1,system2 = sorted([system1,system2])
     question = Question.query.filter(db.and_(db.and_(Question.example== example, Question.system1==system1),Question.system2==system2)).all()
-    assert len(question)==1
+    try:
+        assert len(question)==1
+    except AssertionError:
+        print question
+        raise AssertionError
     question = question[0]
     for ans in val:
         user_id,choice,recognised,timestamp = ans
