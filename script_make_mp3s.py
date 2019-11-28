@@ -441,8 +441,8 @@ def write_sound(sound,filename):
 # #### Prepare Kelz MIDI files
 # ##############################################################
 
-# input_folder = '../MLM_decoding/data/outputs_default_config_split/test'
-# dest_folder = 'data/kelz_outputs'
+# input_folder = '../../MLM_decoding/data/outputs_default_config_split/test'
+# dest_folder = 'app/static/data/kelz_outputs'
 #
 # for filename in os.listdir(input_folder):
 #     if filename.endswith('.csv') and not filename.startswith('.'):
@@ -452,8 +452,8 @@ def write_sound(sound,filename):
 #         roll_bin = (roll>0.5).astype(int)
 #
 #
-#         roll_filt = filter_short_gaps(roll_bin,thresh=3)
-#         roll_filt = filter_short_notes(roll_filt,thresh=3)
+#         roll_filt = filter_short_gaps(roll_bin,thresh=2)
+#         roll_filt = filter_short_notes(roll_filt,thresh=2)
 #
 #         # fig,[ax1,ax2,ax3] = plt.subplots(3,1)
 #         # ax1.imshow(roll_bin,origin='lower',aspect='auto')
@@ -594,16 +594,21 @@ def write_sound(sound,filename):
 # MAPS_folder = "app/static/data/MAPS_wav"
 # AMAPS_folder = "app/static/data/A-MAPS_1.2_with_pedal"
 # MIDI_input_folders = [
-#                     "app/static/data/cheng_outputs",
-#                     "app/static/data/onsets_and_frames_outputs",
+#                     # "app/static/data/cheng_outputs",
+#                     # "app/static/data/onsets_and_frames_outputs",
 #                     "app/static/data/kelz_outputs",
-#                     "app/static/data/lisu_outputs"
+#                     # "app/static/data/lisu_outputs"
 #                     ]
-# MIDI_names = ["cheng","google","kelz","lisu"]
+# MIDI_names = [
+#                 # "cheng",
+#                 # "google",
+#                 "kelz",
+#                 # "lisu"
+#                 ]
 # csv_folder = 'app/static/data/cut_points'
 # dest_folder = 'app/static/data/all_midi_cut'
 #
-# write_AMAPS = True
+# write_AMAPS = False
 #
 # for filename in os.listdir(MAPS_folder):
 #     if filename.endswith('.wav') and not filename.startswith('.') and "chpn-e01" not in filename:# and 'MAPS_MUS-liz_rhap02_ENSTDkAm' in filename:
@@ -644,9 +649,9 @@ def write_sound(sound,filename):
 #                 midi_cut = cut_midi(midi,start_t,end_t)
 #                 midi_cut.write(os.path.join(save_folder,name+'.mid'))
 #
-#             f= open(os.path.join(save_folder,"duration.txt"),"w+")
-#             f.write(str(end_t-start_t))
-#             f.close()
+#             # f= open(os.path.join(save_folder,"duration.txt"),"w+")
+#             # f.write(str(end_t-start_t))
+#             # f.close()
 
 
 
@@ -654,40 +659,43 @@ def write_sound(sound,filename):
 # #### Convert MIDI files into mp3 files
 # ##############################################################
 
-# midi_folder = 'app/static/data/all_midi_cut'
-# dest_folder = 'app/static/data/all_mp3_cut'
-# csv_folder = 'app/static/data/cut_points'
-# AMAPS_folder = "app/static/data/A-MAPS_1.2"
-#
-# to_recompute = ['target']
-#
-# for subfolder_name in os.listdir(midi_folder):
-#     subfolder = os.path.join(midi_folder,subfolder_name)
-#     if os.path.isdir(subfolder):# and 'MAPS_MUS-mz_331_2_ENSTDkCl_16' in subfolder:
-#         print(subfolder)
-#         dest_subfolder = os.path.join(dest_folder,subfolder_name)
-#         safe_mkdir(dest_subfolder)
-#
-#         # #Retrieve duration of example
-#         f=open(os.path.join(subfolder,"duration.txt"), "r")
-#         dur_str = f.read()
-#         duration = float(dur_str)
-#
-#         for midi_file in os.listdir(subfolder):
-#             if midi_file.endswith('.mid') and not midi_file.startswith('.'):
-#                 wav_path = os.path.join(dest_subfolder,midi_file.replace('.mid','.wav'))
-#                 if not os.path.exists(wav_path.replace('.wav','.mp3')) or os.path.splitext(midi_file)[0] in to_recompute:
-#
-#                     data = pm.PrettyMIDI(os.path.join(subfolder,midi_file))
-#                     # print midi_file
-#                     # for instr in data.instruments:
-#                     #     print instr.control_changes
-#
-#                     sound1 = synthesize_midi(data)
-#                     sound1_trim = sound1[:int(duration*44100)]
-#                     wav_path = os.path.join(dest_subfolder,midi_file.replace('.mid','.wav'))
-#                     write_sound(sound1_trim,wav_path)
-#
-#                     sound2 = pydub.AudioSegment.from_wav(wav_path)
-#                     sound2.export(wav_path.replace('.wav','.mp3'), format="mp3", bitrate="320k")
-#                     os.remove(wav_path)
+midi_folder = 'app/static/data/all_midi_cut'
+dest_folder = 'app/static/data/all_mp3_cut'
+csv_folder = 'app/static/data/cut_points'
+AMAPS_folder = "app/static/data/A-MAPS_1.2"
+
+to_recompute = ['kelz']
+
+all_midi_folders = os.listdir(midi_folder)
+n_midi_folders = len(all_midi_folders)
+for i,subfolder_name in enumerate(all_midi_folders):
+    subfolder = os.path.join(midi_folder,subfolder_name)
+
+    if os.path.isdir(subfolder):# and 'MAPS_MUS-mz_331_2_ENSTDkCl_16' in subfolder:
+        print('(',i,'/',n_midi_folders,')', subfolder)
+        dest_subfolder = os.path.join(dest_folder,subfolder_name)
+        safe_mkdir(dest_subfolder)
+
+        # #Retrieve duration of example
+        f=open(os.path.join(subfolder,"duration.txt"), "r")
+        dur_str = f.read()
+        duration = float(dur_str)
+
+        for midi_file in os.listdir(subfolder):
+            if midi_file.endswith('.mid') and not midi_file.startswith('.'):
+                wav_path = os.path.join(dest_subfolder,midi_file.replace('.mid','.wav'))
+                if not os.path.exists(wav_path.replace('.wav','.mp3')) or os.path.splitext(midi_file)[0] in to_recompute:
+
+                    data = pm.PrettyMIDI(os.path.join(subfolder,midi_file))
+                    # print midi_file
+                    # for instr in data.instruments:
+                    #     print instr.control_changes
+
+                    sound1 = synthesize_midi(data)
+                    sound1_trim = sound1[:int(duration*44100)]
+                    wav_path = os.path.join(dest_subfolder,midi_file.replace('.mid','.wav'))
+                    write_sound(sound1_trim,wav_path)
+
+                    sound2 = pydub.AudioSegment.from_wav(wav_path)
+                    sound2.export(wav_path.replace('.wav','.mp3'), format="mp3", bitrate="320k")
+                    os.remove(wav_path)
