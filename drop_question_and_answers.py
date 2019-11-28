@@ -48,8 +48,9 @@ for key in dict_answers.keys():
 
 # Erase the whole database (questions and answers only)
 
-Question.query.delete()
 Answer.query.delete()
+Question.query.delete()
+
 
 # Re-build the database:
 # print('Populate database...')
