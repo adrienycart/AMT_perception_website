@@ -17,10 +17,12 @@ class Answer(db.Model):
 
     choice = db.Column(db.Integer)
     recognised = db.Column(db.Boolean)
+    difficulty = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
+    time_taken =  db.Column(db.Float)
 
     def __repr__(self):
-        return '<Answer {},known {}>'.format(self.choice,self.recognised)
+        return '<Answer {},known {},difficulty {},time {}>'.format(self.choice,self.recognised, self.difficulty, self.time_taken)
 
 
 class User(UserMixin,db.Model):
@@ -115,9 +117,11 @@ class Question(db.Model):
                             backref='question',
                             lazy='dynamic')
 
-    def answer(self,choice,user,recognised):
+    def answer(self,choice,user,recognised,difficulty):
+        time_taken = datetime.datetime.utcnow()-self.ongoing_since
+        time_taken_s = time_taken.total_seconds()
         choice = 1-choice if self.reverse else choice
-        answer = Answer(choice=choice,user_id=user.id,question_id=self.id,recognised=recognised)
+        answer = Answer(choice=choice,user_id=user.id,question_id=self.id,recognised=recognised,difficulty=difficulty,time_taken=time_taken_s)
         db.session.add(answer)
         self.n_answers += 1
         self.reverse = not self.reverse

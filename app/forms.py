@@ -42,6 +42,7 @@ class EditProfileForm(FlaskForm):
 class AnswerForm(FlaskForm):
     choice = RadioField('Select your answer:',choices=[(0,'A'),(1,'B')],coerce=int)
     known = BooleanField("I know this piece")
+    difficulty = RadioField('How easy was it?',choices=[(1,'A'),(2,'B'),(3,'C'),(4,'D'),(5,'E')],coerce=int)
     submit = SubmitField('Next question')
 
     # def validate_choice(self,choice):

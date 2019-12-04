@@ -91,12 +91,12 @@ def question():
     if form.validate_on_submit():
         # flash('Your answered:'+str(form.choice.data)+' to question :'+str(current_question.id)+' known '+str(form.known.data))
         if Question.query.get(question_id).ongoing_user == current_user.id and datetime.utcnow()-current_question.ongoing_since > LOCK_TIME:
-            flash('You took too long to answer! Here is a new example.')
+            flash('You took too long to answer (more than '+str(int(LOCK_TIME.total_seconds()//60))+' minutes)! Here is a new example.')
             current_question.ongoing_since = MIN_DATE
             current_question.ongoing_user = -1
             db.session.commit()
         else:
-            answer = current_question.answer(form.choice.data,current_user,recognised=form.known.data)
+            answer = current_question.answer(form.choice.data,current_user,recognised=form.known.data,difficulty=form.difficulty.data)
 
         session['question_id'] = current_user.next_question()
         Question.query.get(session['question_id']).ongoing_since = datetime.utcnow()

@@ -42,6 +42,13 @@
     <h4> Which transcription sounds most similar to the reference? </h4>
 
         {{ form.hidden_tag() }}
+
+        {% for error in form.choice.errors %}
+        <div class="alert alert-danger" role="alert">
+        {{ error }}<br>
+        </div>
+        {% endfor %}
+
         <p>
           <table class='table-borderless text-center'>
           <tr>
@@ -57,13 +64,41 @@
           </tr>
           </table>
 
-          {% for error in form.choice.errors %}
+
+        </p>
+
+    <h4> How difficult was it to answer the question? </h4>
+
+
+
+        <div class="col-md-6">
+          {% for error in form.difficulty.errors %}
           <div class="alert alert-danger" role="alert">
           {{ error }}<br>
           </div>
           {% endfor %}
+
+        <p>
+          <table class='table text-center table-condensed'>
+          <tr>
+            <td>Very easy</td><td>Easy</td><td>Neutral</td><td>Difficult</td><td>Impossible</td>
+          </tr>
+          <tr>
+          {% for subfield in form.difficulty %}
+            <td>{{subfield}}</td>
+          {% endfor %}
+          </tr>
+          </table>
+
+
         </p>
+
+
+
+
         <p>{{ wtf.form_field(form.submit, button_map={'submit':'primary'}) }}</p>
+        </div>
+
 
     </form>
 
