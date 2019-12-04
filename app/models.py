@@ -66,37 +66,42 @@ class User(UserMixin,db.Model):
             previously_seen_examples.add(q.example)
         previously_seen_examples = list(previously_seen_examples)
 
-        # Only consider questions that are not being answered right now
+        # Choose in priority questions that might have been left unanswered by current_user
         now = datetime.datetime.utcnow()
-        candidates = Question.query.filter(db.or_(Question.ongoing_since<now-LOCK_TIME,Question.ongoing_user==current_user.id))
-        # print(candidates.all())
-
-        # print Question.query.filter(Question.ongoing_since>now-LOCK_TIME).all()
-        # print Question.query.filter(Question.ongoing_user==current_user.id).all()
-
-        # Choose a question whose example was never seen by the user and that is not fully answered
-        candidates = candidates.filter(db.not_(Question.example.in_(previously_seen_examples))).order_by(func.random())
-        # print(candidates.all())
-        # print(Question.query.first().n_answers)
-
-        # Among these, choose a question that was already answers, but still lacks some:
-        candidate = candidates.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
-
-
-        # If no question fullfills that criterion, choose a question such that
-        # its example was already evaluated for some other systems (still not previously seen)
+        candidate = Question.query.filter(db.and_(Question.ongoing_since>now-LOCK_TIME,Question.ongoing_user==current_user.id)).first()
         if candidate is None:
-            # print("Trying to find a partially-filled example")
-            partial_examples = set()
-            for q in candidates.filter(Question.n_answers==MAX_ANSWERS):
-                partial_examples.add(q.example)
-            partial_examples=list(partial_examples)
-            candidate = candidates.filter(Question.example.in_(partial_examples)).filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
-            # If no question fullfills that criterion, choose any question with
-            # unseen example, and lacking answers (it should be an example seen by no-one yet)
+
+            # Only consider questions that are not being answered right now
+            now = datetime.datetime.utcnow()
+            candidates = Question.query.filter(db.or_(Question.ongoing_since<now-LOCK_TIME,Question.ongoing_user==current_user.id))
+            # print(candidates.all())
+
+            # print Question.query.filter(Question.ongoing_since>now-LOCK_TIME).all()
+            # print Question.query.filter(Question.ongoing_user==current_user.id).all()
+
+            # Choose a question whose example was never seen by the user and that is not fully answered
+            candidates = candidates.filter(db.not_(Question.example.in_(previously_seen_examples))).order_by(func.random())
+            # print(candidates.all())
+            # print(Question.query.first().n_answers)
+
+            # Among these, choose a question that was already answers, but still lacks some:
+            candidate = candidates.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
+
+
+            # If no question fullfills that criterion, choose a question such that
+            # its example was already evaluated for some other systems (still not previously seen)
             if candidate is None:
-                # print("Picking new example")
-                candidate = candidates.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
+                # print("Trying to find a partially-filled example")
+                partial_examples = set()
+                for q in candidates.filter(Question.n_answers==MAX_ANSWERS):
+                    partial_examples.add(q.example)
+                partial_examples=list(partial_examples)
+                candidate = candidates.filter(Question.example.in_(partial_examples)).filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
+                # If no question fullfills that criterion, choose any question with
+                # unseen example, and lacking answers (it should be an example seen by no-one yet)
+                if candidate is None:
+                    # print("Picking new example")
+                    candidate = candidates.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
 
         return candidate.id
 
