@@ -67,11 +67,12 @@
 
         </p>
 
+        <div class="col-md-6">
     <h4> How difficult was it to answer the question? </h4>
 
 
 
-        <div class="col-md-6">
+
           {% for error in form.difficulty.errors %}
           <div class="alert alert-danger" role="alert">
           {{ error }}<br>
@@ -97,6 +98,19 @@
 
 
         <p>{{ wtf.form_field(form.submit, button_map={'submit':'primary'}) }}</p>
+        </div>
+
+        <div class="col-md-6">
+        <h5> Difficulty scale: </h5>
+        <p>
+
+             <b>Very easy</b>: 1 play, immediately obvious answer, very confident<br>
+             <b>Easy</b>: 1-2 plays, straightforward answer, confident<br>
+             <b>Neutral</b>: several plays, not easy to answer, moderately confident<br>
+             <b>Difficult</b>: many plays, hard decision, not very confident<br>
+             <b>Impossible</b>: many plays, arbitrary choice, no confidence<br>
+
+        </p>
         </div>
 
 

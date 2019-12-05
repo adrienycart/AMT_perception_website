@@ -28,7 +28,7 @@ def count_answered_questions():
 
     print "Full answers: ", n_full, " (total:",n_all,')'
 
-def get_users():
+def get_users(with_answers=False):
     all_users = User.query.all()
     user_answers = []
     for user in all_users:
@@ -39,6 +39,9 @@ def get_users():
         # print user.gold_msi_answers
         if comment is not None:
             print '    ', comment
+        if with_answers:
+            for ans in user.answers:
+                print '    ', Question.query.get(ans.question_id), ans 
 
         user_answers += [[username,n_answers]]
     return user_answers
