@@ -76,7 +76,7 @@ def count_full_examples():
         if n == 0:
             complete_examples += [example]
         else:
-            partial_examples += [example, n]
+            partial_examples += [[example, n]]
 
     # print "Complete examples: ", len(complete_examples)
     return len(complete_examples), partial_examples
