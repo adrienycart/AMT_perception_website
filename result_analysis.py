@@ -69,17 +69,17 @@ def count_full_examples():
     partial_examples=gather_examples(questions_full)
 
     complete_examples = []
-    partial_examples = []
+    partial_examples_number = []
     for example in partial_examples:
 
         n = Question.query.filter(Question.example == example).filter(Question.n_answers != MAX_ANSWERS).count()
         if n == 0:
             complete_examples += [example]
         else:
-            partial_examples += [[example, n]]
+            partial_examples_number += [[example, n]]
 
     # print "Complete examples: ", len(complete_examples)
-    return len(complete_examples), partial_examples
+    return len(complete_examples), partial_examples_number
 
 
 
