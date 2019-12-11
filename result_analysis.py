@@ -7,22 +7,26 @@ def compute_statistics():
 
     n_partial_query = Question.query.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS))
     n_partial = n_partial_query.count()
-    n_answers_array = [0, 0, 0]
+    partial_questions_array = [0, 0, 0]
     all_partial = n_partial_query.all()
     for question in all_partial:
-        n_answers_array[question.n_answers-1] += 1
+        partial_questions_array[question.n_answers-1] += 1
 
     n_full_questions =  Question.query.filter(Question.n_answers == MAX_ANSWERS).count()
 
-    n_full_examples = count_full_examples()
+    n_full_examples, partial_examples = count_full_examples()
+    partial_examples_array = [0, 0, 0, 0, 0]
+    for example in partial_examples:
+        partial_examples_array[5-example[1]] += 1
 
     n_answers = Answer.query.count()
     n_participants = User.query.count()
 
     print "Total", n_all
     print "Full examples:", n_full_examples
+    print "Partial examples:", len(partial_examples), ', distribution:', zip(['1 question:','2 questions:','3 questions:','4 questions:','5 questions:'],partial_examples_array)
     print "Full questions: ", n_full_questions
-    print "Partial questions:", n_partial, ', distribution:', zip(['1 answer:','2 answers:','3 answers:'],n_answers_array)
+    print "Partial questions:", n_partial, ', distribution:', zip(['1 answer:','2 answers:','3 answers:'],partial_questions_array)
     print 'Total answers:', n_answers
     print 'Total participants:', n_participants
 
@@ -65,16 +69,17 @@ def count_full_examples():
     partial_examples=gather_examples(questions_full)
 
     complete_examples = []
+    partial_examples = []
     for example in partial_examples:
 
         n = Question.query.filter(Question.example == example).filter(Question.n_answers != MAX_ANSWERS).count()
         if n == 0:
             complete_examples += [example]
         else:
-            print example, n
+            partial_examples += [example, n]
 
     # print "Complete examples: ", len(complete_examples)
-    return len(complete_examples)
+    return len(complete_examples), partial_examples
 
 
 
