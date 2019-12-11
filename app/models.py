@@ -4,7 +4,7 @@ import datetime
 from flask_login import UserMixin, current_user
 import random
 import os
-from config import DATA_PATH, MAX_ANSWERS, MIN_DATE, LOCK_TIME
+from config import DATA_PATH, MAX_ANSWERS, N_MODELS, MIN_DATE, LOCK_TIME
 from  sqlalchemy.sql.expression import func
 
 
@@ -74,34 +74,46 @@ class User(UserMixin,db.Model):
             # Only consider questions that are not being answered right now
             now = datetime.datetime.utcnow()
             candidates = Question.query.filter(db.or_(Question.ongoing_since<now-LOCK_TIME,Question.ongoing_user==current_user.id))
-            # print(candidates.all())
 
-            # print Question.query.filter(Question.ongoing_since>now-LOCK_TIME).all()
-            # print Question.query.filter(Question.ongoing_user==current_user.id).all()
-
-            # Choose a question whose example was never seen by the user and that is not fully answered
+            # Choose a question whose example was never seen by the user
             candidates = candidates.filter(db.not_(Question.example.in_(previously_seen_examples))).order_by(func.random())
-            # print(candidates.all())
-            # print(Question.query.first().n_answers)
 
-            # Among these, choose a question that was already answers, but still lacks some:
-            candidate = candidates.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
+            # Among these, rank the examples by number of answers (there is probably a better way to do that in SQL...)
+            questions_not_empty = candidates.filter(Question.n_answers>0).all()
+            examples_not_empty = set()
+            for q in questions_not_empty:
+                examples_not_empty.add(q.example)
+            examples_not_empty = list(examples_not_empty)
+            examples_n_answers = []
+            for example in examples_not_empty:
+                sum_answers = Question.query.filter(Question.example==example).with_entities(func.sum(Question.n_answers)).scalar()
+                # Do not add examples that have been fully answered
+                if not sum_answers == MAX_ANSWERS*(N_MODELS*(N_MODELS-1)/2):
+                    examples_n_answers += [[example,sum_answers]]
+            examples_n_answers = sorted(examples_n_answers,key=lambda x:x[1])
 
+            if len(examples_n_answers) == 0:
+                # If no answers at all, or if all examples have been fully rated, choose a new, random one
+                candidate = None
+            else:
+                # Choose one of the examples that has most answers (random, but biased towards more answers)
+                example_idx = int(len(examples_n_answers) * pow(random.random(),0.25))
+                chosen_example = examples_n_answers[example_idx][0]
+                candidates_example=Question.query.filter(Question.example==chosen_example)
 
-            # If no question fullfills that criterion, choose a question such that
-            # its example was already evaluated for some other systems (still not previously seen)
-            if candidate is None:
-                # print("Trying to find a partially-filled example")
-                partial_examples = set()
-                for q in candidates.filter(Question.n_answers==MAX_ANSWERS):
-                    partial_examples.add(q.example)
-                partial_examples=list(partial_examples)
-                candidate = candidates.filter(Question.example.in_(partial_examples)).filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
-                # If no question fullfills that criterion, choose any question with
-                # unseen example, and lacking answers (it should be an example seen by no-one yet)
+                # Among these, choose a question that was already answers, but still lacks some:
+                candidate = candidates_example.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
+
+                # If all questions are fully answered, choose a new question for this example
                 if candidate is None:
-                    # print("Picking new example")
-                    candidate = candidates.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
+                    # print "New question for same example"
+                    candidate = candidates_example.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
+
+            # If there was no suitable candidate choose a random one.
+            # (e.g. no answers yet, or all questions have been fully answered, or the only questions left have all been seen by current_user...)
+            if candidate is None:
+                # print("Picking new example")
+                candidate = candidates.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
 
         return candidate.id
 
