@@ -16,11 +16,15 @@ def compute_statistics():
 
     n_full_examples = count_full_examples()
 
+    n_answers = Answer.query.count()
+    n_participants = User.query.count()
+
     print "Total", n_all
     print "Full examples:", n_full_examples
     print "Full questions: ", n_full_questions
     print "Partial questions:", n_partial, ', distribution:', zip(['1 answer:','2 answers:','3 answers:'],n_answers_array)
-
+    print 'Total answers:', n_answers
+    print 'Total participants:', n_participants
 
 def count_answered_questions():
     n_full = Question.query.filter(Question.n_answers == MAX_ANSWERS).count()
@@ -41,7 +45,7 @@ def get_users(with_answers=False):
             print '    ', comment
         if with_answers:
             for ans in user.answers:
-                print '    ', Question.query.get(ans.question_id), ans 
+                print '    ', Question.query.get(ans.question_id), ans
 
         user_answers += [[username,n_answers]]
     return user_answers
