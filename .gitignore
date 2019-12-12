@@ -4,4 +4,4 @@ venv_flask/
 app.db
 app/static/data/
 logs/
-app.db_save
+app.db_save*

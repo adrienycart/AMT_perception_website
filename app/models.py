@@ -69,6 +69,7 @@ class User(UserMixin,db.Model):
         # Choose in priority questions that might have been left unanswered by current_user
         now = datetime.datetime.utcnow()
         candidate = Question.query.filter(db.and_(Question.ongoing_since>now-LOCK_TIME,Question.ongoing_user==current_user.id)).first()
+        # candidate = None
         if candidate is None:
 
             # Only consider questions that are not being answered right now
@@ -91,33 +92,46 @@ class User(UserMixin,db.Model):
                 if not sum_answers == MAX_ANSWERS*(N_MODELS*(N_MODELS-1)/2):
                     examples_n_answers += [[example,sum_answers]]
             examples_n_answers = sorted(examples_n_answers,key=lambda x:x[1])
-
+            # print examples_n_answers
             if len(examples_n_answers) == 0:
                 # If no answers at all, or if all examples have been fully rated, choose a new, random one
                 candidate = None
             else:
-                # Choose one of the examples that has most answers (random, but biased towards more answers)
-                example_idx = int(len(examples_n_answers) * pow(random.random(),BIAS_MOST_ANSWERS))
-                # In case BIAS_MOST_ANSWERS==0:
-                if example_idx == len(examples_n_answers):
-                    example_idx = len(examples_n_answers)-1
-                chosen_example = examples_n_answers[example_idx][0]
-                candidates_example=Question.query.filter(Question.example==chosen_example)
+                max_tries = 3
+                tries = 0
+                # Try several times, in case the random example chosen is being answered by someone else
+                while candidate is None and tries < max_tries:
+                    # print 'TRIES', tries
 
-                # Among these, choose a question that was already answers, but still lacks some:
-                candidate = candidates_example.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
 
-                # If all questions are fully answered, choose a new question for this example
-                if candidate is None:
-                    # print "New question for same example"
-                    candidate = candidates_example.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
+                    # Choose one of the examples that has most answers (random, but biased towards more answers)
+                    example_idx = int(len(examples_n_answers) * pow(random.random(),BIAS_MOST_ANSWERS))
+                    # In case BIAS_MOST_ANSWERS==0:
+                    if example_idx == len(examples_n_answers):
+                        example_idx = len(examples_n_answers)-1
+                    chosen_example = examples_n_answers[example_idx][0]
+                    # Choose a question for that example
+                    candidates_example=Question.query.filter(Question.example==chosen_example)
+                    # print candidates_example.all()
+                    # Among these, only consider questions that are not being answered
+                    candidates_example = candidates_example.filter(db.or_(Question.ongoing_since<now-LOCK_TIME,Question.ongoing_user==current_user.id))
+                    # Among these, choose a question that was already answers, but still lacks some:
+                    candidate = candidates_example.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS)).order_by(func.random()).first()
+                    # print candidate
+                    # If all questions are fully answered, choose a new question for this example
+                    if candidate is None:
+                        # print "New question for same example"
+                        candidate = candidates_example.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
+                    tries += 1
 
             # If there was no suitable candidate choose a random one.
-            # (e.g. no answers yet, or all questions have been fully answered, or the only questions left have all been seen by current_user...)
+            # (e.g. no answers yet, or all questions have been fully answered,
+            # or the only questions left have all been seen by current_user,
+            # or the only candidates are all being answered by other people...)
             if candidate is None:
                 # print("Picking new example")
                 candidate = candidates.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
-
+        # print candidate
         return candidate.id
 
 
