@@ -4,7 +4,7 @@ import datetime
 from flask_login import UserMixin, current_user
 import random
 import os
-from config import DATA_PATH, MAX_ANSWERS, N_MODELS, MIN_DATE, LOCK_TIME
+from config import DATA_PATH, MAX_ANSWERS, N_MODELS, MIN_DATE, LOCK_TIME,BIAS_MOST_ANSWERS
 from  sqlalchemy.sql.expression import func
 
 
@@ -97,7 +97,10 @@ class User(UserMixin,db.Model):
                 candidate = None
             else:
                 # Choose one of the examples that has most answers (random, but biased towards more answers)
-                example_idx = int(len(examples_n_answers) * pow(random.random(),0.25))
+                example_idx = int(len(examples_n_answers) * pow(random.random(),BIAS_MOST_ANSWERS))
+                # In case BIAS_MOST_ANSWERS==0:
+                if example_idx == len(examples_n_answers):
+                    example_idx = len(examples_n_answers)-1
                 chosen_example = examples_n_answers[example_idx][0]
                 candidates_example=Question.query.filter(Question.example==chosen_example)
 
