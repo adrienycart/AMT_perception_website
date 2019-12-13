@@ -1,10 +1,11 @@
 from app import db
-from config import MAX_ANSWERS
+from config import MAX_ANSWERS, N_MODELS
 from app.models import Question, User, Answer
 
 def compute_statistics():
     n_all = Question.query.count()
 
+    # Partial questions
     n_partial_query = Question.query.filter(db.and_(Question.n_answers>0,Question.n_answers<MAX_ANSWERS))
     n_partial = n_partial_query.count()
     partial_questions_array = [0, 0, 0]
@@ -14,10 +15,24 @@ def compute_statistics():
 
     n_full_questions =  Question.query.filter(Question.n_answers == MAX_ANSWERS).count()
 
+    # Partial examples
     n_full_examples, partial_examples = count_full_examples()
     partial_examples_array = [0, 0, 0, 0, 0]
     for example in partial_examples:
         partial_examples_array[5-example[1]] += 1
+
+    # Non-empty and non-full examples:
+    questions_not_empty = Question.query.filter(Question.n_answers>0).all()
+    examples_not_empty = set()
+    for q in questions_not_empty:
+        examples_not_empty.add(q.example)
+    examples_not_empty = list(examples_not_empty)
+    examples_n_answers = []
+    for example in examples_not_empty:
+        sum_answers = Question.query.filter(Question.example==example).with_entities(func.sum(Question.n_answers)).scalar()
+        # Do not add examples that have been fully answered
+        if not sum_answers == MAX_ANSWERS*(N_MODELS*(N_MODELS-1)/2):
+            examples_n_answers += [[example,sum_answers]]
 
     n_answers = Answer.query.count()
     n_participants = User.query.count()
@@ -25,6 +40,7 @@ def compute_statistics():
     print "Total", n_all
     print "Full examples:", n_full_examples
     print "Partial examples:", len(partial_examples), ', distribution:', zip(['1 question:','2 questions:','3 questions:','4 questions:','5 questions:'],partial_examples_array)
+    print "Non-empty examples:", len(examples_n_answers)
     print "Full questions: ", n_full_questions
     print "Partial questions:", n_partial, ', distribution:', zip(['1 answer:','2 answers:','3 answers:'],partial_questions_array)
     print 'Total answers:', n_answers
