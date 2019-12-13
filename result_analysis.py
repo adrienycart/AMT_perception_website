@@ -1,6 +1,7 @@
 from app import db
 from config import MAX_ANSWERS, N_MODELS
 from app.models import Question, User, Answer
+from  sqlalchemy.sql.expression import func
 
 def compute_statistics():
     n_all = Question.query.count()
