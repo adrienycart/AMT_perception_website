@@ -96,7 +96,12 @@ def question():
             current_question.ongoing_user = -1
             db.session.commit()
         else:
-            answer = current_question.answer(form.choice.data,current_user,recognised=form.known.data,difficulty=form.difficulty.data)
+            aborted = current_question.answer(form.choice.data,current_user,recognised=form.known.data,difficulty=form.difficulty.data)
+            if aborted:
+                flash('Something went wrong! Here is a new example.')
+                current_question.ongoing_since = MIN_DATE
+                current_question.ongoing_user = -1
+                db.session.commit()
 
         session['question_id'] = current_user.next_question()
         Question.query.get(session['question_id']).ongoing_since = datetime.utcnow()

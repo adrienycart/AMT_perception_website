@@ -156,13 +156,17 @@ class Question(db.Model):
         time_taken_s = time_taken.total_seconds()
         choice = 1-choice if self.reverse else choice
         answer = Answer(choice=choice,user_id=user.id,question_id=self.id,recognised=recognised,difficulty=difficulty,time_taken=time_taken_s)
-        db.session.add(answer)
-        self.n_answers += 1
-        self.reverse = not self.reverse
-        self.ongoing_since = MIN_DATE
-        self.ongoing_user = -1
-        db.session.commit()
-        return
+        if time_taken>LOCK_TIME:
+            # Something went very wrong here
+            return 1
+        else:
+            db.session.add(answer)
+            self.n_answers += 1
+            self.reverse = not self.reverse
+            self.ongoing_since = MIN_DATE
+            self.ongoing_user = -1
+            db.session.commit()
+            return 0
 
     def get_filepaths(self):
         target = os.path.join(DATA_PATH,self.example,'target.mp3')
