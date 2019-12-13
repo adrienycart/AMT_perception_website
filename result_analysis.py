@@ -161,5 +161,5 @@ def gather_ratings():
 # print(get_complete_questions())
 # print(count_full_examples())
 # print(gather_ratings())
-compute_statistics()
 get_users()
+compute_statistics()
