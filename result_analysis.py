@@ -90,6 +90,10 @@ def count_full_examples():
     for example in partial_examples:
 
         n = Question.query.filter(Question.example == example).filter(Question.n_answers != MAX_ANSWERS).count()
+        if example ==  u'MAPS_MUS-mz_332_2_ENSTDkCl_11' :
+            questions= Question.query.filter(Question.example == example).all()
+            for q in questions:
+                print q, q.n_answers
         if n == 0:
             complete_examples += [example]
         else:
@@ -163,3 +167,61 @@ def gather_ratings():
 # print(gather_ratings())
 get_users()
 compute_statistics()
+last_answer = Answer.query.order_by(Answer.timestamp.desc()).first()
+print "#########"
+print last_answer.user, last_answer.timestamp
+print "#########"
+
+
+# def delete_one_answer(ans):
+#     ans.question.n_answers -= 1
+#     db.session.delete(ans)
+
+
+# import os
+# import shutil
+# os.remove('app.db')
+# shutil.copy2('app.db_save','app.db')
+
+# corrupt_answers= Answer.query.filter(Answer.time_taken > 100).all()
+# corrupt_questions = []
+# corrupt_users = []
+# for answer in corrupt_answers:
+#     print answer.question, answer, answer.user
+#     corrupt_questions += [answer.question]
+#     corrupt_users += [answer.user]
+#
+# print '############### BEFORE'
+# print "Questions:"
+# for question in corrupt_questions:
+#     print "        ", question, question.n_answers
+#     print question.answers.all()
+# print "Users:"
+# for user in corrupt_users:
+#     print "        ", user, user.answers.count()
+#     print user.answers.all()
+#
+#
+# #     print answer.question
+# #     print answer
+# #     print answer.user
+# #     print answer.timestamp
+# #     all_answers= answer.question.answers.all()
+# #     print '----'
+# #     for ans in all_answers:
+# #         print ans
+# #         print ans.user
+# #         print ans.timestamp
+# #     print '====================='
+# for answer in corrupt_answers:
+#     delete_one_answer(answer)
+#
+# print '############### After'
+# print "Questions:"
+# for question in corrupt_questions:
+#     print "        ", question, question.n_answers
+#     print question.answers.all()
+# print "Users:"
+# for user in corrupt_users:
+#     print "        ", user, user.answers.count()
+#     print user.answers.all()
