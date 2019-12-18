@@ -5,3 +5,5 @@ app.db
 app/static/data/
 logs/
 app.db_save*
+*runs*
+*plots*

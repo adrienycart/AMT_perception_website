@@ -61,3 +61,8 @@ def Fmeasure(tp,fp,fn):
     prec = precision(tp,fp)
     rec = recall(tp,fn)
     return 2*prec*rec/(prec+rec+np.finfo(float).eps)
+
+def get_decay_rate(midi_pitch, velocity):
+    # compute decay_rate according to midipitch and note velocity
+    decay_rate = 0.0 + 0.0 * midi_pitch + 0.0 * velocity
+    return decay_rate
