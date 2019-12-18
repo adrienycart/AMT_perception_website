@@ -92,10 +92,10 @@ def count_full_examples():
     for example in partial_examples:
 
         n = Question.query.filter(Question.example == example).filter(Question.n_answers != MAX_ANSWERS).count()
-        if example ==  u'MAPS_MUS-mz_332_2_ENSTDkCl_11' :
-            questions= Question.query.filter(Question.example == example).all()
-            for q in questions:
-                print q, q.n_answers
+        # if example ==  u'MAPS_MUS-mz_332_2_ENSTDkCl_11' :
+        #     questions= Question.query.filter(Question.example == example).all()
+        #     for q in questions:
+        #         print q, q.n_answers
         if n == 0:
             complete_examples += [example]
         else:
