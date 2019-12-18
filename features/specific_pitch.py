@@ -1,6 +1,6 @@
 import numpy as np
-
-
+import matplotlib.pyplot as plt
+from utils import *
 
 
 ##############################################
@@ -35,3 +35,54 @@ def specific_pitch_framewise(output,target,fs,n_semitones,down_only=False,delta=
     n_tot = np.sum(output)
 
     return n_match/n_FP, n_match/n_tot
+
+
+########################################
+### Notewise
+########################################
+
+def specific_pitch_notewise(notes_output, intervals_output, notes_target, intervals_target, match, n_semitones, down_only=False, ratio=0.8):
+    # return two ratios: 
+    # 1. the proportion of specific pitch mistakes among false positives
+    # 2. the proportion of specific pitch mistakes among all detected notes
+    if len(match) == 0:
+        return 0.0, 0.0
+    
+    fs = 100
+    # get false positives
+    matched_targets, matched_outputs = zip(*match)
+    fp_idxs = [idx for idx in range(notes_output.shape[0]) if idx not in matched_outputs]
+    if len(fp_idxs) == 0:
+        return 0.0, 0.0
+
+    n_specific_pitch = 0.0
+    for i in fp_idxs:
+        # loop over all false positives
+        note_output = notes_output[i]
+        interval_output = intervals_output[i]
+        is_specific_pitch_error = False
+
+        note_down = note_output - n_semitones
+        intervals_down = [intervals_target[idx] for idx in range(len(notes_target)) if notes_target[idx] == note_down]
+
+        for interval in intervals_down:
+            if (min(interval_output[1], interval[1]) - max(interval_output[0], interval[0])) / (interval_output[1] - interval_output[0]) > ratio:
+                is_specific_pitch_error = True
+                break
+
+        if not down_only and not is_specific_pitch_error:
+            note_up = note_output + n_semitones
+            intervals_up = [intervals_target[idx] for idx in range(len(notes_target)) if notes_target[idx] == note_up]
+
+            for interval in intervals_up:
+                if (min(interval_output[1], interval[1]) - max(interval_output[0], interval[0])) / (interval_output[1] - interval_output[0]) > ratio:
+                    is_specific_pitch_error = True
+                    break
+
+        if is_specific_pitch_error:
+            n_specific_pitch += 1.0
+
+    return n_specific_pitch / len(fp_idxs), n_specific_pitch / len(notes_output)
+
+
+

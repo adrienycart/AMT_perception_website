@@ -9,7 +9,7 @@ from features.loudness import false_negative_loudness, loudness_ratio_false_nega
 from features.out_key import make_key_mask, out_key_errors, out_key_errors_binary_mask
 from features.polyphony import polyphony_level_seq, false_negative_polyphony_level
 from features.repeat_merge import repeated_notes, merged_notes
-from features.specific_pitch import specific_pitch_framewise
+from features.specific_pitch import specific_pitch_framewise, specific_pitch_notewise
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -127,11 +127,11 @@ for example in os.listdir(MIDI_path)[:10]:
 			# print('\n>>>> test high_low_voice notewise, onset and offset')
 			# test_high_low_voice_notewise(notes_system, intervals_system, notes_target, intervals_target, match_onoff)  # onset and offset
 
-			print('\n test loudness =============================================')
-			print('\n>>>> test loudness, onset only')
+			# print('\n test loudness =============================================')
+			# print('\n>>>> test loudness, onset only')
 			# test_loudness(match_on, vel_target)
 
-			test_loudness_ratio(notes_system, intervals_system, notes_target, intervals_target, vel_target match_on)
+			# test_loudness_ratio(notes_system, intervals_system, notes_target, intervals_target, vel_target match_on)
 
 			# print('\n test out_key ===============================================')
 			# mask = make_key_mask(target_pr)
@@ -148,8 +148,10 @@ for example in os.listdir(MIDI_path)[:10]:
 			# print('\n test repeat_merge ===========================================')
 			# test_repeat_merge(notes_system, intervals_system, notes_target, intervals_target, match_on)
 
-			# print('\n test specific_pitch ===========================================')
+			print('\n test specific_pitch ===========================================')
 			# test_specific_pitch(system_pr, target_pr, fs)
+			r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=1)
+			print(str(r1) + "   " + str(r2))
 
 
 
