@@ -48,7 +48,6 @@ def specific_pitch_notewise(notes_output, intervals_output, notes_target, interv
     if len(match) == 0:
         return 0.0, 0.0
     
-    fs = 100
     # get false positives
     matched_targets, matched_outputs = zip(*match)
     fp_idxs = [idx for idx in range(notes_output.shape[0]) if idx not in matched_outputs]

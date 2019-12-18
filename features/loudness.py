@@ -1,5 +1,5 @@
 import numpy as np
-from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls, get_decay_rate
+from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls, get_loudness
 
 ########################################
 ### Loudness
@@ -24,7 +24,7 @@ def false_negative_loudness(match,vel_target):
         return avg_unmatched / float(avg_vel)
 
 
-def loudness_ratio_false_negative(notes_output, intervals_output, notes_target, intervals_target, vel_target, match, min_dur=0.05):
+def loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match, min_dur=0.05):
     # loudness ratio of false negative
     # ratio = FN velocity / max loudness in ground truth at onset
 
@@ -33,14 +33,22 @@ def loudness_ratio_false_negative(notes_output, intervals_output, notes_target, 
 
     # compute false negatives
     matched_targets, matched_outputs = zip(*match)
-    ummatched_targets = list(set(range(len(notes_target))) - set(matched_targets))
+    fn_indexs = [idx for idx in range(len(notes_target)) if idx not in matched_targets]
+    if len(fn_indexs) == 0:
+        return 0.0
 
-    fs = 100
+    ratios = []
+    for i in fn_indexs:
+        # loop over false negatives (missing notes)
+        note_target = notes_target[i]
+        onset_target = intervals_target[i][0]
+        velocity = vel_target[i]
 
-    # get masks for ground truth and false negatives
-    target_refs = make_note_index_matrix(notes_target, intervals_target)
-    ummatched_target_refs = make_note_index_matrix(notes_output, intervals_output)
-    target_refs, output_refs = even_up_rolls(target_refs, output_refs, pad_value = -1)
+        ccn_idxes = [idx for idx in range(len(notes_target)) if intervals_target[idx][0] <= onset_target and intervals_target[idx][1] >= onset_target]
+        concurrent_notes_loudnesses = [get_loudness(notes_target[ccn_idxes[idx]], vel_target[ccn_idxes[idx]], onset_target - intervals_target[ccn_idxes[idx]][0]) for idx in range(len(ccn_idxes))]
+        ratio = velocity / max(concurrent_notes_loudnesses)
+        ratios.append(ratio)
 
-    roll_target = (target_refs != -1).astype(int)
-    roll_output = (output_refs != -1).astype(int)
+    return np.mean(ratios)
+
+

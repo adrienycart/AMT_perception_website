@@ -42,9 +42,6 @@ def test_loudness(match, vel_target):
 	print('loudness value: ' + str(value))
 	return value
 
-def test_loudness_ratio(notes_system, intervals_system, notes_target, intervals_target, vel_target, match):
-	ratio = loudness_ratio_false_negative(notes_system, intervals_system, notes_target, intervals_target, vel_target, match)
-	print('loudness ratio: ' + str(ratio))
 
 def test_out_key_non_binary(notes_output, match, mask):
 	ratio_1, ratio_2 = out_key_errors(notes_output, match, mask)
@@ -127,11 +124,12 @@ for example in os.listdir(MIDI_path)[:10]:
 			# print('\n>>>> test high_low_voice notewise, onset and offset')
 			# test_high_low_voice_notewise(notes_system, intervals_system, notes_target, intervals_target, match_onoff)  # onset and offset
 
-			# print('\n test loudness =============================================')
+			print('\n test loudness =============================================')
 			# print('\n>>>> test loudness, onset only')
 			# test_loudness(match_on, vel_target)
 
-			# test_loudness_ratio(notes_system, intervals_system, notes_target, intervals_target, vel_target match_on)
+			ratio = loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match_on)
+			print('loudness ratio: ' + str(ratio))
 
 			# print('\n test out_key ===============================================')
 			# mask = make_key_mask(target_pr)
@@ -148,10 +146,10 @@ for example in os.listdir(MIDI_path)[:10]:
 			# print('\n test repeat_merge ===========================================')
 			# test_repeat_merge(notes_system, intervals_system, notes_target, intervals_target, match_on)
 
-			print('\n test specific_pitch ===========================================')
+			# print('\n test specific_pitch ===========================================')
 			# test_specific_pitch(system_pr, target_pr, fs)
-			r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=1)
-			print(str(r1) + "   " + str(r2))
+			# r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=1)
+			# print(str(r1) + "   " + str(r2))
 
 
 

@@ -62,7 +62,8 @@ def Fmeasure(tp,fp,fn):
     rec = recall(tp,fn)
     return 2*prec*rec/(prec+rec+np.finfo(float).eps)
 
-def get_decay_rate(midi_pitch, velocity):
+def get_loudness(midi_pitch, velocity, time):
     # compute decay_rate according to midipitch and note velocity
     decay_rate = 0.0 + 0.0 * midi_pitch + 0.0 * velocity
-    return decay_rate
+    loudness = velocity * np.exp(-1.0 * decay_rate * time)
+    return loudness
