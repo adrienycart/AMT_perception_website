@@ -49,7 +49,7 @@ for question in Question.query.filter(Question.n_answers==MAX_ANSWERS).all():
     system2 = question.system2
 
     for answer in question.answers.all():
-        answers_data += [[example,system1,system2,answer.user_id,answer.choice,answer.recognised,answer.difficulty, answer.time]]
+        answers_data += [[example,system1,system2,answer.user_id,answer.choice,answer.recognised,answer.difficulty, answer.time_taken]]
 
 answers_data = np.array(answers_data,dtype=object)
 # print answers_data
