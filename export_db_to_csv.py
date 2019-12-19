@@ -41,7 +41,7 @@ np.savetxt("user_data.csv",user_data, fmt="%s")
 # ANSWERS DATA
 
 answers_data=[]
-answers_data+=[["example",'system1','system2','user_id',"answer",'recognised','difficulty','time']]
+answers_data+=[["question_id","example",'system1','system2','user_id',"answer",'recognised','difficulty','time']]
 
 for question in Question.query.filter(Question.n_answers==MAX_ANSWERS).all():
     example = question.example
@@ -49,7 +49,7 @@ for question in Question.query.filter(Question.n_answers==MAX_ANSWERS).all():
     system2 = question.system2
 
     for answer in question.answers.all():
-        answers_data += [[example,system1,system2,answer.user_id,answer.choice,answer.recognised,answer.difficulty, answer.time_taken]]
+        answers_data += [[question.id,example,system1,system2,answer.user_id,answer.choice,answer.recognised,answer.difficulty, answer.time_taken]]
 
 answers_data = np.array(answers_data,dtype=object)
 # print answers_data
@@ -60,7 +60,7 @@ comments = ""
 for user in User.query.all():
     if len(user.comments) > 0:
         comments += '-----------------------\n'
-        comments += user.id
+        comments += str(user.id)
         comments += "\n"
         comments += user.comments
         comments += "\n"
