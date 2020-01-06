@@ -58,7 +58,7 @@ np.savetxt("answers_data.csv",answers_data, fmt="%s")
 # COMMENTS
 comments = ""
 for user in User.query.all():
-    if len(user.comments) > 0:
+    if user.comments is not None and len(user.comments) > 0:
         comments += '-----------------------\n'
         comments += str(user.id)
         comments += "\n"
