@@ -23,13 +23,13 @@ def parse_answers(user):
     gold_msi_answers = np.array(ans_list[3:-1],dtype=int)
     gold_msi_avg = get_avg_goldMSI(gold_msi_answers)
 
-    return [user.username, gender, age, disability,gold_msi_avg]+ list(gold_msi_answers)
+    return [user.username, user.n_answers, gender, age, disability,gold_msi_avg]+ list(gold_msi_answers)
 
 
 
 # USER DATA
 user_data = []
-user_data += [["user","gender","age","disability","gold_msi_avg"]+["gold_msi_"+str(i) for i in range(17)]]
+user_data += [["user","n_answers","gender","age","disability","gold_msi_avg"]+["gold_msi_"+str(i) for i in range(17)]]
 for user in User.query.all():
     if user.number_answers() > 0:
         user_data += [parse_answers(user)]
