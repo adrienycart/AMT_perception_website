@@ -35,7 +35,7 @@ for user in User.query.all():
         user_data += [parse_answers(user)]
 
 user_data = np.array(user_data,dtype=object)
-np.savetxt("db_csv/user_data.csv",user_data, fmt="%s")
+np.savetxt("db_csv/user_data.csv",user_data, fmt="%s",delimiter=';')
 
 
 # ANSWERS DATA
@@ -53,7 +53,7 @@ for question in Question.query.filter(Question.n_answers==MAX_ANSWERS).all():
 
 answers_data = np.array(answers_data,dtype=object)
 # print answers_data
-np.savetxt("db_csv/answers_data.csv",answers_data, fmt="%s")
+np.savetxt("db_csv/answers_data.csv",answers_data, fmt="%s",delimiter=';')
 
 # COMMENTS
 comments = ""
