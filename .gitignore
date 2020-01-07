@@ -8,3 +8,4 @@ app.db_save*
 *runs*
 *plots*
 /db_csv
+/precomputed_features
