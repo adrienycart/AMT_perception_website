@@ -2,3 +2,4 @@ pretty_midi
 mir_eval
 pydub
 pyloudnorm
+matplotlib

@@ -18,7 +18,7 @@ def get_lowest(roll):
     # when no note, returns roll.shape[0]
     lowest = np.argmax(roll,axis=0)
     # lowest[lowest==0]= target.shape[0]
-    lowest[lowest==0] = roll.shape[0]
+    lowest[lowest==0] = roll.shape[0]-1
     return lowest
 
 def framewise_highest(output, target):
