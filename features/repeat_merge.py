@@ -16,7 +16,7 @@ def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,m
     else:
         fs = 500
 
-        matched_targets, matched_outputs = zip(*match_on)
+        matched_targets, matched_outputs = zip(*match)
         matched_targets = np.array(matched_targets)
         matched_outputs = list(matched_outputs)
         unmatched_outputs= list(set(range(len(notes_output)))-set(matched_outputs))
@@ -60,7 +60,7 @@ def merged_notes(notes_output,intervals_output,notes_target,intervals_target,mat
     else:
         fs = 500
 
-        matched_targets, matched_outputs = zip(*match_on)
+        matched_targets, matched_outputs = zip(*match)
         matched_targets = np.array(matched_targets)
         unmatched_targets= list(set(range(len(notes_target)))-set(matched_targets))
 
