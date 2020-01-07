@@ -1,3 +1,5 @@
+import os
+import cPickle as pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -83,7 +85,7 @@ import codecs
 #
 
 ############################################
-##### RESPONSES
+##### PAIRWISE RESPONSES
 ############################################
 
 filecp = codecs.open('db_csv/answers_data.csv', encoding = 'utf-8')
@@ -194,32 +196,128 @@ right_labels = [pair[1] for pair in pairs]
 
 #### Plot majority
 
-normalized_majority= majority/np.sum(majority,axis=1).astype(float)[:,None]
-start = np.zeros_like(normalized_majority[:,0])
-colors = ['tab:blue','grey','tab:red']
-color_labels = ['1st best','Draw','2nd best']
-for i in range(3):
-    end = start + normalized_majority[:,i]
-    plt.barh(r, normalized_majority[:,i], left=np.sum(normalized_majority[:,:i],axis=1), color=colors[i], edgecolor='black', height=barWidth,label=color_labels[i])
+# normalized_majority= majority/np.sum(majority,axis=1).astype(float)[:,None]
+# start = np.zeros_like(normalized_majority[:,0])
+# colors = ['tab:blue','grey','tab:red']
+# color_labels = ['1st best','Draw','2nd best']
+# for i in range(3):
+#     end = start + normalized_majority[:,i]
+#     plt.barh(r, normalized_majority[:,i], left=np.sum(normalized_majority[:,:i],axis=1), color=colors[i], edgecolor='black', height=barWidth,label=color_labels[i])
+#
+# for i in range(len(pairs)):
+#     plt.text(-0.05,i,pairs[i][0],ha='right', va='center')
+#     plt.text(1.05,i,pairs[i][1],ha='left', va='center')
+#
+# frame1 = plt.gca()
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='x')
+# frame1.axes.yaxis.set_visible(False)
+# frame1.set_axisbelow(True)
+# plt.box(False)
+#
+# plt.legend(loc=[0,1], ncol=3)
+#
+# plt.title('Proportion of majority decisions for each question',y=1.1)
+# plt.tight_layout(rect=[0.1, 0, 0.9, 1])
+#
+# plt.show()
 
-for i in range(len(pairs)):
-    plt.text(-0.05,i,pairs[i][0],ha='right', va='center')
-    plt.text(1.05,i,pairs[i][1],ha='left', va='center')
+############################################
+##### AGREEMENT F-MEASURE - ANSWERS
+############################################
+
+results_dict = {}
+feature_dir = 'precomputed_features'
+
+for example in np.unique(answers[:,1]):
+    example_dir = os.path.join(feature_dir,example)
+    results_dict[example] = {}
+    for system in systems:
+        results = pickle.load(open(os.path.join(example_dir,system+'.pkl'), "rb"))
+        results_dict[example][system]=results
+
+
+
+f1_agreement_majority = 0
+f1_diff_equal = 0
+
+dict_stats = {}
+
+for pair in pairs:
+    f1_agreement_each = 0
+    # For each answer
+    data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
+
+    for row in data:
+        choice = int(row[5])
+        f_syst1 = results_dict[row[1]][row[2]]['notewise_On_50'][-1]
+        f_syst2 = results_dict[row[1]][row[3]]['notewise_On_50'][-1]
+        f_choice = 1-int(f_syst1>f_syst2)
+
+        # print f_syst1, f_syst2, f_choice, choice
+
+        if choice == f_choice:
+            f1_agreement_each += 1
+
+    # # Majority
+    f1_agreement_majority = 0
+    total_questions_not_draw = 0
+    f1_diff_equal = []
+    for q_id in np.unique(data[:,0]):
+        data_q = data[data[:,0]==q_id,:]
+
+        f_syst1 = results_dict[data_q[0,1]][data_q[0,2]]['notewise_On_50'][-1]
+        f_syst2 = results_dict[data_q[0,1]][data_q[0,3]]['notewise_On_50'][-1]
+        f_choice = 1-int(f_syst1>f_syst2)
+
+        vote = np.sum(data_q[:,5].astype(int))
+
+        if vote < 2:
+            total_questions_not_draw+=1
+            if f_choice == 0:
+                f1_agreement_majority+=1
+        elif vote == 2:
+            f1_diff_equal += [abs(f_syst1-f_syst2)]
+        elif vote > 2:
+            total_questions_not_draw+=1
+            if f_choice == 1:
+                f1_agreement_majority+=1
+
+    dict_stats[str(pair)] = [f1_agreement_each/float(data.shape[0]),f1_agreement_majority/float(total_questions_not_draw),np.mean(f1_diff_equal)]
+
+choices = []
+majority = []
+for pair in pairs:
+    stats = dict_stats[str(pair)]
+    choices += [[stats[0],1-stats[0]]]
+    majority += [[stats[1],1-stats[1]]]
+
+choices = np.array(choices)
+majority = np.array(majority)
+
+labels = [" - ".join(pair) for pair in pairs]
+
+### Plot for all answers
+plt.bar(r, choices[:,0], color='tab:blue', edgecolor='black', width=barWidth)
 
 frame1 = plt.gca()
-plt.grid(color='grey', linestyle='-', linewidth=1,axis='x')
-frame1.axes.yaxis.set_visible(False)
+plt.xticks(r,labels)
+plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
 frame1.set_axisbelow(True)
 plt.box(False)
 
-plt.legend(loc=[0,1], ncol=3)
-
-plt.title('Proportion of majority decisions for each question',y=1.1)
-plt.tight_layout(rect=[0.1, 0, 0.9, 1])
+plt.title('Agreement between raters and F-measure (all answers)')
 
 plt.show()
 
+### Plot for majority voting only
+plt.bar(r, majority[:,0], color='tab:blue', edgecolor='black', width=barWidth)
 
-### Percentage of pieces known
+frame1 = plt.gca()
+plt.xticks(r,labels)
+plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+frame1.set_axisbelow(True)
+plt.box(False)
 
-print np.mean((answers[:,6]=='True').astype(int))
+plt.title('Agreement between raters and F-measure (majority voting, no draws)')
+
+plt.show()
