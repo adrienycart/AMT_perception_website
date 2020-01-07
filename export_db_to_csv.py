@@ -23,7 +23,7 @@ def parse_answers(user):
     gold_msi_answers = np.array(ans_list[3:-1],dtype=int)
     gold_msi_avg = get_avg_goldMSI(gold_msi_answers)
 
-    return [user.username, len(user.answers.all()), gender, age, disability,gold_msi_avg]+ list(gold_msi_answers)
+    return [user.id, len(user.answers.all()), gender, age, disability,gold_msi_avg]+ list(gold_msi_answers)
 
 
 
