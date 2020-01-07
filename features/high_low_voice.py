@@ -16,9 +16,11 @@ def get_highest(roll):
 
 def get_lowest(roll):
     # when no note, returns roll.shape[0]
+    # we give value roll.shape[0] rather than roll.shape[0]-1, otherwise,
+    # we cannot distinguish the case where there is no note and where the lowest note is roll.shape[0]-1
     lowest = np.argmax(roll,axis=0)
-    # lowest[lowest==0]= target.shape[0]
-    lowest[lowest==0] = roll.shape[0]-1
+    # We must make the distinction between no note, and lowest note is 0
+    lowest[logical_and(lowest==0,roll[0,:]==0)] = roll.shape[0]
     return lowest
 
 def framewise_highest(output, target):
@@ -46,6 +48,7 @@ def framewise_lowest(output, target):
 
     lowest = get_lowest(target)
 
+    # We give value target.shape[0] when there are no notes by convention
     lowest_nonzero = lowest[lowest!=target.shape[0]]
     frames_nonzero = np.arange(len(lowest))[lowest!=target.shape[0]]
 
