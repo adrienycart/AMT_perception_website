@@ -22,3 +22,15 @@ def framewise(output,target):
 
     P_f,R_f,F_f = precision(tp,fp), recall(tp,fn), Fmeasure(tp,fp,fn)
     return P_f,R_f,F_f
+
+
+##################################################
+### NOTEWISE METRICS
+##################################################
+
+
+def notewise(match,est_pitches,ref_pitches):
+    prec = float(len(match))/(len(est_pitches)+np.finfo(float).eps)
+    rec = float(len(match))/(len(ref_pitches)+np.finfo(float).eps)
+    F = 2*prec*rec/(prec+rec+np.finfo(float).eps)
+    return prec, rec, F
