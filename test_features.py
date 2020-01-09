@@ -4,7 +4,7 @@ import pretty_midi as pm
 import mir_eval
 import matplotlib.pyplot as plt
 import features.utils as utils
-from features.high_low_voice import framewise_highest, framewise_lowest, notewise_highest, notewise_lowest
+from features.high_low_voice import framewise_highest, framewise_lowest, notewise_highest, notewise_lowest, correct_highest_seq, correct_lowest_seq
 from features.loudness import false_negative_loudness, loudness_ratio_false_negative
 from features.out_key import make_key_mask, out_key_errors, out_key_errors_binary_mask
 from features.polyphony import polyphony_level_seq, false_negative_polyphony_level
@@ -115,7 +115,10 @@ for example in os.listdir(MIDI_path)[:20]:
 			match_onoff = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_system, notes_system, offset_ratio=0.2, pitch_tolerance=0.25)
 
 			# test features...
-			# print('\n test high_low_voice =======================================')
+			print('\n test high_low_voice =======================================')
+			correct_highest_seq(system_pr, target_pr)
+			correct_lowest_seq(system_pr, target_pr)
+
 			# print('\n>>>> test high_low_voice framewise')
 			# test_high_low_voice_framewise(system_pr, target_pr)
 
@@ -152,11 +155,11 @@ for example in os.listdir(MIDI_path)[:20]:
 			# r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=1)
 			# print(str(r1) + "   " + str(r2))
 
-			print('\n test rhythm =====================================================')
-			f1, f2 = rhythm_histogram(intervals_system, intervals_target)
-			print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
-			mean_drift, max_drift = rhythm_dispersion(intervals_system, intervals_target)
-			print("cluster centre drift: " + str(mean_drift) + "(mean)  " + str(max_drift) + "(max)")
+			# print('\n test rhythm =====================================================')
+			# f1, f2 = rhythm_histogram(intervals_system, intervals_target)
+			# print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
+			# mean_drift, max_drift = rhythm_dispersion(intervals_system, intervals_target)
+			# print("cluster centre drift: " + str(mean_drift) + "(mean)  " + str(max_drift) + "(max)")
 
 
 

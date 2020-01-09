@@ -208,3 +208,18 @@ def notewise_lowest(notes_output,intervals_output,notes_target,intervals_target,
         # plt.show()
 
         return precision(tp,fp),recall(tp, fn), Fmeasure(tp,fp,fn)
+
+
+def correct_highest_seq(output, target):
+    highest_output = get_highest(output)
+    highest_target = get_highest(target)
+    ch = [int(highest_output[idx] == highest_target[idx]) for idx in range(len(highest_output))]
+    return ch
+
+
+def correct_lowest_seq(output, target):
+    lowest_output = get_lowest(output)
+    lowest_target = get_lowest(target)
+    cl = [int(lowest_output[idx] == lowest_target[idx]) for idx in range(len(lowest_output))]
+    print(cl)
+    return cl
