@@ -10,7 +10,7 @@ from features.out_key import make_key_mask, out_key_errors, out_key_errors_binar
 from features.polyphony import polyphony_level_seq, false_negative_polyphony_level
 from features.repeat_merge import repeated_notes, merged_notes
 from features.specific_pitch import specific_pitch_framewise, specific_pitch_notewise
-from features.rhythm import rhythm_histogram
+from features.rhythm import rhythm_histogram, rhythm_dispersion
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -87,7 +87,7 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 44100
 
 
-for example in os.listdir(MIDI_path)[:10]:
+for example in os.listdir(MIDI_path)[:20]:
 	example_path = os.path.join(MIDI_path, example)  # folder path
 	print('\n\npath = ' + example_path)
 	target_data = pm.PrettyMIDI(os.path.join(example_path, 'target.mid'))
@@ -115,46 +115,48 @@ for example in os.listdir(MIDI_path)[:10]:
 			match_onoff = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_system, notes_system, offset_ratio=0.2, pitch_tolerance=0.25)
 
 			# test features...
-			print('\n test high_low_voice =======================================')
-			print('\n>>>> test high_low_voice framewise')
-			test_high_low_voice_framewise(system_pr, target_pr)
+			# print('\n test high_low_voice =======================================')
+			# print('\n>>>> test high_low_voice framewise')
+			# test_high_low_voice_framewise(system_pr, target_pr)
 
-			print('\n>>>> test high_low_voice notewise, onset only')
-			test_high_low_voice_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on)  # onset only
+			# print('\n>>>> test high_low_voice notewise, onset only')
+			# test_high_low_voice_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on)  # onset only
 
-			print('\n>>>> test high_low_voice notewise, onset and offset')
-			test_high_low_voice_notewise(notes_system, intervals_system, notes_target, intervals_target, match_onoff)  # onset and offset
+			# print('\n>>>> test high_low_voice notewise, onset and offset')
+			# test_high_low_voice_notewise(notes_system, intervals_system, notes_target, intervals_target, match_onoff)  # onset and offset
 
-			print('\n test loudness =============================================')
-			print('\n>>>> test loudness, onset only')
-			test_loudness(match_on, vel_target)
+			# print('\n test loudness =============================================')
+			# print('\n>>>> test loudness, onset only')
+			# test_loudness(match_on, vel_target)
 
-			ratio = loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match_on)
-			print('loudness ratio: ' + str(ratio))
+			# ratio = loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match_on)
+			# print('loudness ratio: ' + str(ratio))
 
-			print('\n test out_key ===============================================')
-			mask = make_key_mask(target_pr)
+			# print('\n test out_key ===============================================')
+			# mask = make_key_mask(target_pr)
 
-			print('\n>>>> non-binary pitch profile, onset only')
-			test_out_key_non_binary(notes_system, match_on, mask)
+			# print('\n>>>> non-binary pitch profile, onset only')
+			# test_out_key_non_binary(notes_system, match_on, mask)
 
-			print('\n>>>> binary pitch profile, onset only')
-			test_out_key_binary(notes_system, match_on, mask)
+			# print('\n>>>> binary pitch profile, onset only')
+			# test_out_key_binary(notes_system, match_on, mask)
 
-			print('\n test polyphony ==============================================')
-			test_polyphony(target_pr, intervals_target, match_on)
+			# print('\n test polyphony ==============================================')
+			# test_polyphony(target_pr, intervals_target, match_on)
 
-			print('\n test repeat_merge ===========================================')
-			test_repeat_merge(notes_system, intervals_system, notes_target, intervals_target, match_on)
+			# print('\n test repeat_merge ===========================================')
+			# test_repeat_merge(notes_system, intervals_system, notes_target, intervals_target, match_on)
 
-			print('\n test specific_pitch ===========================================')
-			test_specific_pitch(system_pr, target_pr, fs)
-			r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=1)
-			print(str(r1) + "   " + str(r2))
+			# print('\n test specific_pitch ===========================================')
+			# test_specific_pitch(system_pr, target_pr, fs)
+			# r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=1)
+			# print(str(r1) + "   " + str(r2))
 
 			print('\n test rhythm =====================================================')
 			f1, f2 = rhythm_histogram(intervals_system, intervals_target)
-			print("spectral flatness: " + str(f1) + "   " + str(f2))
+			print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
+			mean_drift, max_drift = rhythm_dispersion(intervals_system, intervals_target)
+			print("cluster centre drift: " + str(mean_drift) + "(mean)  " + str(max_drift) + "(max)")
 
 
 
