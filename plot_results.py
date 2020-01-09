@@ -22,12 +22,12 @@ warnings.filterwarnings("error")
 
 
 
-#
-#
-# filecp = codecs.open('db_csv/user_data.csv', encoding = 'utf-8')
-# users = np.genfromtxt(filecp,dtype=object,delimiter=";")
-# users = users[1:,:]
-# n_users = users.shape[0]
+
+
+filecp = codecs.open('db_csv/user_data.csv', encoding = 'utf-8')
+users = np.genfromtxt(filecp,dtype=object,delimiter=";")
+users = users[1:,:]
+n_users = users.shape[0]
 # #### 0         1      2     3    4          5
 # #### user;n_answers;gender;age;disability;gold_msi_avg
 #
@@ -459,8 +459,10 @@ for pair in pairs:
 
     # For each answer
     data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
+    # For each answern, dropping difficulty==5
+    # data = data[data[:,7].astype(int)<4]
 
-    for measure in ['notewise_On_25','notewise_On_50','notewise_On_75','notewise_On_100','notewise_OnOff_25','notewise_OnOff_50','notewise_OnOff_75','notewise_OnOff_100']:
+    for measure in ['framewise','notewise_On_25','notewise_On_50','notewise_On_75','notewise_On_100','notewise_OnOff_25','notewise_OnOff_50','notewise_OnOff_75','notewise_OnOff_100']:
         f1_agreement_each = 0
         for row in data:
             choice = int(row[5])
@@ -474,7 +476,7 @@ for pair in pairs:
 
     # # Majority
     check = {}
-    for measure in ['notewise_On_25','notewise_On_50','notewise_On_75','notewise_On_100','notewise_OnOff_25','notewise_OnOff_50','notewise_OnOff_75','notewise_OnOff_100']:
+    for measure in ['framewise','notewise_On_25','notewise_On_50','notewise_On_75','notewise_On_100','notewise_OnOff_25','notewise_OnOff_50','notewise_OnOff_75','notewise_OnOff_100']:
         check[measure] = []
         f1_agreement_majority = 0
         total_questions_not_draw = 0
@@ -516,21 +518,49 @@ f1_agreement_each = np.array(f1_agreement_each)
 f1_agreement_majority = np.array(f1_agreement_majority)
 
 
+# ######
+# ## ON-NOTEWISE ONLY
+# f1_agreement_each = f1_agreement_each[:,1:5]
+# f1_agreement_majority = f1_agreement_majority[:,1:5]
+# bar_labels = ['25ms','50ms','75ms','100ms']
+# n_bars = f1_agreement_each.shape[1]
+# colors = [np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([0,1,1])for i in range(n_bars)]
+
 ######
-## ON-NOTEWISE ONLY
-f1_agreement_each = f1_agreement_each[:4]
-f1_agreement_majority = f1_agreement_majority[:4]
-
-
+## ON-NOTEWISE and FRAMEWISE
+f1_agreement_each = f1_agreement_each[:,:5]
+f1_agreement_majority = f1_agreement_majority[:,:5]
+bar_labels = ['Frame','On\n25ms','On\n50ms','On\n75ms','On\n100ms']
 n_bars = f1_agreement_each.shape[1]
+colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([0,1,1])for i in range(4)]
+
+
+######
+## ONOFF-NOTEWISE ONLY
+# f1_agreement_each = f1_agreement_each[:,5:]
+# f1_agreement_majority = f1_agreement_majority[:,5:]
+# bar_labels = ['OnOff\n25ms','OnOff\n50ms','OnOff\n75ms','OnOff\n100ms']
+# n_bars = f1_agreement_each.shape[1]
+# colors = [np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([1,1,0])for i in range(n_bars)]
+
+# ######
+# ## ONOFF-NOTEWISE and FRAMEWISE
+# f1_agreement_each = f1_agreement_each[:,[0,5,6,7,8]]
+# f1_agreement_majority = f1_agreement_majority[:,[0,5,6,7,8]]
+# bar_labels = ['Frame','OnOff\n25ms','OnOff\n50ms','OnOff\n75ms','OnOff\n100ms']
+# n_bars = f1_agreement_each.shape[1]
+# colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([1,1,0])for i in range(n_bars)]
+
+
+
 single_barWidth = barWidth/n_bars
-bar_labels = ['25ms','50ms','75ms','100ms']
+
 
 # # ### Plot for all answers
-#
+
 # for i in range(n_bars):
 #     plt.barh(r-single_barWidth/2+(i-1)*single_barWidth, f1_agreement_each[:,i],
-#         color=np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([0,1,1]), edgecolor='black',
+#         color=colors[i], edgecolor='black',
 #         height=single_barWidth,label=bar_labels[i])
 #
 # frame1 = plt.gca()
@@ -548,7 +578,7 @@ bar_labels = ['25ms','50ms','75ms','100ms']
 #
 # for i in range(n_bars):
 #     plt.barh(r-single_barWidth/2+(i-1)*single_barWidth, f1_agreement_majority[:,i],
-#         color=np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([0,1,1]), edgecolor='black',
+#         color=colors[i], edgecolor='black',
 #         height=single_barWidth,label=bar_labels[i])
 #
 # frame1 = plt.gca()
@@ -556,6 +586,7 @@ bar_labels = ['25ms','50ms','75ms','100ms']
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='x')
 # frame1.set_axisbelow(True)
 # plt.box(False)
+# plt.xlim((0,1.1))
 # plt.legend()
 # plt.title('Agreement between raters and F-measure,\n with various onset thresholds (majority voting, no draws)',x=0.4)
 # plt.tight_layout(rect=[0, 0, 1, 1])
@@ -574,12 +605,12 @@ bar_labels = ['25ms','50ms','75ms','100ms']
 # f1_agreement_each = np.sum(f1_agreement_each[:,0,:],axis=0)/np.sum(f1_agreement_each[:,1,:],axis=0).astype(float)
 # f1_agreement_majority = np.sum(f1_agreement_majority[:,0,:],axis=0)/np.sum(f1_agreement_majority[:,1,:],axis=0).astype(float)
 #
-# labels = ["On\n25ms","On\n50ms","On\n75ms","On\n100ms","OnOff\n25ms","OnOff\n50ms","OnOff\n75ms","OnOff\n100ms"]
-# colors = [np.array([1.0,1,1])-(i+1)/float(4)*np.array([0,1,1]) for i in range(4)]+[np.array([1.0,1,1])-(i+1)/float(4)*np.array([1,1,0]) for i in range(4)]
+# labels = ["Frame","On\n25ms","On\n50ms","On\n75ms","On\n100ms","OnOff\n25ms","OnOff\n50ms","OnOff\n75ms","OnOff\n100ms"]
+# colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(4)*np.array([0,1,1]) for i in range(4)]+[np.array([1.0,1,1])-(i+1)/float(4)*np.array([1,1,0]) for i in range(4)]
 #
-# plt.bar(list(range(8)), f1_agreement_each, color=colors, edgecolor='black', width=barWidth)
+# plt.bar(list(range(len(f1_agreement_each))), f1_agreement_each, color=colors, edgecolor='black', width=barWidth)
 # frame1 = plt.gca()
-# plt.xticks(list(range(8)),labels)
+# plt.xticks(list(range(len(f1_agreement_each))),labels)
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
 # frame1.set_axisbelow(True)
 # plt.box(False)
@@ -587,10 +618,10 @@ bar_labels = ['25ms','50ms','75ms','100ms']
 # plt.title('Agreement between raters and various F-measures\n(all answers)')
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
-#
-# plt.bar(list(range(8)), f1_agreement_majority, color=colors, edgecolor='black', width=barWidth)
+
+# plt.bar(list(range(len(f1_agreement_each))), f1_agreement_majority, color=colors, edgecolor='black', width=barWidth)
 # frame1 = plt.gca()
-# plt.xticks(list(range(8)),labels)
+# plt.xticks(list(range(len(f1_agreement_each))),labels)
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
 # frame1.set_axisbelow(True)
 # plt.box(False)
@@ -693,23 +724,49 @@ print answers
 # plt.show()
 
 
+#### Agreement with F-measure vs difficulty
+# f_choice = 1-int(f_syst1>f_syst2)
+# f_choices = 1-(answers[:,-2]>answers[:,-1]).astype(int)
+# agree = (f_choices==answers[:,5].astype(int)).astype(int)
+# difficulties = answers[:,7]
+# data = [np.mean(agree[difficulties==str(i)]) for i in range(1,6)]
+#
+# plt.bar([1,2,3,4,5],data,width=barWidth,edgecolor='black')
+# frame1 = plt.gca()
+# plt.xticks([1,2,3,4,5],[1,2,3,4,5])
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+# frame1.set_axisbelow(True)
+# plt.box(False)
+# plt.ylim((0,1.05))
+# plt.title('Agreement between raters and F-measure\nfor each reported difficulty')
+# plt.tight_layout(rect=[0, 0, 1, 1])
+# plt.show()
+
 #### Known vs Unknown pieces
 
-# known = answers[:,6]=='True'
-# unknown = answers[:,6]=='False'
-#
-# agree_known = 0
-# agree_unknown = 0
-# for row in answers:
-#     f_choice = 1-int(row[-2]>row[-1])
-#     agree = f_choice == int(row[5])
-#
-#     if agree and row[6] == 'True':
-#         agree_known += 1
-#     elif agree and row[6] == 'False':
-#         agree_unknown += 1
-#
-#
+known = answers[:,6]=='True'
+unknown = answers[:,6]=='False'
+
+agree_known = 0
+agree_unknown = 0
+difficulty_known = [0,0,0,0,0]
+difficulty_unknown = [0,0,0,0,0]
+for row in answers:
+    f_choice = 1-int(row[-2]>row[-1])
+    agree = f_choice == int(row[5])
+
+    if row[6] == 'True':
+        difficulty_known[int(row[7])-1] += 1
+        if agree:
+            agree_known += 1
+    elif row[6] == 'False':
+        difficulty_unknown[int(row[7])-1] += 1
+        if agree:
+            agree_unknown += 1
+difficulty_known = np.array(difficulty_known)/float(sum(difficulty_known))
+difficulty_unknown = np.array(difficulty_unknown)/float(sum(difficulty_unknown))
+
+
 # plt.bar([0,1],[agree_known/float(np.sum(known.astype(int))),agree_unknown/float(np.sum(unknown.astype(int)))],width=barWidth)
 # frame1 = plt.gca()
 # plt.xticks([0,1],['Known','Unknown'])
@@ -721,31 +778,106 @@ print answers
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
 
+difficulties = np.concatenate([difficulty_known[None,:],difficulty_unknown[None,:]],axis=0)
+print difficulties.shape
 
-#### Known vs Unknown pieces
+start = np.zeros([2])
+for i in range(5):
+    end = start + difficulties[:,i]
+    plt.barh([0,1], difficulties[:,i], left=np.sum(difficulties[:,:i],axis=1), color=np.array([1.0,1,1])-(i+1)/5.0*np.array([0,1,1]), edgecolor='black', height=barWidth)
 
-known = answers[:,6]=='True'
-unknown = answers[:,6]=='False'
-
-agree_known = 0
-agree_unknown = 0
-for row in answers:
-    f_choice = 1-int(row[-2]>row[-1])
-    agree = f_choice == int(row[5])
-
-    if agree and row[6] == 'True':
-        agree_known += 1
-    elif agree and row[6] == 'False':
-        agree_unknown += 1
-
-
-plt.bar([0,1],[agree_known/float(np.sum(known.astype(int))),agree_unknown/float(np.sum(unknown.astype(int)))],width=barWidth)
 frame1 = plt.gca()
-plt.xticks([0,1],['Known','Unknown'])
+plt.yticks([0,1],['Known','Unknown'])
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+frame1.set_axisbelow(True)
+plt.box(False)
+# plt.ylim((0,1.05))
+plt.title('Reported difficulty for known and unknown examples')
+# plt.tight_layout(rect=[0, 0, 1, 1])
+plt.show()
+
+
+#### Musicians vs non-musicians
+
+# goldmsi = users[:,5].astype(float)
+# median_goldmsi = np.median(goldmsi)
+#
+# musicians_id = users[goldmsi>median_goldmsi,0]
+# non_musicians_id = users[goldmsi<median_goldmsi,0]
+#
+# agree_musicians = 0
+# total_musicians = 0
+# agree_non_musicians = 0
+# total_non_musicians = 0
+# for row in answers:
+#     f_choice = 1-int(row[-2]>row[-1])
+#     agree = f_choice == int(row[5])
+#
+#     if row[4] in musicians_id:
+#         total_musicians+=1
+#
+#         if agree :
+#             agree_musicians += 1
+#     elif row[4] in non_musicians_id:
+#         total_non_musicians+=1
+#         if agree :
+#             agree_non_musicians += 1
+#
+#
+# plt.bar([0,1],[agree_musicians/float(total_musicians),agree_non_musicians/float(total_non_musicians)],width=barWidth,edgecolor='black')
+# frame1 = plt.gca()
+# plt.xticks([0,1],['Musicians','Non-musicians'])
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+# frame1.set_axisbelow(True)
+# plt.box(False)
+# plt.ylim((0,1.05))
+# plt.title('Agreement between raters and F-measure\nfor musicians and non-musicians')
+# plt.tight_layout(rect=[0, 0, 1, 1])
+# plt.show()
+
+
+#### Difficuly vs GoldMSI
+
+goldmsi = []
+avg_difficulty = []
+avg_agreement = []
+known = []
+for user in users:
+    data = answers[answers[:,4]==user[0]]
+    goldmsi += [float(user[5])]
+    avg_difficulty += [np.mean(data[:,7].astype(int))]
+
+    f_choice = 1-(data[:,-2]>data[:,-1]).astype(int)
+    agree = f_choice == data[:,5].astype(int)
+    avg_agreement += [np.mean(agree.astype(int))]
+
+    known += [np.mean((data[:,6]=='True').astype(int))]
+
+
+plt.scatter(goldmsi,avg_difficulty)
+frame1 = plt.gca()
+plt.xticks(range(2,8),range(2,8))
+plt.yticks(range(6),range(6))
+plt.xlabel('GoldMSI Score')
+plt.ylabel('Average reported difficulty')
 plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
 frame1.set_axisbelow(True)
 plt.box(False)
-plt.ylim((0,1.05))
-plt.title('Agreement between raters and F-measure\nfor known and unknown examples')
+
+plt.title('Average reported difficulty vs. GoldMSI Score')
 plt.tight_layout(rect=[0, 0, 1, 1])
 plt.show()
+
+# plt.scatter(goldmsi,known)
+# frame1 = plt.gca()
+# plt.xticks(range(2,8),range(2,8))
+# plt.yticks(range(6),range(6))
+# plt.xlabel('GoldMSI Score')
+# plt.ylabel('Average reported difficulty')
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+# frame1.set_axisbelow(True)
+# plt.box(False)
+#
+# plt.title('Average reported difficulty vs. GoldMSI Score')
+# plt.tight_layout(rect=[0, 0, 1, 1])
+# plt.show()
