@@ -4,7 +4,7 @@ import pretty_midi as pm
 import mir_eval
 import matplotlib.pyplot as plt
 import features.utils as utils
-from features.benchmark import notewise
+from features.benchmark import framewise, notewise
 from features.high_low_voice import framewise_highest, framewise_lowest, notewise_highest, notewise_lowest
 from features.loudness import false_negative_loudness, loudness_ratio_false_negative
 from features.out_key import make_key_mask, out_key_errors, out_key_errors_binary_mask
@@ -44,6 +44,8 @@ for example in os.listdir(MIDI_path):
         notes_target, intervals_target, vel_target = utils.get_notes_intervals(target_data, with_vel=True)
         notes_system, intervals_system = utils.get_notes_intervals(system_data)
 
+        frame = framewise(system_pr,target_pr)
+
         match_on = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_system, notes_system, offset_ratio=None, pitch_tolerance=0.25)
         match_onoff = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_system, notes_system, offset_ratio=0.2, pitch_tolerance=0.25)
 
@@ -69,6 +71,7 @@ for example in os.listdir(MIDI_path):
         notewise_OnOff_100 = notewise(match_onoff_100,notes_system,notes_target)
 
         results_dict = {
+                "framewise" : frame,
                 "notewise_On_50": notewise_On_50,
                 "notewise_OnOff_50":notewise_OnOff_50,
                 "notewise_On_25": notewise_On_25,
