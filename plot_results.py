@@ -125,7 +125,6 @@ n_users = users.shape[0]
 filecp = codecs.open('db_csv/answers_data.csv', encoding = 'utf-8')
 answers = np.genfromtxt(filecp,dtype=object,delimiter=";")
 answers = answers[1:,:]
-# n_users = answers.shape[0]
 
 ####       0            1         2          3        4         5        6            7           8        9           10
 #### ['question_id' 'example' 'system1' 'system2' 'user_id' 'answer' 'recognised' 'difficulty' 'time'  'F_syst1' , 'F_syst2']

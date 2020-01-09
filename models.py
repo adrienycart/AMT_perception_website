@@ -126,20 +126,7 @@ for q_id in np.unique(answers[:,0]):
     features1 += [import_features(example_dir,system1)]
     features2 += [import_features(example_dir,system2)]
 
-for row in features1:
-    for elt in row:
-        if len(row) != 43:
-            print 'kqjshdkqjshdkjqshkqjsh'
-            print len(row)
-        if type(elt) is not float:
-            print type(elt), elt
-
-print features1[0]
-print features1[1]
-print len(features1)
-features1 = np.asarray(features1,dtype=float)
-print features1.shape
-print features1.dtype
+features1 = np.array(features1,dtype=float)
 
 
 
