@@ -84,7 +84,7 @@ def test_specific_pitch(output, target, fs):
 
 MIDI_path = 'app/static/data/all_midi_cut'
 systems = ['kelz', 'lisu', 'google', 'cheng']
-fs = 44100
+fs = 100
 
 
 for example in os.listdir(MIDI_path)[:20]:
@@ -99,8 +99,8 @@ for example in os.listdir(MIDI_path)[:20]:
 
 			# target and system piano rolls
 			# print('getting piano roll...')
-			target_pr = (target_data.get_piano_roll()>0).astype(int)
-			system_pr = (system_data.get_piano_roll()>0).astype(int)
+			target_pr = (target_data.get_piano_roll(fs)>0).astype(int)
+			system_pr = (system_data.get_piano_roll(fs)>0).astype(int)
 			target_pr, system_pr = utils.even_up_rolls(target_pr, system_pr)
 
 			# plot_piano_roll(target_pr)
@@ -160,7 +160,3 @@ for example in os.listdir(MIDI_path)[:20]:
 			# print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
 			# mean_drift, max_drift = rhythm_dispersion(intervals_system, intervals_target)
 			# print("cluster centre drift: " + str(mean_drift) + "(mean)  " + str(max_drift) + "(max)")
-
-
-
-

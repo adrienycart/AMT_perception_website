@@ -30,11 +30,14 @@ def specific_pitch_framewise(output,target,fs,n_semitones,down_only=False,delta=
         match_pitch = np.logical_or(match_down,match_down).astype(int)
         n_match = np.sum(match_pitch*match_past)
 
-    n_match = float(n_match)
-    n_FP = np.sum(FPs)
-    n_tot = np.sum(output)
+    if np.sum(FPs) == 0:
+        return 0.0,0.0
+    else:
+        n_match = float(n_match)
+        n_FP = np.sum(FPs)
+        n_tot = np.sum(output)
 
-    return n_match/n_FP, n_match/n_tot
+        return n_match/n_FP, n_match/n_tot
 
 
 ########################################
@@ -42,12 +45,12 @@ def specific_pitch_framewise(output,target,fs,n_semitones,down_only=False,delta=
 ########################################
 
 def specific_pitch_notewise(notes_output, intervals_output, notes_target, intervals_target, match, n_semitones, down_only=False, ratio=0.8):
-    # return two ratios: 
+    # return two ratios:
     # 1. the proportion of specific pitch mistakes among false positives
     # 2. the proportion of specific pitch mistakes among all detected notes
     if len(match) == 0:
         return 0.0, 0.0
-    
+
     # get false positives
     matched_targets, matched_outputs = zip(*match)
     fp_idxs = [idx for idx in range(notes_output.shape[0]) if idx not in matched_outputs]
@@ -82,6 +85,3 @@ def specific_pitch_notewise(notes_output, intervals_output, notes_target, interv
             n_specific_pitch += 1.0
 
     return n_specific_pitch / len(fp_idxs), n_specific_pitch / len(notes_output)
-
-
-

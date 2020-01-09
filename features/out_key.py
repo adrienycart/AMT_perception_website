@@ -18,7 +18,7 @@ def make_key_mask(target_roll):
 def out_key_errors(notes_output,match,mask):
 
     if len(match) == 0:
-        unmatched_outputs = list(range(notes_output))
+        unmatched_outputs = list(range(len(notes_output)))
     else:
         matched_targets, matched_outputs = zip(*match)
         unmatched_outputs= list(set(range(len(notes_output)))-set(matched_outputs))
@@ -34,7 +34,10 @@ def out_key_errors(notes_output,match,mask):
         for note in notes_output:
             all_weights += [1- mask[note%12]]
 
-        return np.mean(all_weights), sum(unmatched_weights)/sum(all_weights)
+        if sum(all_weights)==0:
+            return 0.0, 0.0
+        else:
+            return np.mean(all_weights), sum(unmatched_weights)/sum(all_weights)
 
 def out_key_errors_binary_mask(notes_output,match,mask,mask_thresh=0.1):
 
@@ -48,7 +51,7 @@ def out_key_errors_binary_mask(notes_output,match,mask,mask_thresh=0.1):
     # plt.show()
 
     if len(match) == 0:
-        unmatched_outputs = list(range(notes_output))
+        unmatched_outputs = list(range(len(notes_output)))
     else:
         matched_targets, matched_outputs = zip(*match)
         unmatched_outputs= list(set(range(len(notes_output)))-set(matched_outputs))
