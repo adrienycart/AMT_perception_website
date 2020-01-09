@@ -12,7 +12,7 @@ def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,m
     # than tol percent of its duration is considered a repeated note
 
     if len(match) == 0:
-        return 0.0, 0.0, 0.0
+        return 0.0, 0.0
     else:
         fs = 500
 
@@ -57,7 +57,7 @@ def merged_notes(notes_output,intervals_output,notes_target,intervals_target,mat
     # than tol percent of its duration is considered a repeated note
 
     if len(match) == 0:
-        return 0.0, 0.0, 0.0
+        return 0.0, 0.0
     else:
         fs = 500
 

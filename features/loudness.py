@@ -8,7 +8,7 @@ from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_r
 def false_negative_loudness(match,vel_target):
 
     if len(match) == 0:
-        return 128.0
+        return 0.0
     else:
         matched_targets, matched_outputs = zip(*match)
         unmatched_targets= list(set(range(len(vel_target)))-set(matched_targets))
@@ -50,5 +50,3 @@ def loudness_ratio_false_negative(notes_target, intervals_target, vel_target, ma
         ratios.append(ratio)
 
     return np.mean(ratios)
-
-
