@@ -52,15 +52,15 @@ for i,example in enumerate(example_paths):
 
         frame = framewise(output,target)
 
-        for on_tol in [25,50,75,100]:
+        for on_tol in [25,50,75,100,125,150]:
             match_on = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance=on_tol/1000.0, offset_ratio=None, pitch_tolerance=0.25)
             if on_tol == 50:
                 match = match_on
             note = notewise(match_on,notes_output,notes_target)
             results_dict.update({'notewise_On_'+str(on_tol): note})
 
-        for on_tol in [25,50,75,100]:
-            for off_tol in [0.1,0.2,0.3,0.4]:
+        for on_tol in [25,50,75,100,125,150]:
+            for off_tol in [0.1,0.2,0.3,0.4,0.5]:
                 match_onoff = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output,onset_tolerance=on_tol/1000.0, offset_ratio=off_tol, pitch_tolerance=0.25)
                 note = notewise(match_onoff,notes_output,notes_target)
                 results_dict.update({'notewise_OnOff_'+str(on_tol)+'_'+str(object=off_tol): note})
