@@ -25,18 +25,20 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs=100
 
 write_path = 'precomputed_features'
-
-for example in os.listdir(MIDI_path):
+example_paths = [path for path in os.listdir(MIDI_path) if not path.startswith('.')]
+for i,example in enumerate(example_paths):
     if example.startswith('.'):# or not 'MAPS_MUS-mendel_op62_5_ENSTDkAm_13' in example:
         continue
     example_path = os.path.join(MIDI_path, example)  # folder path
-    print('\n\npath = ' + example_path)
+    print(str(i)+'/'+str(len(example_paths))+' path = ' + example_path)
     target_data = pm.PrettyMIDI(os.path.join(example_path, 'target.mid'))
     dir = os.path.join(write_path,example)
     if not os.path.exists(dir):
         os.mkdir(dir)
 
     for system in systems:
+        results_dict = {}
+
         system_data = pm.PrettyMIDI(os.path.join(example_path, system + '.mid'))
 
         # target and system piano rolls
@@ -50,31 +52,18 @@ for example in os.listdir(MIDI_path):
 
         frame = framewise(output,target)
 
-        match_on = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, offset_ratio=None, pitch_tolerance=0.25)
-        match_onoff = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, offset_ratio=0.2, pitch_tolerance=0.25)
+        for on_tol in [25,50,75,100]:
+            match_on = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance=on_tol/1000.0, offset_ratio=None, pitch_tolerance=0.25)
+            if on_tol == 50:
+                match = match_on
+            note = notewise(match_on,notes_output,notes_target)
+            results_dict.update({'notewise_On_'+str(on_tol): note})
 
-        match = match_on
-
-        match_on_25 = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance = 0.025, offset_ratio=None, pitch_tolerance=0.25)
-        match_onoff_25 = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance = 0.025, offset_ratio=0.2, pitch_tolerance=0.25)
-
-        match_on_75 = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance = 0.075, offset_ratio=None, pitch_tolerance=0.25)
-        match_onoff_75 = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance = 0.075, offset_ratio=0.2, pitch_tolerance=0.25)
-
-        match_on_100 = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance = 0.01, offset_ratio=None, pitch_tolerance=0.25)
-        match_onoff_100 = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance = 0.01, offset_ratio=0.2, pitch_tolerance=0.25)
-
-        notewise_On_50 = notewise(match_on,notes_output,notes_target)
-        notewise_OnOff_50 = notewise(match_onoff,notes_output,notes_target)
-
-        notewise_On_25 = notewise(match_on_25,notes_output,notes_target)
-        notewise_OnOff_25 = notewise(match_onoff_25,notes_output,notes_target)
-
-        notewise_On_75 = notewise(match_on_75,notes_output,notes_target)
-        notewise_OnOff_75 = notewise(match_onoff_75,notes_output,notes_target)
-
-        notewise_On_100 = notewise(match_on_100,notes_output,notes_target)
-        notewise_OnOff_100 = notewise(match_onoff_100,notes_output,notes_target)
+        for on_tol in [25,50,75,100]:
+            for off_tol in [0.1,0.2,0.3,0.4]:
+                match_onoff = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output,onset_tolerance=on_tol/1000.0, offset_ratio=off_tol, pitch_tolerance=0.25)
+                note = notewise(match_on,notes_output,notes_target)
+                results_dict.update({'notewise_OnOff_'+str(on_tol)+'_'+str(object=off_tol): note})
 
 
         high_f = framewise_highest(output, target)
@@ -104,19 +93,10 @@ for example in os.listdir(MIDI_path):
 
 
 
-
-
-
-        results_dict = {
+        results_dict.update({
                 "framewise" : frame,
-                "notewise_On_50": notewise_On_50,
-                "notewise_OnOff_50":notewise_OnOff_50,
-                "notewise_On_25": notewise_On_25,
-                "notewise_OnOff_25": notewise_OnOff_25,
-                "notewise_On_75": notewise_On_75,
-                "notewise_OnOff_75":notewise_OnOff_75,
-                "notewise_On_100":notewise_On_100,
-                "notewise_OnOff_100":notewise_OnOff_100,
+
+                #Notewise have already been added
 
                 "high_f": high_f,
                 "low_f": low_f,
@@ -138,7 +118,7 @@ for example in os.listdir(MIDI_path):
                 "semitone_n":semitone_n,
                 "octave_n":octave_n,
                 "third_harmonic_n":third_harmonic_n,
-                }
+                })
 
 
         pickle.dump(results_dict, open(os.path.join(dir,system+'.pkl'), 'wb'))
