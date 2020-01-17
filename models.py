@@ -8,6 +8,7 @@ import tensorflow as tf
 
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+from sklearn.linear_model import LogisticRegression
 import pandas as pd
 
 from config import MAX_ANSWERS
@@ -111,7 +112,6 @@ answers = answers[1:,:]
 
 
 AQ = pd.read_csv('db_csv/answers_data.csv',delimiter=';')
-print type(AQ)
 
 results_dict = {}
 feature_dir = 'precomputed_features'
@@ -133,13 +133,14 @@ for example in np.unique(answers[:,1]):
 
 f_syst1 = []
 f_syst2 = []
+f_diff = []
 for row in answers:
     f_syst1 += [results_dict[row[1]][row[2]]["notewise_On_50"][-1]]
     f_syst2 += [results_dict[row[1]][row[3]]["notewise_On_50"][-1]]
+    f_diff += [abs(results_dict[row[1]][row[2]]["notewise_On_50"][-1]-results_dict[row[1]][row[3]]["notewise_On_50"][-1])]
 
-data = {'f_system1':f_syst1,'f_system2':f_syst2}
+data = {'f_system1':f_syst1,'f_system2':f_syst2, 'f_diff':f_diff}
 data_f_mes = pd.DataFrame(data)
-
 
 filecp = codecs.open('db_csv/user_data.csv', encoding = 'utf-8')
 users = np.genfromtxt(filecp,dtype=object,delimiter=";")
@@ -153,14 +154,47 @@ data = {'goldmsi':goldmsi}
 data_goldmsi = pd.DataFrame(data)
 
 AQ_new = pd.concat([AQ, data_f_mes,data_goldmsi],axis=1)
-print AQ_new
+reverse_idx = AQ_new['f_system1']>AQ_new['f_system2']
 
-mixed = smf.mixedlm("answer ~ recognised+difficulty+f_system1+f_system2+goldmsi", AQ_new,groups='user_id')
-mixed_fit = mixed.fit()
-print(mixed_fit.summary())
 
 ####       0            1         2          3        4         5        6            7           8        9           10             11
 #### ['question_id' 'example' 'system1' 'system2' 'user_id' 'answer' 'recognised' 'difficulty' 'time'  'f_system1' , 'f_system2', 'goldmsi']
+
+# print AQ_new[['question_id','system1','system2','answer']]
+
+system1 = AQ_new["system1"][reverse_idx]
+f_system1 = AQ_new["f_system1"][reverse_idx]
+AQ_new.loc[reverse_idx, 'system1']=AQ_new["system2"][reverse_idx]
+AQ_new.loc[reverse_idx, 'system2']=system1
+AQ_new.loc[reverse_idx, 'f_system1']=AQ_new["f_system2"][reverse_idx]
+AQ_new.loc[reverse_idx, 'f_system2']=f_system1
+AQ_new.loc[reverse_idx, 'answer']=1- AQ_new["answer"][reverse_idx]
+
+# print AQ_new[['question_id','system1','system2','answer']]
+
+
+
+### Co-dependent variables: *
+### Random variables: +(var/user_id) --> /user_id
+### Also check multiple regression (simple)
+### Also check multiple logistic regression
+
+### Mixed Effects Model
+mixed = smf.mixedlm("answer ~ f_system1*f_system2+goldmsi+recognised+difficulty", AQ_new,groups='question_id')
+mixed_fit = mixed.fit()
+print(mixed_fit.summary())
+
+### logistic regression
+# feature_columns = ["recognised","difficulty","f_system1","f_system2","goldmsi"]
+# X = AQ_new.loc[:, feature_columns].values
+#
+# X = np.concatenate([X,X[:,4:5]-X[:,3:4]],axis=1)
+# print X.shape
+# y=AQ_new.answer
+# clf = LogisticRegression().fit(X, y)
+# print clf.coef_
+# for c,feat in zip(clf.coef_[0],feature_columns+['f_diff']):
+#     print feat, 'coef', c
 
 
 ########################################################
