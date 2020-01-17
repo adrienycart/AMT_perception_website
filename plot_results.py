@@ -48,8 +48,8 @@ filecp = codecs.open('db_csv/user_data.csv', encoding = 'utf-8')
 users = np.genfromtxt(filecp,dtype=object,delimiter=";")
 users = users[1:,:]
 n_users = users.shape[0]
-# #### 0         1      2     3    4          5
-# #### user;n_answers;gender;age;disability;gold_msi_avg
+# #### 0         1      2     3    4          5          ....   -1
+# #### user;n_answers;gender;age;disability;gold_msi_avg ....   classical
 #
 # male_users = users[users[:,2]=="male",:]
 # female_users = users[users[:,2]=="female",:]
@@ -119,8 +119,31 @@ n_users = users.shape[0]
 #
 
 
+### Correlation classical question and average
+# def get_avg_goldMSI(answers):
+#     positive = np.array([1,1,0,1,0,1,1,0,1,0,0,1,1,1,1,1])
+#     avg = np.mean(answers*positive + (7-answers)*(1-positive))
+#     return avg
+#
+# all_averages = []
+# all_last_question = []
+#
+# for row in users:
+#     all_averages += [get_avg_goldMSI(row[6:-1].astype(int))]
+#     all_last_question += [int(row[7])]
+#
+# from scipy.stats import linregress
+# slope_n, intercept_n, r_value_n, p_value_n, std_err_n = linregress(all_averages,all_last_question)
+#
+# print("Slope = ",slope_n ,"R value = ", r_value_n,"P value = ", p_value_n,"Standard error = ", std_err_n)
+# print('R2 = ', r_value_n**2)
 
-
+# plt.scatter(all_averages,all_last_question)
+# plt.show()
+#
+# data = [F_mes_diffs[agreements==0],F_mes_diffs[agreements==1],F_mes_diffs[agreements==2]]
+# plt.violinplot(data, positions=[0,1,2], vert=True, widths=0.3,
+#                        showextrema=True, showmedians=True)
 
 
 
@@ -865,37 +888,37 @@ answers = np.concatenate([answers,F_measures],axis=1)
 
 #### Agreement with F-measure vs best F-measure of the pair
 
-n_bins = 10
-
-def f_measure_agreement_by_f_measure(data):
-    f_choices = 1-(data[:,-2]>data[:,-1]).astype(int)
-    agree = (f_choices==data[:,5].astype(int)).astype(int)
-
-    ## Chosen F-measure
-    # all_fs = data[:,-2:]
-    # fs = all_fs[range(len(f_choices)),f_choices]
-
-    ## Best F-measure
-    fs = np.maximum(data[:,-1],data[:,-2])
-
-    # print [(agree[difficulties[5]==str(i)]).shape for i in range(1,6)]
-
-    return [np.mean(agree[np.logical_and(fs>i/float(n_bins),fs<(i+1)/float(n_bins))]) for i in range(0,n_bins)]
-
-
-data,std = bootstrap(f_measure_agreement_by_f_measure,answers)
-
-plt.bar(np.arange(n_bins)+0.5,data,yerr=std,capsize=2,width=1,edgecolor='black')
-frame1 = plt.gca()
-plt.xticks(range(n_bins+1),[i/float(n_bins) for i in range(n_bins+1)])
-plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
-frame1.set_axisbelow(True)
-plt.box(False)
-plt.ylim((0,1.05))
-plt.title('Agreement between raters and F-measure\ndepending on the F-measure of the chosen solution ')
-plt.xlabel('F-measure of the chosen solution')
-plt.tight_layout(rect=[0, 0, 1, 1])
-plt.show()
+# n_bins = 10
+#
+# def f_measure_agreement_by_f_measure(data):
+#     f_choices = 1-(data[:,-2]>data[:,-1]).astype(int)
+#     agree = (f_choices==data[:,5].astype(int)).astype(int)
+#
+#     ## Chosen F-measure
+#     # all_fs = data[:,-2:]
+#     # fs = all_fs[range(len(f_choices)),f_choices]
+#
+#     ## Best F-measure
+#     fs = np.maximum(data[:,-1],data[:,-2])
+#
+#     # print [(agree[difficulties[5]==str(i)]).shape for i in range(1,6)]
+#
+#     return [np.mean(agree[np.logical_and(fs>i/float(n_bins),fs<(i+1)/float(n_bins))]) for i in range(0,n_bins)]
+#
+#
+# data,std = bootstrap(f_measure_agreement_by_f_measure,answers)
+#
+# plt.bar(np.arange(n_bins)+0.5,data,yerr=std,capsize=2,width=1,edgecolor='black')
+# frame1 = plt.gca()
+# plt.xticks(range(n_bins+1),[i/float(n_bins) for i in range(n_bins+1)])
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+# frame1.set_axisbelow(True)
+# plt.box(False)
+# plt.ylim((0,1.05))
+# plt.title('Agreement between raters and F-measure\ndepending on the F-measure of the chosen solution ')
+# plt.xlabel('F-measure of the chosen solution')
+# plt.tight_layout(rect=[0, 0, 1, 1])
+# plt.show()
 
 #### Known vs Unknown pieces
 
@@ -993,22 +1016,24 @@ plt.show()
 
 #### Difficuly vs GoldMSI
 
-# goldmsi = []
-# avg_difficulty = []
-# avg_agreement = []
-# known = []
-# for user in users:
-#     data = answers[answers[:,4]==user[0]]
-#     goldmsi += [float(user[5])]
-#     avg_difficulty += [np.mean(data[:,7].astype(int))]
-#
-#     f_choice = 1-(data[:,-2]>data[:,-1]).astype(int)
-#     agree = f_choice == data[:,5].astype(int)
-#     avg_agreement += [np.mean(agree.astype(int))]
-#
-#     known += [np.mean((data[:,6]=='True').astype(int))]
-#
-#
+goldmsi = []
+classical = []
+avg_difficulty = []
+avg_agreement = []
+known = []
+for user in users:
+    data = answers[answers[:,4]==user[0]]
+    goldmsi += [float(user[5])]
+    classical += [int(user[-1])]
+    avg_difficulty += [np.mean(data[:,7].astype(int))]
+
+    f_choice = 1-(data[:,-2]>data[:,-1]).astype(int)
+    agree = f_choice == data[:,5].astype(int)
+    avg_agreement += [np.mean(agree.astype(int))]
+
+    known += [np.mean((data[:,6]=='True').astype(int))]
+
+
 # plt.scatter(goldmsi,avg_difficulty)
 # frame1 = plt.gca()
 # plt.xticks(range(2,8),range(2,8))
@@ -1018,24 +1043,38 @@ plt.show()
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
 # frame1.set_axisbelow(True)
 # plt.box(False)
-#
 # plt.title('Average reported difficulty vs. GoldMSI Score')
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
 
-# plt.scatter(goldmsi,known)
+plt.scatter(goldmsi,known)
+frame1 = plt.gca()
+plt.xticks(range(2,8),range(2,8))
+# plt.yticks(range(6),range(6))
+plt.xlabel('GoldMSI Score')
+plt.ylabel('Proportion of recognised pieces')
+plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+frame1.set_axisbelow(True)
+plt.box(False)
+plt.title('Proportion of recognised pieces vs. GoldMSI Score')
+plt.tight_layout(rect=[0, 0, 1, 1])
+plt.show()
+
+# plt.scatter(classical,known)
 # frame1 = plt.gca()
 # plt.xticks(range(2,8),range(2,8))
-# plt.yticks(range(6),range(6))
-# plt.xlabel('GoldMSI Score')
-# plt.ylabel('Average reported difficulty')
+# # plt.yticks(range(6),range(6))
+# plt.xlabel('Listens to classical music')
+# plt.ylabel('Proportion of recognised pieces')
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
 # frame1.set_axisbelow(True)
 # plt.box(False)
-#
-# plt.title('Average reported difficulty vs. GoldMSI Score')
+# plt.title('Proportion of recognised pieces vs. GoldMSI Score')
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
+
+
+
 
 
 
