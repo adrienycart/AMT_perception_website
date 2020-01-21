@@ -35,10 +35,15 @@ barWidth = 0.75
 # ############################################
 
 
-### Gold-MSI scores in general population
+### Gold-MSI scores in general population: mean
 ### Perceptual abilities: 50.20, 9 questions --> 5.578
 ### Musical Training: 26.52, 7 questions --> 3.789
 ### Overall: 4.795
+
+### Gold-MSI scores in general population: median
+### Perceptual abilities: 50, 9 questions --> 5.556
+### Musical Training: 27, 7 questions --> 3.857
+### Overall: 4.813
 
 
 
@@ -191,6 +196,26 @@ for example in np.unique(answers[:,1]):
         results = pickle.load(open(os.path.join(example_dir,system+'.pkl'), "rb"))
         results_dict[example][system]=results
 
+pairs_f1 = []
+
+for pair in pairs:
+    f1_agreement_each = 0
+    # For each answer
+    data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
+    f1_syst1 = []
+    f1_syst2 = []
+    for row in data:
+        choice = int(row[5])
+        f_syst1 = results_dict[row[1]][row[2]]['notewise_On_50'][-1]
+        f_syst2 = results_dict[row[1]][row[3]]['notewise_On_50'][-1]
+        f1_syst1 += [f_syst1]
+        f1_syst2 += [f_syst2]
+
+    pairs_f1 += [["{0:.1f}".format(100*np.mean(f1_syst1)),"{0:.1f}".format(100*np.mean(f1_syst2))]]
+
+labels = [" - ".join(pair) for pair in pairs]
+labels_f1 = [" - ".join(pair) for pair in pairs_f1]
+
 ### Pairwise comparisons
 
 
@@ -250,23 +275,7 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 #
 #
 #
-# pairs_f1 = []
-#
-# for pair in pairs:
-#     f1_agreement_each = 0
-#     # For each answer
-#     data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
-#     f1_syst1 = []
-#     f1_syst2 = []
-#     for row in data:
-#         choice = int(row[5])
-#         f_syst1 = results_dict[row[1]][row[2]]['notewise_On_50'][-1]
-#         f_syst2 = results_dict[row[1]][row[3]]['notewise_On_50'][-1]
-#         f1_syst1 += [f_syst1]
-#         f1_syst2 += [f_syst2]
-#
-#     pairs_f1 += [["{0:.1f}".format(100*np.mean(f1_syst1)),"{0:.1f}".format(100*np.mean(f1_syst2))]]
-#
+
 
 
 #### Plot choices
@@ -333,8 +342,7 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 #     end = start + normalized_difficulty[:,i]
 #     plt.barh(r, normalized_difficulty[:,i], left=np.sum(normalized_difficulty[:,:i],axis=1), color=np.array([1.0,1,1])-(i+1)/5.0*np.array([0,1,1]), edgecolor='black', height=barWidth)
 #
-# labels = [" - ".join(pair) for pair in pairs]
-# labels_f1 = [" - ".join(pair) for pair in pairs_f1]
+
 # for i in range(len(pairs)):
 #     plt.text(-0.05,i+0.15,labels[i],ha='right', va='center')
 #     plt.text(-0.05,i-0.15,'F1s: '+labels_f1[i],ha='right', va='center',fontsize=8)
@@ -470,7 +478,7 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 # f1_agreement_each = np.array(f1_agreement_each)
 # f1_agreement_majority = np.array(f1_agreement_majority)
 #
-# labels = [" - ".join(pair) for pair in pairs]
+labels = [" - ".join(pair) for pair in pairs]
 
 
 #### Plot choices with F-measure
@@ -596,26 +604,42 @@ def agreement_f_measure_answers(data,measures=all_measures,with_majority=True,av
             output += [np.array(f1_agreement_majority_all)]
     return output
 
+################
+# with_error_bars=True
+#
+# ### ONLY FOR VERY CONFIDENT ANSWERS:
+# answers=answers[answers[:,7].astype(int)<3]
+################
 
-dict_stats = {}
-for pair in pairs:
-
-    # For each answer
-    data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
-    # For each answern, dropping difficulty==5
-    # data = data[data[:,7].astype(int)<4]
-
-    dict_stats[str(pair)] = agreement_f_measure_answers(data)
-
-
-f1_agreement_each=[]
-f1_agreement_majority=[]
-for pair in pairs:
-    f1_agreement_each += [dict_stats[str(pair)][0][:,0]/dict_stats[str(pair)][0][:,1]]
-    f1_agreement_majority += [dict_stats[str(pair)][1][:,0]/dict_stats[str(pair)][1][:,1]]
-f1_agreement_each = np.array(f1_agreement_each)
-f1_agreement_majority = np.array(f1_agreement_majority)
-
+# dict_stats = {}
+# for pair in pairs:
+#
+#     # For each answer
+#     data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
+#     # For each answern, dropping difficulty==5
+#     # data = data[data[:,7].astype(int)<4]
+#
+#     if not with_error_bars:
+#         dict_stats[str(pair)] = agreement_f_measure_answers(data)
+#     else:
+#         dict_stats[str(pair)] = bootstrap(agreement_f_measure_answers,data,n_repeat=100,with_majority=False,average=True)
+#
+#
+# f1_agreement_each=[]
+# f1_agreement_majority=[]
+# if with_error_bars:
+#     f1_agreement_each_std = []
+# for pair in pairs:
+#     if not with_error_bars:
+#         f1_agreement_each += [dict_stats[str(pair)][0][:,0]/dict_stats[str(pair)][0][:,1]]
+#         f1_agreement_majority += [dict_stats[str(pair)][1][:,0]/dict_stats[str(pair)][1][:,1]]
+#     else:
+#         f1_agreement_each += [dict_stats[str(pair)][0][0]]
+#         f1_agreement_each_std += [dict_stats[str(pair)][1][0]]
+# f1_agreement_each = np.array(f1_agreement_each)
+# f1_agreement_majority = np.array(f1_agreement_majority)
+# if with_error_bars:
+#     f1_agreement_each_std = np.array(f1_agreement_each_std)
 
 # ######
 # ## ON-NOTEWISE ONLY
@@ -627,11 +651,12 @@ f1_agreement_majority = np.array(f1_agreement_majority)
 
 ######
 ## ON-NOTEWISE and FRAMEWISE
-f1_agreement_each = f1_agreement_each[:,:5]
-f1_agreement_majority = f1_agreement_majority[:,:5]
-bar_labels = ['Frame','On\n25ms','On\n50ms','On\n75ms','On\n100ms']
-n_bars = f1_agreement_each.shape[1]
-colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([0,1,1])for i in range(4)]
+# f1_agreement_each = f1_agreement_each[:,:5]
+# f1_agreement_majority = f1_agreement_majority[:,:5]
+# bar_labels = ['Frame','On\n25ms','On\n50ms','On\n75ms','On\n100ms']
+# n_bars = f1_agreement_each.shape[1]
+# colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([0,1,1])for i in range(4)]
+
 
 
 ######
@@ -650,17 +675,34 @@ colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([0,1,1]
 # n_bars = f1_agreement_each.shape[1]
 # colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([1,1,0])for i in range(n_bars)]
 
-
-
-single_barWidth = barWidth/n_bars
+######
+## ON-NOTEWISE , ONOFF-notewise and FRAMEWISE
+# f1_agreement_each = f1_agreement_each[:,[0,2,13]]
+# if with_error_bars:
+#     f1_agreement_each_std = f1_agreement_each_std[:,[0,2,13]]
+# # f1_agreement_majority = f1_agreement_majority[:,:5]
+# bar_labels = ['Frame','On\n(50ms)','OnOff\n(50ms,20%)']
+# n_bars = f1_agreement_each.shape[1]
+# colors = ['tab:green','tab:red','tab:blue']
+#
+#
+#
+# single_barWidth = barWidth/n_bars
 
 
 # # ### Plot for all answers
 
-# for i in range(n_bars):
-#     plt.barh(r-single_barWidth/2+(i-1)*single_barWidth, f1_agreement_each[:,i],
-#         color=colors[i], edgecolor='black',
-#         height=single_barWidth,label=bar_labels[i])
+# if with_error_bars:
+#     for i in range(n_bars):
+#         plt.barh(r-single_barWidth/2+(i-1)*single_barWidth, f1_agreement_each[:,i],
+#             xerr=f1_agreement_each_std[:,i],capsize=2,
+#             color=colors[i], edgecolor='black',
+#             height=single_barWidth,label=bar_labels[i])
+# else:
+#     for i in range(n_bars):
+#         plt.barh(r-single_barWidth/2+(i-1)*single_barWidth, f1_agreement_each[:,i],
+#             color=colors[i], edgecolor='black',
+#             height=single_barWidth,label=bar_labels[i])
 #
 # frame1 = plt.gca()
 # plt.yticks(r,labels)
@@ -693,28 +735,21 @@ single_barWidth = barWidth/n_bars
 
 #### ACROSS ALL SYSTEM PAIRS, WITH ERROR bars
 
-
-# f1_agreement_each,f1_agreement_each_std = bootstrap(agreement_f_measure_answers,answers,n_repeat=100,with_majority=False,average=True)
+# ### ONLY FOR VERY CONFIDENT ANSWERS:
+# answers=answers[answers[:,7].astype(int)<3]
+#
+# f1_agreement_each,f1_agreement_each_std = bootstrap(agreement_f_measure_answers,answers,n_repeat=10,with_majority=False,average=True)
 # f1_agreement_each = f1_agreement_each[0]
 # f1_agreement_each_std = f1_agreement_each_std[0]
-# # # f1_agreement_majority=[]
-# # for pair in pairs:
-# #     f1_agreement_each += [[dict_stats[str(pair)][0][:,0],dict_stats[str(pair)][0][:,1]]]
-# #     # f1_agreement_majority += [[dict_stats[str(pair)][1][:,0],dict_stats[str(pair)][1][:,1]]]
-# # f1_agreement_each = np.array(f1_agreement_each)
-# # # f1_agreement_majority = np.array(f1_agreement_majority)
-# #
-# # f1_agreement_each = np.sum(f1_agreement_each[:,0,:],axis=0)/np.sum(f1_agreement_each[:,1,:],axis=0).astype(float)
-# # # f1_agreement_majority = np.sum(f1_agreement_majority[:,0,:],axis=0)/np.sum(f1_agreement_majority[:,1,:],axis=0).astype(float)
 #
 # labels_on = ['On\n'+str(on_tol)+'ms' for on_tol in onset_tolerances]
-# labels_on_off = ['OnOff\n'+str(on_tol)+'ms\n'+str(off_tol)+'%' for on_tol in onset_tolerances for off_tol in offset_tolerances]
+# labels_on_off = ['OnOff\n'+str(on_tol)+'ms\n'+str(off_tol*100)+'%' for on_tol in onset_tolerances for off_tol in offset_tolerances]
 # labels = ["Frame"]+labels_on+labels_on_off
-#
-# colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(len(labels_on))*np.array([0,1,1]) for i in range(len(labels_on))]+[np.array([1.0,1,1])-(i+1)/float(len(labels_on_off))*np.array([1,1,0]) for i in range(len(labels_on_off))]
-#
-#
-# ### Only On-notewise metrics:
+
+colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(len(labels_on))*np.array([0,1,1]) for i in range(len(labels_on))]+[np.array([1.0,1,1])-(i+1)/float(len(labels_on_off))*np.array([1,1,0]) for i in range(len(labels_on_off))]
+
+
+### Only On-notewise metrics:
 # lab = labels[:len(labels_on)+1]
 # col = colors[:len(labels_on)+1]
 # values = f1_agreement_each[:len(labels_on)+1]
@@ -730,6 +765,28 @@ single_barWidth = barWidth/n_bars
 # plt.title('Agreement between raters and various F-measures\n(all answers)')
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
+
+# ######
+# ## ON-notewise , ONOFF-notewise and framewise
+# idxs = [0,2,13]
+# lab = np.array(labels,dtype=object)[idxs]
+# col = ['tab:green','tab:red','tab:blue']
+# values = np.array(f1_agreement_each,dtype=object)[idxs]
+# stds = np.array(f1_agreement_each_std,dtype=object)[idxs]
+#
+#
+# plt.bar(list(range(len(values))), values, yerr=stds,capsize=2,color=col, edgecolor='black', width=barWidth)
+# frame1 = plt.gca()
+# plt.xticks(list(range(len(values))),lab)
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+# frame1.set_axisbelow(True)
+# plt.box(False)
+# plt.ylim((0.7,0.83))
+# plt.title('Agreement between raters and various F-measures\n(all answers)')
+# plt.tight_layout(rect=[0, 0, 1, 1])
+# plt.show()
+
+
 #
 # ### On-Off Matrix
 #
@@ -1016,22 +1073,22 @@ answers = np.concatenate([answers,F_measures],axis=1)
 
 #### Difficuly vs GoldMSI
 
-goldmsi = []
-classical = []
-avg_difficulty = []
-avg_agreement = []
-known = []
-for user in users:
-    data = answers[answers[:,4]==user[0]]
-    goldmsi += [float(user[5])]
-    classical += [int(user[-1])]
-    avg_difficulty += [np.mean(data[:,7].astype(int))]
-
-    f_choice = 1-(data[:,-2]>data[:,-1]).astype(int)
-    agree = f_choice == data[:,5].astype(int)
-    avg_agreement += [np.mean(agree.astype(int))]
-
-    known += [np.mean((data[:,6]=='True').astype(int))]
+# goldmsi = []
+# classical = []
+# avg_difficulty = []
+# avg_agreement = []
+# known = []
+# for user in users:
+#     data = answers[answers[:,4]==user[0]]
+#     goldmsi += [float(user[5])]
+#     classical += [int(user[-1])]
+#     avg_difficulty += [np.mean(data[:,7].astype(int))]
+#
+#     f_choice = 1-(data[:,-2]>data[:,-1]).astype(int)
+#     agree = f_choice == data[:,5].astype(int)
+#     avg_agreement += [np.mean(agree.astype(int))]
+#
+#     known += [np.mean((data[:,6]=='True').astype(int))]
 
 
 # plt.scatter(goldmsi,avg_difficulty)
@@ -1047,18 +1104,18 @@ for user in users:
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
 
-plt.scatter(goldmsi,known)
-frame1 = plt.gca()
-plt.xticks(range(2,8),range(2,8))
-# plt.yticks(range(6),range(6))
-plt.xlabel('GoldMSI Score')
-plt.ylabel('Proportion of recognised pieces')
-plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
-frame1.set_axisbelow(True)
-plt.box(False)
-plt.title('Proportion of recognised pieces vs. GoldMSI Score')
-plt.tight_layout(rect=[0, 0, 1, 1])
-plt.show()
+# plt.scatter(goldmsi,known)
+# frame1 = plt.gca()
+# plt.xticks(range(2,8),range(2,8))
+# # plt.yticks(range(6),range(6))
+# plt.xlabel('GoldMSI Score')
+# plt.ylabel('Proportion of recognised pieces')
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+# frame1.set_axisbelow(True)
+# plt.box(False)
+# plt.title('Proportion of recognised pieces vs. GoldMSI Score')
+# plt.tight_layout(rect=[0, 0, 1, 1])
+# plt.show()
 
 # plt.scatter(classical,known)
 # frame1 = plt.gca()
