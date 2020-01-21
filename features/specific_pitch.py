@@ -8,6 +8,7 @@ from utils import *
 ##############################################
 
 
+# TESTED
 def specific_pitch_framewise(output,target,fs,n_semitones,down_only=False,delta=0.05):
 
     FPs = np.logical_and(output == 1, target == 0)
@@ -44,6 +45,7 @@ def specific_pitch_framewise(output,target,fs,n_semitones,down_only=False,delta=
 ### Notewise
 ########################################
 
+# TESTED
 def specific_pitch_notewise(notes_output, intervals_output, notes_target, intervals_target, match, n_semitones, down_only=False, ratio=0.8):
     # return two ratios:
     # 1. the proportion of specific pitch mistakes among false positives

@@ -7,6 +7,8 @@ from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_r
 ### Repeated/merged notes
 ########################################
 
+
+# TESTED
 def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
     # Here, any note that is a false positive an overlaps with a ground truth note for more
     # than tol percent of its duration is considered a repeated note
@@ -52,6 +54,8 @@ def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,m
 
                 return n_repeat/tot_err, n_repeat/tot_notes
 
+
+# TESTED
 def merged_notes(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
     # Here, any note that is a false positive an overlaps with a ground truth note for more
     # than tol percent of its duration is considered a repeated note

@@ -4,6 +4,8 @@ from scipy import stats
 
 SMALL_VALUE = 0.0001
 
+
+# TESTED
 def rhythm_histogram(intervals_output, intervals_target):
     # return the logged spectral flatness ratio of the IOIs
     # 1. spectral flatness for IOI of the output transcription
@@ -29,6 +31,8 @@ def rhythm_histogram(intervals_output, intervals_target):
     return log_gmean_output - np.log(mean_output), log_gmean_target - np.log(mean_target)
 
 
+# TESTED: current
+# TODO: add standard diviation for each cluster
 def rhythm_dispersion(intervals_output, intervals_target):
     # return changes in k-means clusters
     # 1. change in standard deviations (k-means doesn't have std definition...)
@@ -46,6 +50,9 @@ def rhythm_dispersion(intervals_output, intervals_target):
         if histogram_target[i] > 0 and histogram_target[i] >= histogram_target[i-1] and histogram_target[i] >= histogram_target[i+1]:
             means.append(np.mean([bins[i], bins[i+1]]))
             
+    if len(means) == 0:
+        return 0.0, 0.0
+
     # k-means on target intervals
     moving = 1
     while moving > 0.0001:

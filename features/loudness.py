@@ -5,6 +5,7 @@ from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_r
 ### Loudness
 ########################################
 
+# TESTED
 def false_negative_loudness(match,vel_target):
 
     if len(match) == 0:
@@ -24,6 +25,7 @@ def false_negative_loudness(match,vel_target):
         return avg_unmatched / float(avg_vel)
 
 
+# TESTED
 def loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match, min_dur=0.05):
     # loudness ratio of false negative
     # ratio = FN velocity / max loudness in ground truth at onset

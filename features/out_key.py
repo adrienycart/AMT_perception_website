@@ -15,6 +15,8 @@ def make_key_mask(target_roll):
 
     return output
 
+
+# TESTED
 def out_key_errors(notes_output,match,mask):
 
     if len(match) == 0:
@@ -39,6 +41,8 @@ def out_key_errors(notes_output,match,mask):
         else:
             return np.mean(all_weights), sum(unmatched_weights)/sum(all_weights)
 
+
+# TESTED
 def out_key_errors_binary_mask(notes_output,match,mask,mask_thresh=0.1):
 
 
