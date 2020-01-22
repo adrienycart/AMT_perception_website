@@ -56,72 +56,72 @@ n_users = users.shape[0]
 # #### 0         1      2     3    4          5          ....   -1
 # #### user;n_answers;gender;age;disability;gold_msi_avg ....   classical
 #
-# male_users = users[users[:,2]=="male",:]
-# female_users = users[users[:,2]=="female",:]
-# other_users = users[users[:,2]=="other",:]
-#
-#
-# ### Genre distrbution
-# n_male = len(male_users)
-# n_female = len(female_users)
-# n_other = len(other_users)
-#
-# print "n_male",n_male,"n_female",n_female,"n_other",n_other
-#
-# values = [n_male,n_female,n_other]
-# plt.pie(values,labels=['Male',"Female","Non-binary"],autopct=lambda p : '{:.2f}%  ({:,.0f})'.format(p,p * sum(values)/100),colors=['tab:blue','tab:red','tab:green'])
-# plt.axis('equal')
-# plt.title('Gender distribution')
-# plt.show()
+male_users = users[users[:,2]=="male",:]
+female_users = users[users[:,2]=="female",:]
+other_users = users[users[:,2]=="other",:]
+
+
+### Genre distrbution
+n_male = len(male_users)
+n_female = len(female_users)
+n_other = len(other_users)
+
+print "n_male",n_male,"n_female",n_female,"n_other",n_other
+
+values = [n_male,n_female,n_other]
+plt.pie(values,labels=['Male',"Female","Non-binary"],autopct=lambda p : '{:.2f}%  ({:,.0f})'.format(p,p * sum(values)/100),colors=['tab:blue','tab:red','tab:green'])
+plt.axis('equal')
+plt.title('Gender distribution')
+plt.show()
 #
 # ### Age distribution
-# age_male = male_users[:,3]
-# age_female = female_users[:,3]
-# age_other = other_users[:,3]
-# sns.kdeplot(age_male,shade=True,color='tab:blue',label='Male')
-# sns.kdeplot(age_female,shade=True,color='tab:red',label="Female")
-# # sns.kdeplot(age_other,shade=True,color='tab:green')
-# plt.legend()
-# plt.title('Age distribution')
-# plt.show()
-#
-# average_age = np.mean(users[:,3].astype(int))
-# median_age = np.median(users[:,3].astype(int))
-# std_age = np.std(users[:,3].astype(int))
-# print "average_age", average_age, "median_age", median_age, "std_age", std_age
-#
+age_male = male_users[:,3]
+age_female = female_users[:,3]
+age_other = other_users[:,3]
+sns.kdeplot(age_male,shade=True,color='tab:blue',label='Male')
+sns.kdeplot(age_female,shade=True,color='tab:red',label="Female")
+# sns.kdeplot(age_other,shade=True,color='tab:green')
+plt.legend()
+plt.title('Age distribution')
+plt.show()
+
+average_age = np.mean(users[:,3].astype(int))
+median_age = np.median(users[:,3].astype(int))
+std_age = np.std(users[:,3].astype(int))
+print "average_age", average_age, "median_age", median_age, "std_age", std_age
+
 #
 #
 # ### GoldMSI distribution
-# goldmsi_male = male_users[:,5]
-# goldmsi_female = female_users[:,5]
-# sns.kdeplot(goldmsi_male,shade=True,color='tab:blue',label='Male')
-# sns.kdeplot(goldmsi_female,shade=True,color='tab:red',label="Female")
-# # sns.kdeplot(age_other,shade=True,color='tab:green')
-# plt.legend()
-# plt.title('GoldMSI score distribution')
-# plt.show()
-#
-# average_goldmsi = np.mean(users[:,5].astype(float))
-# median_goldmsi = np.median(users[:,5].astype(float))
-# std_goldmsi = np.std(users[:,5].astype(float))
-# print "average_goldmsi", average_goldmsi, "median_goldmsi", median_goldmsi, "std_goldmsi", std_goldmsi
-#
+goldmsi_male = male_users[:,5]
+goldmsi_female = female_users[:,5]
+sns.kdeplot(goldmsi_male,shade=True,color='tab:blue',label='Male')
+sns.kdeplot(goldmsi_female,shade=True,color='tab:red',label="Female")
+# sns.kdeplot(age_other,shade=True,color='tab:green')
+plt.legend()
+plt.title('GoldMSI score distribution')
+plt.show()
+
+average_goldmsi = np.mean(users[:,5].astype(float))
+median_goldmsi = np.median(users[:,5].astype(float))
+std_goldmsi = np.std(users[:,5].astype(float))
+print "average_goldmsi", average_goldmsi, "median_goldmsi", median_goldmsi, "std_goldmsi", std_goldmsi
+
 # ### Number of answers distrbution
-# answers_male = male_users[:,1].astype(int)
-# answers_female = female_users[:,1].astype(int)
-# sns.distplot(answers_male,kde=False,color='tab:blue',label='Male')
-# sns.distplot(answers_female,kde=False,color='tab:red',label="Female")
-# # sns.kdeplot(age_other,shade=True,color='tab:green')
-# plt.legend()
-# plt.title('Number of answers distribution')
-# plt.show()
-#
-# average_answers = np.mean(users[:,1].astype(int))
-# median_answers = np.median(users[:,1].astype(int))
-# std_answers = np.std(users[:,1].astype(int))
-# print "average_answers", average_answers, "median_answers", median_answers, "std_answers", std_answers
-#
+answers_male = male_users[:,1].astype(int)
+answers_female = female_users[:,1].astype(int)
+sns.distplot(answers_male,kde=False,color='tab:blue',label='Male')
+sns.distplot(answers_female,kde=False,color='tab:red',label="Female")
+# sns.kdeplot(age_other,shade=True,color='tab:green')
+plt.legend()
+plt.title('Number of answers distribution')
+plt.show()
+
+average_answers = np.mean(users[:,1].astype(int))
+median_answers = np.median(users[:,1].astype(int))
+std_answers = np.std(users[:,1].astype(int))
+print "average_answers", average_answers, "median_answers", median_answers, "std_answers", std_answers
+
 
 
 ### Correlation classical question and average
