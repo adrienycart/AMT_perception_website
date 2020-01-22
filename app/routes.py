@@ -225,52 +225,46 @@ def music_background():
 
 
 @app.route('/consent',methods=['GET','POST'])
-@login_required
+# @login_required
 def consent():
-    if CLOSE_WEBSITE:
-        return redirect(url_for('index'))
-    else:
 
-        consent_points = [
-                    "I agree that the research project named above has been explained to me to my satisfaction",
-                    "I understand that if I decide at any other time during the research that I no longer wish to participate in this project, I can notify the researchers involved and be withdrawn from it immediately",
-                    "I have read both the notes written above and the Information Sheet about the project, and understand what the research study involves",
-                    "I agree to take part in the study, which will include use of my personal data (we will not be capturing sensitive or identifiable personal data)",
-                    ]
+    consent_points = [
+                "I agree that the research project named above has been explained to me to my satisfaction",
+                "I understand that if I decide at any other time during the research that I no longer wish to participate in this project, I can notify the researchers involved and be withdrawn from it immediately",
+                "I have read both the notes written above and the Information Sheet about the project, and understand what the research study involves",
+                "I agree to take part in the study, which will include use of my personal data (we will not be capturing sensitive or identifiable personal data)",
+                ]
 
 
-        form = ConsentForm()
+    form = ConsentForm()
 
-        if len(form.consent.entries) !=4 :
-            #pop all
-            while len(form.consent.entries)!=0:
-                form.consent.pop_entry()
-            #append all
-            for i in range(len(consent_points)):
-                form.consent.append_entry()
-            if current_user.ethics_approved:
-                for entry in form.consent.entries:
-                    entry.data= True
+    if len(form.consent.entries) !=4 :
+        #pop all
+        while len(form.consent.entries)!=0:
+            form.consent.pop_entry()
+        #append all
+        for i in range(len(consent_points)):
+            form.consent.append_entry()
+        if not current_user.is_anonymous and current_user.ethics_approved:
+            for entry in form.consent.entries:
+                entry.data= True
 
-        if form.validate_on_submit():
+    if form.validate_on_submit():
 
-            flash('Thank you for your consent!')
-            current_user.ethics_approved = True
-            db.session.commit()
-            if current_user.gold_msi_completed:
-                return redirect(url_for('instructions'))
-            else:
-                return redirect(url_for('music_background'))
+        flash('Thank you for your consent!')
+        current_user.ethics_approved = True
+        db.session.commit()
+        if current_user.gold_msi_completed:
+            return redirect(url_for('instructions'))
+        else:
+            return redirect(url_for('music_background'))
 
-        return render_template('consent.html',form=form,consent_points=consent_points)
+    return render_template('consent.html',form=form,consent_points=consent_points,CLOSE_WEBSITE=CLOSE_WEBSITE)
 
 @app.route('/information_sheet')
 # @login_required
 def information_sheet():
-    if CLOSE_WEBSITE:
-        return redirect(url_for('index'))
-    else:
-        return render_template('information_sheet.html')
+    return render_template('information_sheet.html',CLOSE_WEBSITE=CLOSE_WEBSITE)
 
 @app.before_request
 def before_request():

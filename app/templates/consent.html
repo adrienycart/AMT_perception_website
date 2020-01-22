@@ -49,7 +49,15 @@
 
 
         </p>
-        <p>{{ wtf.form_field(form.submit, button_map={'submit':'primary'}) }}</p>
 
+        {%if not CLOSE_WEBSITE %}
+          {%if current_user.is_anonymous%}
+          <p> You need to be logged in to accept this form! </p>
+          <a class="btn btn-primary" role="button"  href="{{url_for('login')}}"> Log In </a>
+          <a class="btn btn-primary" role="button"  href="{{url_for('register')}}"> Register </a>
+          {% else %}
+          <p>{{ wtf.form_field(form.submit, button_map={'submit':'primary'}) }}</p>
+          {% endif %}
+        {% endif %}
     </form>
 {% endblock %}

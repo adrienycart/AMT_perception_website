@@ -60,10 +60,13 @@ End Road, London, E1 4NS or data-protection@qmul.ac.uk
 You can find this information sheet once you have registered in your "Profile" section (link in the navigation bar)
 </p>
 
-{% if current_user.is_anonymous %}
-<a class="btn btn-primary" role="button"  href="{{url_for('register')}}"> I'm ready to register </a>
-{% else %}
-<a class="btn btn-primary" role="button"  href="{{url_for('index')}}"> Home </a>
+{% if not CLOSE_WEBSITE %}
+
+  {% if current_user.is_anonymous %}
+  <a class="btn btn-primary" role="button"  href="{{url_for('register')}}"> I'm ready to register </a>
+  {% else %}
+  <a class="btn btn-primary" role="button"  href="{{url_for('index')}}"> Home </a>
+  {% endif %}
 {% endif %}
 
 {% endblock %}
