@@ -137,7 +137,7 @@ class User(UserMixin,db.Model):
             if candidate is None:
                 # print("Picking new example")
                 candidate = candidates.filter(Question.n_answers<MAX_ANSWERS).order_by(func.random()).first()
-        print candidate, candidate.n_answers
+        # print candidate, candidate.n_answers
         return candidate.id
 
 
