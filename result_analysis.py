@@ -175,9 +175,9 @@ print last_answer.user, last_answer.timestamp
 print "#########"
 
 
-# def delete_one_answer(ans):
-#     ans.question.n_answers -= 1
-#     db.session.delete(ans)
+def delete_one_answer(ans):
+    ans.question.n_answers -= 1
+    db.session.delete(ans)
 
 
 # import os
@@ -185,7 +185,10 @@ print "#########"
 # os.remove('app.db')
 # shutil.copy2('app.db_save','app.db')
 
-# corrupt_answers= Answer.query.filter(Answer.time_taken > 100).all()
+corrupt_answers= Answer.query.filter(Answer.time_taken < 10).all()
+#corrupt_answers= User.query.filter(User.username=="yixi").first().answers.all()
+for answer in corrupt_answers:
+    print answer, answer.user
 # corrupt_questions = []
 # corrupt_users = []
 # for answer in corrupt_answers:
@@ -215,8 +218,9 @@ print "#########"
 # #         print ans.user
 # #         print ans.timestamp
 # #     print '====================='
-# for answer in corrupt_answers:
-#     delete_one_answer(answer)
+#for answer in corrupt_answers:
+#    delete_one_answer(answer)
+#db.session.commit()
 #
 # print '############### After'
 # print "Questions:"
