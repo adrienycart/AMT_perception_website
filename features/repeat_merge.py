@@ -7,12 +7,14 @@ from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_r
 ### Repeated/merged notes
 ########################################
 
+
+# TESTED
 def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
     # Here, any note that is a false positive an overlaps with a ground truth note for more
     # than tol percent of its duration is considered a repeated note
 
     if len(match) == 0:
-        return 0.0, 0.0, 0.0
+        return 0.0, 0.0
     else:
         fs = 500
 
@@ -23,7 +25,7 @@ def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,m
 
         if len(unmatched_outputs)==0:
             # No false positives, return zero
-            return 0.0,0.0,[]
+            return 0.0,0.0
         else:
 
             repeated = []
@@ -35,28 +37,31 @@ def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,m
             roll_target = (target_refs!=-1).astype(int)
             roll_output = (output_refs!=-1).astype(int)
 
-            for idx in unmatched_outputs:
-                roll_idx = output_refs==idx
-                overlap = np.sum(roll_target[roll_idx])/float(fs)
-                note_duration = intervals_output[idx][1] -  intervals_output[idx][0]
-                if overlap/note_duration > tol:
-                    repeated += [idx]
+            if len(unmatched_outputs) == 0:
+                return 0.0,0.0
+            else:
+                for idx in unmatched_outputs:
+                    roll_idx = output_refs==idx
+                    overlap = np.sum(roll_target[roll_idx])/float(fs)
+                    note_duration = intervals_output[idx][1] -  intervals_output[idx][0]
+                    if overlap/note_duration > tol:
+                        repeated += [idx]
 
 
-            n_repeat = float(len(repeated))
-            tot_err = len(unmatched_outputs)
-            tot_notes = len(notes_output)
+                n_repeat = float(len(repeated))
+                tot_err = len(unmatched_outputs)
+                tot_notes = len(notes_output)
 
-            print n_repeat, tot_err, tot_notes
+                return n_repeat/tot_err, n_repeat/tot_notes
 
-            return n_repeat/tot_err, n_repeat/tot_notes
 
+# TESTED
 def merged_notes(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
     # Here, any note that is a false positive an overlaps with a ground truth note for more
     # than tol percent of its duration is considered a repeated note
 
     if len(match) == 0:
-        return 0.0, 0.0, 0.0
+        return 0.0, 0.0
     else:
         fs = 500
 
@@ -66,7 +71,7 @@ def merged_notes(notes_output,intervals_output,notes_target,intervals_target,mat
 
         if len(unmatched_targets)==0:
             # No false positives, return zero
-            return 0.0,0.0,[]
+            return 0.0,0.0
         else:
 
             repeated = []
@@ -90,7 +95,6 @@ def merged_notes(notes_output,intervals_output,notes_target,intervals_target,mat
             tot_err = len(unmatched_targets)
             tot_notes = len(notes_output)
 
-            print n_repeat, tot_err, tot_notes
 
             return n_repeat/tot_err, n_repeat/tot_notes
 

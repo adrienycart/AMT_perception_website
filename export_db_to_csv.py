@@ -6,7 +6,7 @@ import numpy as np
 
 
 def get_avg_goldMSI(answers):
-    positive = np.array([1,1,0,1,0,1,1,0,1,0,0,1,1,1,1,1,1])
+    positive = np.array([1,1,0,1,0,1,1,0,1,0,0,1,1,1,1,1])
     avg = np.mean(answers*positive + (7-answers)*(1-positive))
     return avg
 
@@ -20,7 +20,8 @@ def parse_answers(user):
     disability = ans_list[2]=='True'
 
     # DROP LAST ANSWER, IT WAS NOT RECORDED FOR FEMALE PARTICIPANTS
-    gold_msi_answers = np.array(ans_list[3:-1],dtype=int)
+    # Also drop before last answer (not included in the original goldmsi test, we treat it separately)
+    gold_msi_answers = np.array(ans_list[3:-2],dtype=int)
     gold_msi_avg = get_avg_goldMSI(gold_msi_answers)
 
     return [user.id, len(user.answers.all()), gender, age, disability,gold_msi_avg]+ list(gold_msi_answers)

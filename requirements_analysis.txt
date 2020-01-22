@@ -3,3 +3,4 @@ mir_eval
 pydub
 pyloudnorm
 matplotlib
+seaborn

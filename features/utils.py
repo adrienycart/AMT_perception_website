@@ -65,6 +65,6 @@ def Fmeasure(tp,fp,fn):
 def get_loudness(midi_pitch, velocity, time):
     # compute decay_rate according to midipitch and note velocity
     time = min(time, 1)
-    decay_rate = 0.0 + 0.0 * midi_pitch + 0.0 * velocity
+    decay_rate = 0.050532 + 0.021292 * midi_pitch
     loudness = velocity * np.exp(-1.0 * decay_rate * time)
     return loudness

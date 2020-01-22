@@ -20,9 +20,10 @@ def get_lowest(roll):
     # we cannot distinguish the case where there is no note and where the lowest note is roll.shape[0]-1
     lowest = np.argmax(roll,axis=0)
     # We must make the distinction between no note, and lowest note is 0
-    lowest[logical_and(lowest==0,roll[0,:]==0)] = roll.shape[0]
+    lowest[np.logical_and(lowest==0,roll[0,:]==0)] = roll.shape[0]
     return lowest
 
+# TESTED
 def framewise_highest(output, target):
 
     highest = get_highest(target)
@@ -44,6 +45,7 @@ def framewise_highest(output, target):
     return precision(tp,fp),recall(tp, fn), Fmeasure(tp,fp,fn)
 
 
+# TESTED
 def framewise_lowest(output, target):
 
     lowest = get_lowest(target)
@@ -70,6 +72,7 @@ def framewise_lowest(output, target):
 ########################################
 
 
+# TESTED
 def notewise_highest(notes_output,intervals_output,notes_target,intervals_target,match,min_dur=0.05):
     #min_dur represents the minimum duration a note has to be the highest to be considered
     #in the skyline
@@ -140,6 +143,7 @@ def notewise_highest(notes_output,intervals_output,notes_target,intervals_target
         return precision(tp,fp),recall(tp, fn), Fmeasure(tp,fp,fn)
 
 
+# TESTED
 def notewise_lowest(notes_output,intervals_output,notes_target,intervals_target,match,min_dur=0.05):
 
     if len(match) == 0:
@@ -158,8 +162,8 @@ def notewise_lowest(notes_output,intervals_output,notes_target,intervals_target,
         roll_output = (output_refs!=-1).astype(int)
 
         lowest = get_lowest(roll_target)
-        lowest_nonzero = lowest[lowest!=-1]
-        frames_nonzero = np.arange(len(lowest))[lowest!=-1]
+        lowest_nonzero = lowest[lowest!=roll_target.shape[0]]
+        frames_nonzero = np.arange(len(lowest))[lowest!=roll_target.shape[0]]
 
         lowest_notes_idx, count = np.unique(target_refs[lowest_nonzero,frames_nonzero],return_counts=True)
         lowest_notes_idx = lowest_notes_idx[count/float(fs) > min_dur]
@@ -208,3 +212,20 @@ def notewise_lowest(notes_output,intervals_output,notes_target,intervals_target,
         # plt.show()
 
         return precision(tp,fp),recall(tp, fn), Fmeasure(tp,fp,fn)
+
+
+# TESTED
+def correct_highest_lowest_note_framewise(output, target):
+    # return two parameters, the proportion of correct highest notes and lowest notes framewise
+    highest_output = get_highest(output)
+    highest_target = get_highest(target)
+    correct_highest_seq = [int(highest_output[idx] == highest_target[idx]) for idx in range(len(highest_output))]
+    lowest_output = get_lowest(output)
+    lowest_target = get_lowest(target)
+    correct_lowest_seq = [int(lowest_output[idx] == lowest_target[idx]) for idx in range(len(lowest_output))]
+
+    correct_highest_count = correct_highest_seq.count(1)
+    correct_lowest_count = correct_lowest_seq.count(1)
+
+    return float(correct_highest_count) / len(correct_highest_seq), float(correct_lowest_count) / len(correct_lowest_seq)
+
