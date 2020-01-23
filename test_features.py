@@ -154,11 +154,11 @@ for example in os.listdir(MIDI_path)[:]:
 			# print('\n test repeat_merge ===========================================')
 			# test_repeat_merge(notes_system, intervals_system, notes_target, intervals_target, match_on)
 
-			# print('\n test rhythm =====================================================')
+			print('\n test rhythm =====================================================')
 			# f1, f2 = rhythm_histogram(intervals_system, intervals_target)
 			# print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
-			# mean_drift, max_drift = rhythm_dispersion(intervals_system, intervals_target)
-			# print("cluster centre drift: " + str(mean_drift) + "(mean)  " + str(max_drift) + "(max)")
+			stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
+			print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
 
 			# print('\n test specific_pitch ===========================================')
 			# print('>>framewise>>')

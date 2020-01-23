@@ -4,3 +4,4 @@ pydub
 pyloudnorm
 matplotlib
 seaborn
+statistics

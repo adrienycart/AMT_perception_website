@@ -1,8 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
+from statistics import stdev
 
 SMALL_VALUE = 0.0001
+
+
+def calculate_stds(data, means):
+	# calculate stds for k-means result
+	data_groups = [[] for i in range(len(means))]
+	for ioi in data:
+		data_groups[np.argmin(abs(np.array(means) - ioi))].append(ioi)
+	stds = []
+	for group in data_groups:
+		if len(group) <= 1:
+			stds.append(0.0)
+		else:
+			stds.append(stdev(group))
+	return stds
 
 
 # TESTED
@@ -31,12 +46,11 @@ def rhythm_histogram(intervals_output, intervals_target):
     return log_gmean_output - np.log(mean_output), log_gmean_target - np.log(mean_target)
 
 
-# TESTED: current
-# TODO: add standard diviation for each cluster
+# TESTED
 def rhythm_dispersion(intervals_output, intervals_target):
     # return changes in k-means clusters
-    # 1. change in standard deviations (k-means doesn't have std definition...)
-    # 2. center drift (average drift and max drift)
+    # 1. change in standard deviations
+    # 2. center drift
 
     ioi_output = [float(intervals_output[idx][1] - intervals_output[idx][0]) for idx in range(len(intervals_output))]
     ioi_target = [float(intervals_target[idx][1] - intervals_target[idx][0]) for idx in range(len(intervals_target))]
@@ -72,6 +86,9 @@ def rhythm_dispersion(intervals_output, intervals_target):
         means = new_means
         # print(means)
 
+    # calculate target std
+    stds_target = calculate_stds(ioi_target, means)
+
     # print('--')
     # k-means on output intervals
     means_output = [means[i] for i in range(len(means))] # copy target means
@@ -93,7 +110,12 @@ def rhythm_dispersion(intervals_output, intervals_target):
         means_output = new_means_output
         # print(means_output)
 
+    # calculate stds for output
+    stds_output = calculate_stds(ioi_output, means_output)
+    # calcuate std chage
+    stds_change = list(np.array(stds_output) - np.array(stds_target))
+
     # cluster centre drift
     drifts = [abs(means[idx] - means_output[idx]) for idx in range(len(means))]
 
-    return np.mean(drifts), max(drifts)
+    return stds_change, drifts
