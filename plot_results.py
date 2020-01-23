@@ -2,6 +2,7 @@ import os
 import cPickle as pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rc
 import seaborn as sns
 import codecs
 import sklearn
@@ -10,6 +11,8 @@ import tqdm
 import warnings
 warnings.filterwarnings("error")
 
+plt.rcParams.update({'font.size': 13.5,'font.family' : 'serif'})
+rc('text', usetex=True)
 
 def bootstrap(function,data,n_repeat=100,**kwargs):
     all_results = []
@@ -56,71 +59,71 @@ n_users = users.shape[0]
 # #### 0         1      2     3    4          5          ....   -1
 # #### user;n_answers;gender;age;disability;gold_msi_avg ....   classical
 #
-male_users = users[users[:,2]=="male",:]
-female_users = users[users[:,2]=="female",:]
-other_users = users[users[:,2]=="other",:]
-
-
-### Genre distrbution
-n_male = len(male_users)
-n_female = len(female_users)
-n_other = len(other_users)
-
-print "n_male",n_male,"n_female",n_female,"n_other",n_other
-
-values = [n_male,n_female,n_other]
-plt.pie(values,labels=['Male',"Female","Non-binary"],autopct=lambda p : '{:.2f}%  ({:,.0f})'.format(p,p * sum(values)/100),colors=['tab:blue','tab:red','tab:green'])
-plt.axis('equal')
-plt.title('Gender distribution')
-plt.show()
-#
-# ### Age distribution
-age_male = male_users[:,3]
-age_female = female_users[:,3]
-age_other = other_users[:,3]
-sns.kdeplot(age_male,shade=True,color='tab:blue',label='Male')
-sns.kdeplot(age_female,shade=True,color='tab:red',label="Female")
-# sns.kdeplot(age_other,shade=True,color='tab:green')
-plt.legend()
-plt.title('Age distribution')
-plt.show()
-
-average_age = np.mean(users[:,3].astype(int))
-median_age = np.median(users[:,3].astype(int))
-std_age = np.std(users[:,3].astype(int))
-print "average_age", average_age, "median_age", median_age, "std_age", std_age
-
+# male_users = users[users[:,2]=="male",:]
+# female_users = users[users[:,2]=="female",:]
+# other_users = users[users[:,2]=="other",:]
 #
 #
-# ### GoldMSI distribution
-goldmsi_male = male_users[:,5]
-goldmsi_female = female_users[:,5]
-sns.kdeplot(goldmsi_male,shade=True,color='tab:blue',label='Male')
-sns.kdeplot(goldmsi_female,shade=True,color='tab:red',label="Female")
-# sns.kdeplot(age_other,shade=True,color='tab:green')
-plt.legend()
-plt.title('GoldMSI score distribution')
-plt.show()
-
-average_goldmsi = np.mean(users[:,5].astype(float))
-median_goldmsi = np.median(users[:,5].astype(float))
-std_goldmsi = np.std(users[:,5].astype(float))
-print "average_goldmsi", average_goldmsi, "median_goldmsi", median_goldmsi, "std_goldmsi", std_goldmsi
-
-# ### Number of answers distrbution
-answers_male = male_users[:,1].astype(int)
-answers_female = female_users[:,1].astype(int)
-sns.distplot(answers_male,kde=False,color='tab:blue',label='Male')
-sns.distplot(answers_female,kde=False,color='tab:red',label="Female")
-# sns.kdeplot(age_other,shade=True,color='tab:green')
-plt.legend()
-plt.title('Number of answers distribution')
-plt.show()
-
-average_answers = np.mean(users[:,1].astype(int))
-median_answers = np.median(users[:,1].astype(int))
-std_answers = np.std(users[:,1].astype(int))
-print "average_answers", average_answers, "median_answers", median_answers, "std_answers", std_answers
+# ### Genre distrbution
+# n_male = len(male_users)
+# n_female = len(female_users)
+# n_other = len(other_users)
+#
+# print "total", n_users , "n_male",n_male,"n_female",n_female,"n_other",n_other
+#
+# values = [n_male,n_female,n_other]
+# plt.pie(values,labels=['Male',"Female","Non-binary"],autopct=lambda p : '{:.2f}%  ({:,.0f})'.format(p,p * sum(values)/100),colors=['tab:blue','tab:red','tab:green'])
+# plt.axis('equal')
+# plt.title('Gender distribution')
+# plt.show()
+# #
+# # ### Age distribution
+# age_male = male_users[:,3]
+# age_female = female_users[:,3]
+# age_other = other_users[:,3]
+# sns.kdeplot(age_male,shade=True,color='tab:blue',label='Male')
+# sns.kdeplot(age_female,shade=True,color='tab:red',label="Female")
+# # sns.kdeplot(age_other,shade=True,color='tab:green')
+# plt.legend()
+# plt.title('Age distribution')
+# plt.show()
+#
+# average_age = np.mean(users[:,3].astype(int))
+# median_age = np.median(users[:,3].astype(int))
+# std_age = np.std(users[:,3].astype(int))
+# print "average_age", average_age, "median_age", median_age, "std_age", std_age
+#
+# #
+# #
+# # ### GoldMSI distribution
+# goldmsi_male = male_users[:,5]
+# goldmsi_female = female_users[:,5]
+# sns.kdeplot(goldmsi_male,shade=True,color='tab:blue',label='Male')
+# sns.kdeplot(goldmsi_female,shade=True,color='tab:red',label="Female")
+# # sns.kdeplot(age_other,shade=True,color='tab:green')
+# plt.legend()
+# plt.title('GoldMSI score distribution')
+# plt.show()
+#
+# average_goldmsi = np.mean(users[:,5].astype(float))
+# median_goldmsi = np.median(users[:,5].astype(float))
+# std_goldmsi = np.std(users[:,5].astype(float))
+# print "average_goldmsi", average_goldmsi, "median_goldmsi", median_goldmsi, "std_goldmsi", std_goldmsi
+#
+# # ### Number of answers distrbution
+# answers_male = male_users[:,1].astype(int)
+# answers_female = female_users[:,1].astype(int)
+# sns.distplot(answers_male,kde=False,color='tab:blue',label='Male')
+# sns.distplot(answers_female,kde=False,color='tab:red',label="Female")
+# # sns.kdeplot(age_other,shade=True,color='tab:green')
+# plt.legend()
+# plt.title('Number of answers distribution')
+# plt.show()
+#
+# average_answers = np.mean(users[:,1].astype(int))
+# median_answers = np.median(users[:,1].astype(int))
+# std_answers = np.std(users[:,1].astype(int))
+# print "average_answers", average_answers, "median_answers", median_answers, "std_answers", std_answers
 
 
 
@@ -182,6 +185,8 @@ results_dict = {}
 feature_dir = 'precomputed_features'
 
 systems = ['cheng','google',"kelz","lisu"]
+system_names = {'cheng': 'NMF', 'google':'SoA', "kelz":'CNN',"lisu":'HF'}
+system_colors = {'cheng': 'tab:green', 'google':'tab:red', "kelz":'tab:blue',"lisu":'tab:orange'}
 pairs = []
 for i in range(len(systems)):
     for j in range(i+1,len(systems)):
@@ -213,8 +218,9 @@ for pair in pairs:
 
     pairs_f1 += [["{0:.1f}".format(100*np.mean(f1_syst1)),"{0:.1f}".format(100*np.mean(f1_syst2))]]
 
-labels = [" - ".join(pair) for pair in pairs]
+labels = [system_names[pair[0]]+" - "+system_names[pair[1]] for pair in pairs]
 labels_f1 = [" - ".join(pair) for pair in pairs_f1]
+
 
 ### Pairwise comparisons
 
@@ -297,7 +303,7 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 #
 # plt.show()
 
-#### Plot choices with error bars
+### Plot choices with error bars
 # dict_stats_bootstrap = {}
 # for pair in pairs:
 #     data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
@@ -315,21 +321,30 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 # choices = np.array(choices)
 # stds = np.array(stds)
 #
-# plt.barh(r, 1-choices[:,0], xerr=stds,capsize=2, color='tab:blue', edgecolor='black', height=barWidth)
-# plt.barh(r, 1-choices[:,1], left=1-choices[:,0], color='tab:red', edgecolor='black', height=barWidth)
 # for i in range(len(pairs)):
-#     plt.text(-0.05,i+0.15,pairs[i][0],ha='right', va='center')
-#     plt.text(-0.05,i-0.15,'F1: '+pairs_f1[i][0],ha='right', va='center',fontsize=9)
-#     plt.text(1.05,i+0.15,pairs[i][1],ha='left', va='center')
-#     plt.text(1.05,i-0.15,'F1: '+pairs_f1[i][1],ha='left', va='center',fontsize=9)
+#     print pairs[i], 1-choices[i,0]
+#     plt.barh(i, 1-choices[i,0], xerr=stds[i],capsize=2, color='tab:blue', edgecolor='black', height=barWidth)
+#     plt.barh(i, 1-choices[i,1], left=1-choices[i,0], color='tab:red', edgecolor='black', height=barWidth)
+#
+# ### With F-measures
+# # for i in range(len(pairs)):
+# #     plt.text(-0.05,i+0.15,pairs[i][0],ha='right', va='center')
+# #     plt.text(-0.05,i-0.15,'F1: '+pairs_f1[i][0],ha='right', va='center',fontsize=9)
+# #     plt.text(1.05,i+0.15,pairs[i][1],ha='left', va='center')
+# #     plt.text(1.05,i-0.15,'F1: '+pairs_f1[i][1],ha='left', va='center',fontsize=9)
+# ### Without F-measures:
+# for i in range(len(pairs)):
+#     plt.text(-0.03,i,system_names[pairs[i][0]],ha='right', va='center')
+#     plt.text(1.03,i,system_names[pairs[i][1]],ha='left', va='center')
+#
 # frame1 = plt.gca()
 # frame1.axes.yaxis.set_visible(False)
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='x')
 # frame1.set_axisbelow(True)
 # plt.box(False)
 #
-# plt.title('Proportion of choices among all answers')
-#
+# # plt.title('Proportion of choices among all answers')
+# plt.tight_layout(rect=[0.1,0,0.9,1])
 # plt.show()
 
 #
@@ -478,7 +493,7 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 # f1_agreement_each = np.array(f1_agreement_each)
 # f1_agreement_majority = np.array(f1_agreement_majority)
 #
-labels = [" - ".join(pair) for pair in pairs]
+
 
 
 #### Plot choices with F-measure
@@ -605,7 +620,7 @@ def agreement_f_measure_answers(data,measures=all_measures,with_majority=True,av
     return output
 
 ################
-# with_error_bars=True
+with_error_bars=True
 #
 # ### ONLY FOR VERY CONFIDENT ANSWERS:
 # answers=answers[answers[:,7].astype(int)<3]
@@ -681,17 +696,17 @@ def agreement_f_measure_answers(data,measures=all_measures,with_majority=True,av
 # if with_error_bars:
 #     f1_agreement_each_std = f1_agreement_each_std[:,[0,2,13]]
 # # f1_agreement_majority = f1_agreement_majority[:,:5]
-# bar_labels = ['Frame','On\n(50ms)','OnOff\n(50ms,20%)']
+# bar_labels = [r'$F_f$',r'$F_{n,On}$',r'$F_{n,OnOff}$']
 # n_bars = f1_agreement_each.shape[1]
 # colors = ['tab:green','tab:red','tab:blue']
 #
 #
 #
 # single_barWidth = barWidth/n_bars
-
-
-# # ### Plot for all answers
-
+#
+#
+# # # ### Plot for all answers
+#
 # if with_error_bars:
 #     for i in range(n_bars):
 #         plt.barh(r-single_barWidth/2+(i-1)*single_barWidth, f1_agreement_each[:,i],
@@ -710,11 +725,11 @@ def agreement_f_measure_answers(data,measures=all_measures,with_majority=True,av
 # frame1.set_axisbelow(True)
 # plt.box(False)
 # plt.xlim((0,1.1))
-# plt.title('Agreement between raters and F-measure,\n with various onset thresholds (all answers)')
+# # plt.title('Agreement between raters and F-measure,\n with various onset thresholds (all answers)')
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.legend()
 # plt.show()
-#
+
 # ### Plot for majority voting only
 #
 # for i in range(n_bars):
@@ -738,15 +753,15 @@ def agreement_f_measure_answers(data,measures=all_measures,with_majority=True,av
 # ### ONLY FOR VERY CONFIDENT ANSWERS:
 # answers=answers[answers[:,7].astype(int)<3]
 #
-# f1_agreement_each,f1_agreement_each_std = bootstrap(agreement_f_measure_answers,answers,n_repeat=10,with_majority=False,average=True)
+# f1_agreement_each,f1_agreement_each_std = bootstrap(agreement_f_measure_answers,answers,n_repeat=100,with_majority=False,average=True)
 # f1_agreement_each = f1_agreement_each[0]
 # f1_agreement_each_std = f1_agreement_each_std[0]
 #
-# labels_on = ['On\n'+str(on_tol)+'ms' for on_tol in onset_tolerances]
+# labels_on = [r'$F_{n,On}$'+'\n'+str(on_tol)+'ms' for on_tol in onset_tolerances]
 # labels_on_off = ['OnOff\n'+str(on_tol)+'ms\n'+str(off_tol*100)+'%' for on_tol in onset_tolerances for off_tol in offset_tolerances]
-# labels = ["Frame"]+labels_on+labels_on_off
-
-colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(len(labels_on))*np.array([0,1,1]) for i in range(len(labels_on))]+[np.array([1.0,1,1])-(i+1)/float(len(labels_on_off))*np.array([1,1,0]) for i in range(len(labels_on_off))]
+# labels = [r'$F_f$']+labels_on+labels_on_off
+#
+# colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(len(labels_on))*np.array([0,1,1]) for i in range(len(labels_on))]+[np.array([1.0,1,1])-(i+1)/float(len(labels_on_off))*np.array([1,1,0]) for i in range(len(labels_on_off))]
 
 
 ### Only On-notewise metrics:
@@ -761,13 +776,13 @@ colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(len(labels_on))*np.array
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
 # frame1.set_axisbelow(True)
 # plt.box(False)
-# plt.ylim((0.7,0.83))
+# plt.ylim((0.7,0.84))
 # plt.title('Agreement between raters and various F-measures\n(all answers)')
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
 
-# ######
-# ## ON-notewise , ONOFF-notewise and framewise
+######
+## ON-notewise , ONOFF-notewise and framewise
 # idxs = [0,2,13]
 # lab = np.array(labels,dtype=object)[idxs]
 # col = ['tab:green','tab:red','tab:blue']
@@ -802,12 +817,11 @@ colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(len(labels_on))*np.array
 # plt.imshow(matrix,cmap='inferno',aspect='auto')
 # plt.xticks(range(len(offset_tolerances)),offset_tolerances)
 # plt.yticks(range(len(onset_tolerances)),onset_tolerances)
-# plt.ylabel("Onset tolerance (in milliseconds)")
-# plt.xlabel("Offset tolerance (in proportion of note duration)")
-# plt.title("Agreement between raters and On-Off F-measure\nfor various onset and offset tolerance thresholds")
+# plt.ylabel("Onset tolerance (in milliseconds)", fontsize=15)
+# plt.xlabel("Offset tolerance (in proportion of note duration)", fontsize=15)
+# # plt.title("Agreement between raters and On-Off F-measure\nfor various onset and offset tolerance thresholds")
 # cbar_ticks = [np.min(matrix),(np.min(matrix)+np.max(matrix))/2,np.max(matrix)]
 # cbar_ticks_labels = np.round([np.min(matrix),(np.min(matrix)+np.max(matrix))/2,np.max(matrix)],3)
-# print cbar_ticks
 # cbar = plt.colorbar()
 # cbar.set_ticks(cbar_ticks)
 # cbar.set_ticklabels(cbar_ticks_labels)
@@ -945,37 +959,60 @@ answers = np.concatenate([answers,F_measures],axis=1)
 
 #### Agreement with F-measure vs best F-measure of the pair
 
-# n_bins = 10
-#
-# def f_measure_agreement_by_f_measure(data):
-#     f_choices = 1-(data[:,-2]>data[:,-1]).astype(int)
-#     agree = (f_choices==data[:,5].astype(int)).astype(int)
-#
-#     ## Chosen F-measure
-#     # all_fs = data[:,-2:]
-#     # fs = all_fs[range(len(f_choices)),f_choices]
-#
-#     ## Best F-measure
-#     fs = np.maximum(data[:,-1],data[:,-2])
-#
-#     # print [(agree[difficulties[5]==str(i)]).shape for i in range(1,6)]
-#
-#     return [np.mean(agree[np.logical_and(fs>i/float(n_bins),fs<(i+1)/float(n_bins))]) for i in range(0,n_bins)]
-#
-#
-# data,std = bootstrap(f_measure_agreement_by_f_measure,answers)
-#
-# plt.bar(np.arange(n_bins)+0.5,data,yerr=std,capsize=2,width=1,edgecolor='black')
-# frame1 = plt.gca()
-# plt.xticks(range(n_bins+1),[i/float(n_bins) for i in range(n_bins+1)])
-# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
-# frame1.set_axisbelow(True)
-# plt.box(False)
-# plt.ylim((0,1.05))
+# ### ONLY FOR VERY CONFIDENT ANSWERS:
+# answers=answers[answers[:,7].astype(int)<3]
+n_bins = 10
+
+def f_measure_agreement_by_f_measure(data,to_compare):
+    f_choices = 1-(data[:,-2]>data[:,-1]).astype(int)
+    agree = (f_choices==data[:,5].astype(int)).astype(int)
+
+    if to_compare == 'chosen':
+        all_fs = data[:,-2:]
+        fs = all_fs[range(len(f_choices)),f_choices]
+
+    if to_compare == 'best':
+        fs = np.maximum(data[:,-1],data[:,-2])
+
+    if to_compare == 'diff':
+        fs = np.abs(data[:,-1]-data[:,-2])
+
+    # print [(agree[difficulties[5]==str(i)]).shape for i in range(1,6)]
+
+    return [np.mean(agree[np.logical_and(fs>i/float(n_bins),fs<(i+1)/float(n_bins))]) if np.any(np.logical_and(fs>i/float(n_bins),fs<(i+1)/float(n_bins))) else 0 for i in range(0,n_bins)]
+
+
+######## Agreement vs diff
+
+data,std = bootstrap(f_measure_agreement_by_f_measure,answers,to_compare='chosen')
+plt.bar(np.arange(n_bins)+0.5,data,yerr=std,capsize=2,edgecolor="black",width=1)
+frame1 = plt.gca()
+plt.xticks(range(n_bins+1),[i/float(n_bins) for i in range(n_bins+1)])
+plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+frame1.set_axisbelow(True)
+plt.box(False)
+plt.ylim((0,1.05))
 # plt.title('Agreement between raters and F-measure\ndepending on the F-measure of the chosen solution ')
-# plt.xlabel('F-measure of the chosen solution')
+plt.ylabel(r'Agreement between ratings and $F_{n,on}$')
+plt.xlabel(r'$F_{n,on}$ of chosen option')
 # plt.tight_layout(rect=[0, 0, 1, 1])
-# plt.show()
+plt.show()
+
+######## Agreement vs diff
+
+data,std = bootstrap(f_measure_agreement_by_f_measure,answers,to_compare='diff')
+plt.bar(np.arange(n_bins-1)+0.5,data[:-1],yerr=std[:-1],capsize=2,edgecolor="black",width=1)
+frame1 = plt.gca()
+plt.xticks(range(n_bins),[i/float(n_bins) for i in range(n_bins)])
+plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+frame1.set_axisbelow(True)
+plt.box(False)
+plt.ylim((0.5,1.05))
+# plt.title('Agreement between raters and F-measure\ndepending on the F-measure of the chosen solution ')
+plt.ylabel(r'Agreement between ratings and $F_{n,on}$')
+plt.xlabel(r'Absolute difference in $F_{n,on}$')
+# plt.tight_layout(rect=[0, 0, 1, 1])
+plt.show()
 
 #### Known vs Unknown pieces
 
