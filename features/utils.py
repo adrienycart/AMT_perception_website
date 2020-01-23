@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def even_up_rolls(roll1,roll2,pad_value=0):
@@ -68,3 +69,10 @@ def get_loudness(midi_pitch, velocity, time):
     decay_rate = 0.050532 + 0.021292 * midi_pitch
     loudness = velocity * np.exp(-1.0 * decay_rate * time)
     return loudness
+
+
+def plot_piano_roll(pr):
+    fig = plt.figure()
+    fig = plt.imshow(pr)
+    plt.show()
+    return

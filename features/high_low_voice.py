@@ -1,5 +1,5 @@
 import numpy as np
-from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls
+from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls, plot_piano_roll
 
 
 
@@ -28,14 +28,15 @@ def framewise_highest(output, target):
 
     highest = get_highest(target)
 
+    # plot_piano_roll(target)
+    # print(highest)
+
     highest_nonzero = highest[highest!=-1]
     frames_nonzero = np.arange(len(highest))[highest!=-1]
 
     tp = np.sum(output[highest_nonzero,frames_nonzero])
 
     fn = np.sum(output[highest_nonzero,frames_nonzero]==0)
-
-
 
     i,j = np.indices(target.shape)
     mask = [i>highest]
