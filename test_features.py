@@ -15,70 +15,18 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def test_high_low_voice_notewise(notes_output, intervals_output, notes_target, intervals_target, match):
-    highest_p, highest_r, highest_f = notewise_highest(notes_output, intervals_output, notes_target, intervals_target, match)
-    lowest_p, lowest_r, lowest_f = notewise_lowest(notes_output, intervals_output, notes_target, intervals_target, match)
-    print('highest evaluation: ' + str(highest_p) + ', ' + str(highest_r) + ', ' + str(highest_f))
-    print('lowest evaluation: ' + str(lowest_p) + ', ' + str(lowest_r) + ', ' + str(lowest_f))
-    return highest_p, highest_r, highest_f, lowest_p, lowest_r, lowest_f
-
-
-def test_loudness(match, vel_target):
-    value = false_negative_loudness(match, vel_target)
-    print('loudness value: ' + str(value))
-    return value
-
-
-def test_out_key_non_binary(notes_output, match, mask):
-    ratio_1, ratio_2 = out_key_errors(notes_output, match, mask)
-    print('ratios: ' + str(ratio_1) + ', ' + str(ratio_2))
-    return ratio_1, ratio_2
-
-
-def test_out_key_binary(notes_output, match, mask):
-    ratio_1, ratio_2 = out_key_errors_binary_mask(notes_output, match, mask)
-    print('ratios: ' + str(ratio_1) + ', ' + str(ratio_2))
-    return ratio_1, ratio_2
-
-
-def test_polyphony(roll_target, intervals_target, match):
-    level = polyphony_level_seq(roll_target)
-    level_FN = false_negative_polyphony_level(roll_target, intervals_target, match)
-    # print('polyphony level: ' + str(level))
-    print('polyphony level FN: ' + str(level_FN))
-    return level
-
-
-def test_repeat_merge(notes_output, intervals_output, notes_target, intervals_target, match):
-    repeat_ratio = repeated_notes(notes_output, intervals_output, notes_target, intervals_target, match)
-    merge_ratio = merged_notes(notes_output, intervals_output, notes_target, intervals_target, match)
-    print('repeated notes ratios: ' + str(repeat_ratio[0]) + ', ' + str(repeat_ratio[1]))
-    print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
-    return repeat_ratio, merge_ratio
-
-
-def test_specific_pitch(output, target, fs):
-    semitone = specific_pitch_framewise(output, target, fs, 1)
-    octave = specific_pitch_framewise(output, target, fs, 12)
-    third_harmonic = specific_pitch_framewise(output, target, fs, 19)
-    print('semitone error: ' + str(semitone))
-    print('octave error: ' + str(octave))
-    print('third_harmonic: ' + str(third_harmonic))
-    return semitone, octave, third_harmonic
-
-
 MIDI_path = 'app/static/data/all_midi_cut'
 systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[:2]:
+for example in os.listdir(MIDI_path)[:4]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
     target_data = pm.PrettyMIDI(os.path.join(example_path, 'target.mid'))
 
     for system in systems:
-        # if system == 'google':
+        # if system == 'cheng':
             print('\n' + system)
             system_data = pm.PrettyMIDI(os.path.join(example_path, system + '.mid'))
 
@@ -105,53 +53,72 @@ for example in os.listdir(MIDI_path)[:2]:
 
             # test features...
 
-            print('test high_low_voice =================================================')
+            # print('test high_low_voice =================================================')
 
-            # high low voice framewise
-            highest_p, highest_r, highest_f = framewise_highest(system_pr, target_pr)
-            print('highest evaluation: ' + str(highest_p) + ', ' + str(highest_r) + ', ' + str(highest_f))
+            # # high low voice framewise
+            # highest_p, highest_r, highest_f = framewise_highest(system_pr, target_pr)
+            # print('highest evaluation: ' + str(highest_p) + ', ' + str(highest_r) + ', ' + str(highest_f))
             # lowest_p, lowest_r, lowest_f = framewise_lowest(system_pr, target_pr)
             # print('lowest evaluation: ' + str(lowest_p) + ', ' + str(lowest_r) + ', ' + str(lowest_f))
 
-            # # high low voice notewise, onset only
-            # test_high_low_voice_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on) 
-            # # high low voice notewise, onset and offset
-            # test_high_low_voice_notewise(notes_system, intervals_system, notes_target, intervals_target, match_onoff) 
+            # # high low voice notewise
+            # highest_p, highest_r, highest_f = notewise_highest(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            # print('highest evaluation: ' + str(highest_p) + ', ' + str(highest_r) + ', ' + str(highest_f))
+            # lowest_p, lowest_r, lowest_f = notewise_lowest(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            # print('lowest evaluation: ' + str(lowest_p) + ', ' + str(lowest_r) + ', ' + str(lowest_f))
+
             # # correct highest and lowset note framewise
             # print(correct_highest_lowest_note_framewise(system_pr, target_pr))
 
-            # print('\n test loudness =============================================')
-            # print('\n>>>> test loudness, onset only')
-            # test_loudness(match_on, vel_target)
+            # print('\n test loudness ========================================================')
+
+            # value = false_negative_loudness(match_on, vel_target)
+            # print('loudness value: ' + str(value))
 
             # ratio = loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match_on)
             # print('loudness ratio: ' + str(ratio))
 
-            # print('\n test out_key ===============================================')
+            # print('\n test out_key =======================================================')
             # mask = make_key_mask(target_pr)
 
             # print('\n>>>> non-binary pitch profile, onset only')
-            # test_out_key_non_binary(notes_system, match_on, mask)
+            # ratio_1, ratio_2 = out_key_errors(notes_system, match_on, mask)
+            # print('ratios: ' + str(ratio_1) + ', ' + str(ratio_2))
 
             # print('\n>>>> binary pitch profile, onset only')
-            # test_out_key_binary(notes_system, match_on, mask)
+            # ratio_1, ratio_2 = out_key_errors_binary_mask(notes_system, match_on, mask)
+            # print('ratios: ' + str(ratio_1) + ', ' + str(ratio_2))
 
             # print('\n test polyphony ==============================================')
-            # test_polyphony(target_pr, intervals_target, match_on)
+            # level_FN = false_negative_polyphony_level(target_pr, intervals_target, match_on)
+            # print('polyphony level FN: ' + str(level_FN))
+            # level = polyphony_level_seq(target_pr)
+            # print('polyphony level: ' + str(level))
 
             # print('\n test repeat_merge ===========================================')
-            # test_repeat_merge(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            # repeat_ratio = repeated_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            # print('repeated notes ratios: ' + str(repeat_ratio[0]) + ', ' + str(repeat_ratio[1]))
+            # merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            # print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
 
-            # print('\n test rhythm =====================================================')
+            print('\n test rhythm =====================================================')
             # f1, f2 = rhythm_histogram(intervals_system, intervals_target)
             # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
-            # stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
-            # print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
+            # print("rhythm flatness difference: " + str(f1-f2))
+            stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
+            print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
 
-            # print('\n test specific_pitch ===========================================')
-            # print('>>framewise>>')
-            # test_specific_pitch(system_pr, target_pr, fs)
-            # print('>>notewise>>')
+            # print('\n test specific_pitch ==================================================')
+
+            # print('\n>>framewise>>')
+            # semitone = specific_pitch_framewise(system_pr, target_pr, fs, 1)
+            # print('semitone error: ' + str(semitone))
+            # octave = specific_pitch_framewise(system_pr, target_pr, fs, 12)
+            # print('octave error: ' + str(octave))
+            # third_harmonic = specific_pitch_framewise(system_pr, target_pr, fs, 19)
+            # print('third_harmonic: ' + str(third_harmonic))
+
+            # print('\n>>notewise>>')
             # r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=1)
             # print('semitone error: ' + str(r1) + "   " + str(r2))
             # r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=8)

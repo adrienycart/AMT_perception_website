@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from utils import *
 
 
@@ -18,6 +17,15 @@ def specific_pitch_framewise(output,target,fs,n_semitones,down_only=False,delta=
 
     match_down = FPs*target_shift_up # correspond to when an output is matched with a target n_semitones below
     match_up = FPs*target_shift_down # correspond to when an output is matched with a target n_semitones above
+
+    # import matplotlib.pyplot as plt
+    # plt.subplot(311)
+    # plt.imshow(output)
+    # plt.subplot(312)
+    # plt.imshow(match_down)
+    # plt.subplot(313)
+    # plt.imshow(match_up)
+    # plt.show()
 
     delta_steps = int(round(delta*fs))
     delta_steps = min(delta_steps, target.shape[1])  # limit delta_steps within segment length

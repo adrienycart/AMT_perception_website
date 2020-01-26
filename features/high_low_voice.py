@@ -1,6 +1,6 @@
 import numpy as np
 from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls, plot_piano_roll
-
+import matplotlib.pyplot as plt
 
 
 ##############################################
@@ -92,6 +92,11 @@ def notewise_highest(notes_output,intervals_output,notes_target,intervals_target
         roll_output = (output_refs!=-1).astype(int)
 
         highest = get_highest(roll_target)
+
+        # print(highest)
+        # plt.imshow(roll_target)
+        # plt.show()
+
         highest_nonzero = highest[highest!=-1]
         frames_nonzero = np.arange(len(highest))[highest!=-1]
 
@@ -124,7 +129,6 @@ def notewise_highest(notes_output,intervals_output,notes_target,intervals_target
         unmatched_outputs_is_higher = [idx for idx in unmatched_outputs if idx in higher_notes_idx]
         fp = len(unmatched_outputs_is_higher)
 
-        # import matplotlib.pyplot as plt
         # fig,((ax0,ax1),(ax2,ax3)) = plt.subplots(2,2)
         # ax0.imshow(roll_target,aspect='auto',origin='lower')
         # ax1.imshow(roll_output,aspect='auto',origin='lower')
@@ -134,9 +138,9 @@ def notewise_highest(notes_output,intervals_output,notes_target,intervals_target
         #     display1[notes_target[i],int(intervals_target[i][0]*fs):int(intervals_target[i,1]*fs)] = 1
         # for i in unmatched_outputs_is_higher:
         #     display2[notes_output[i],int(intervals_output[i][0]*fs):int(intervals_output[i,1]*fs)] = 1
-        #
+        
         # display2[higher_mask]+=3
-        #
+        
         # ax2.imshow(display1,aspect='auto',origin='lower')
         # ax3.imshow(display2,aspect='auto',origin='lower')
         # plt.show()

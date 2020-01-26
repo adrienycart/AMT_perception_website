@@ -36,6 +36,10 @@ def out_key_errors(notes_output,match,mask):
         for note in notes_output:
             all_weights += [1- mask[note%12]]
 
+        # import matplotlib.pyplot as plt
+        # plt.plot(all_weights)
+        # plt.show()
+
         if sum(all_weights)==0:
             return 0.0, 0.0
         else:
