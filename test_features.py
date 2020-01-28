@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 import pretty_midi as pm
 import mir_eval
@@ -11,6 +12,7 @@ from features.polyphony import polyphony_level_seq, false_negative_polyphony_lev
 from features.repeat_merge import repeated_notes, merged_notes
 from features.specific_pitch import specific_pitch_framewise, specific_pitch_notewise
 from features.rhythm import rhythm_histogram, rhythm_dispersion
+from features.dynamic import consonance_measures, polyphony_level
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -20,15 +22,21 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[:4]:
+for example in os.listdir(MIDI_path)[8:12]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
     target_data = pm.PrettyMIDI(os.path.join(example_path, 'target.mid'))
+    # play midi
+    os.system("app\\static\\data\\all_midi_cut\\"+example+"\\target.mid")
+    time.sleep(target_data.get_end_time() + 0.5)
 
     for system in systems:
         # if system == 'cheng':
             print('\n' + system)
             system_data = pm.PrettyMIDI(os.path.join(example_path, system + '.mid'))
+            # play midi
+            os.system("app\\static\\data\\all_midi_cut\\"+example+"\\"+system+".mid")
+            time.sleep(system_data.get_end_time() + 0.5)
 
             # target and system piano rolls
             # print('getting piano roll...')
@@ -90,8 +98,6 @@ for example in os.listdir(MIDI_path)[:4]:
             # print('ratios: ' + str(ratio_1) + ', ' + str(ratio_2))
 
             # print('\n test polyphony ==============================================')
-            # level_FN = false_negative_polyphony_level(target_pr, intervals_target, match_on)
-            # print('polyphony level FN: ' + str(level_FN))
             # level = polyphony_level_seq(target_pr)
             # print('polyphony level: ' + str(level))
 
@@ -101,12 +107,12 @@ for example in os.listdir(MIDI_path)[:4]:
             # merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
             # print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
 
-            print('\n test rhythm =====================================================')
+            # print('\n test rhythm =====================================================')
             # f1, f2 = rhythm_histogram(intervals_system, intervals_target)
             # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
             # print("rhythm flatness difference: " + str(f1-f2))
-            stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
-            print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
+            # stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
+            # print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
 
             # print('\n test specific_pitch ==================================================')
 
@@ -125,3 +131,6 @@ for example in os.listdir(MIDI_path)[:4]:
             # print('octave error: ' + str(r1) + "   " + str(r2))
             # r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=19)
             # print('third_harmonic error: ' + str(r1) + "   " + str(r2))
+
+            print('\n test dynamic features ==================================================')
+
