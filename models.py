@@ -16,7 +16,7 @@ import pandas as pd
 from config import MAX_ANSWERS
 
 
-BATCH_SIZE = 50
+BATCH_SIZE = 100
 
 
 def get_feature_labels(features_to_use):
@@ -165,6 +165,15 @@ def sample(n_samples,*args):
         output += [arg[sample_idx]]
     return output
 
+def split_data(ranges,*args):
+    output = []
+    for arg in args:
+        out = []
+        for start,end in ranges:
+            out += [arg[start:end]]
+        output += [np.concatenate(out,axis=0)]
+    return output
+
 #### Prepare data:
 feature_dir = 'precomputed_features'
 
@@ -177,11 +186,29 @@ users = np.genfromtxt(filecp,dtype=object,delimiter=";")
 users = users[1:,:]
 
 
+# #################################################
+# ###### Bradley-Terry comparison : DOESN'T WORK
+# #################################################
+#
+# import choix
+# # systems = ['cheng','google',"kelz","lisu"]
+# syst_dict = {'cheng':0,'google':1,"kelz":2,"lisu":3}
+# data = []
+# for row in answers:
+#     choice = int(row[5])
+#     systs=row[2:4]
+#     data += [(syst_dict[systs[choice]],syst_dict[systs[1-choice]])]
+#
+# n_items = 4
+# params = choix.ilsr_pairwise(n_items, data)
+# print params
+# print("ranking (worst to best):", np.argsort(params))
+
 #################################################@
 ####### MIXED EFFECTS MODEL
 #################################################@
 
-
+#
 # AQ = pd.read_csv('db_csv/answers_data.csv',delimiter=';')
 #
 # results_dict = {}
@@ -234,7 +261,7 @@ users = users[1:,:]
 #         'best_repeated':best_repeated,}
 # data_f_mes = pd.DataFrame(data)
 #
-
+#
 #
 # goldmsi = []
 # for row in answers:
@@ -245,13 +272,8 @@ users = users[1:,:]
 #
 # AQ_new = pd.concat([AQ, data_f_mes,data_goldmsi],axis=1)
 # reverse_idx = AQ_new['f_system1']>AQ_new['f_system2']
-
-
-####       0            1         2          3        4         5        6            7           8        9           10             11
-#### ['question_id' 'example' 'system1' 'system2' 'user_id' 'answer' 'recognised' 'difficulty' 'time'  'f_system1' , 'f_system2', 'goldmsi']
-
-# print AQ_new[['question_id','system1','system2','answer']]
-
+#
+#
 # system1 = AQ_new["system1"][reverse_idx]
 # f_system1 = AQ_new["f_system1"][reverse_idx]
 # AQ_new.loc[reverse_idx, 'system1']=AQ_new["system2"][reverse_idx]
@@ -260,27 +282,36 @@ users = users[1:,:]
 # AQ_new.loc[reverse_idx, 'f_system2']=f_system1
 # AQ_new.loc[reverse_idx, 'answer']=1- AQ_new["answer"][reverse_idx]
 
+###       0            1         2          3        4         5        6            7           8        9           10             11
+### ['question_id' 'example' 'system1' 'system2' 'user_id' 'answer' 'recognised' 'difficulty' 'time'  'f_system1' , 'f_system2', 'goldmsi']
+
+# print AQ_new[['question_id','system1','system2','answer']]
+
+
+
 
 
 # print AQ_new[['question_id','system1','system2','answer']]
 
-# Only confident answers
+### Only confident answers
 # AQ_new = AQ_new[AQ_new['difficulty']<3]
+# print AQ_new
 
-# Only kelz vs lisu
+
+### Only kelz vs lisu
 # AQ_new = AQ_new[np.logical_and(np.isin(AQ_new['system1'],['kelz','lisu']),np.isin(AQ_new['system2'],['kelz','lisu']))]
 
-# Only musicians
+### Only musicians
 # goldmsi_med = np.median(AQ_new['goldmsi'])
 # AQ_new = AQ_new[AQ_new['goldmsi']>goldmsi_med]
 
-### Co-dependent variables: *
-### Random variables: +(var/user_id) --> /user_id
-### Also check multiple regression (simple)
-### Also check multiple logistic regression
+## Co-dependent variables: *
+## Random variables: +(var/user_id) --> /user_id
+## Also check multiple regression (simple)
+## Also check multiple logistic regression
 
-### Mixed Effects Model
-# mixed = smf.mixedlm("answer ~ f_system1+f_system2+goldmsi+recognised+difficulty", AQ_new,groups='question_id')
+## Mixed Effects Model
+# mixed = smf.mixedlm("answer ~ f_diff+f_system2+goldmsi+recognised+difficulty", AQ_new,groups='question_id')
 # mixed_fit = mixed.fit()
 # print(mixed_fit.summary())
 
@@ -295,6 +326,77 @@ users = users[1:,:]
 #     print feat, 'coef', c
 
 
+###############################################################
+#### INTER-RATER AGREEMENT
+###############################################################
+
+### Only confident answers
+# AQ_new = AQ_new[AQ_new['difficulty']<3]
+# print AQ_new
+
+### Only keep questions with 4 ratings
+# q_ids,counts = np.unique(AQ_new['question_id'],return_counts=True)
+# q_ids_to_keep = q_ids[counts==4]
+# answers_to_keep = np.isin(AQ_new['question_id'],q_ids_to_keep)
+# AQ_new = AQ_new[answers_to_keep]
+#
+# f_syst1s = []
+# f_syst2s = []
+# F_mes_diffs = []
+# inter_rater_agreements = []
+# agreements_with_f = []
+# avg_gold_msi = []
+# std_gold_msi = []
+# avg_difficulty = []
+# q_ids = []
+#
+# for q_id in np.unique(AQ_new['question_id']):
+#     q_ids += [q_id]
+#     data_q = AQ_new[AQ_new['question_id']==q_id]
+#     f_syst1 = np.mean(data_q['f_system1'])
+#     f_syst2 = np.mean(data_q['f_system2'])
+#     f_syst1s += [f_syst1]
+#     f_syst2s += [f_syst2]
+#     F_mes_diffs += [abs(f_syst1-f_syst2)]
+#     vote = np.sum(data_q["answer"])
+#     agreement = abs(vote-2)
+#     inter_rater_agreements += [agreement]
+#
+#     f_choice = 1-int(f_syst1>f_syst2)
+#     agreements_with_f += [vote] if f_choice else [4-vote]
+#
+#     avg_gold_msi += [np.mean(data_q['goldmsi'])]
+#     std_gold_msi += [np.std(data_q['goldmsi'])]
+#
+#     avg_difficulty += [np.mean(data_q['difficulty'])]
+#
+# q_ids = np.array(q_ids)
+# f_syst1s = np.array(f_syst1s)
+# f_syst2s = np.array(f_syst2s)
+# F_mes_diffs = np.array(F_mes_diffs)
+# inter_rater_agreements = np.array(inter_rater_agreements)
+# agreements_with_f = np.array(agreements_with_f)
+# avg_gold_msi = np.array(avg_gold_msi)
+# std_gold_msi = np.array(std_gold_msi)
+# avg_difficulty = np.array(avg_difficulty)
+#
+# AQ_new = pd.DataFrame({ 'question_id':q_ids,
+#                         'f_system1':f_syst1s,
+#                         'f_system2':f_syst2s,
+#                         'f_diff':f_syst2s-f_syst1s,
+#                         'inter_rater_agreements':inter_rater_agreements,
+#                         'agreements_with_f':agreements_with_f,
+#                         'avg_gold_msi':avg_gold_msi,
+#                         'std_gold_msi':std_gold_msi,
+#                         'avg_difficulty':avg_difficulty,})
+#
+# mixed = smf.mixedlm("agreements_with_f ~ f_diff+f_system2+avg_gold_msi+std_gold_msi+avg_difficulty", AQ_new,groups='question_id')
+# mixed_fit = mixed.fit()
+# print(mixed_fit.summary())
+
+
+
+
 ########################################################
 ###########      USING FEATURES
 ########################################################
@@ -307,6 +409,11 @@ ratings=[]
 notewise1 = []
 notewise2 = []
 goldmsi = []
+
+save_destination = 'results_metric/all_features'
+if not os.path.exists(save_destination):
+    os.makedirs(save_destination)
+
 
 features_to_use = [
                 "framewise",
@@ -335,6 +442,27 @@ features_to_use = [
                 ]
 
 labels = get_feature_labels(features_to_use)
+N_FEATURES = len(labels)
+
+#### Graph definition
+
+features1_ph = tf.placeholder(tf.float32,[None,N_FEATURES])
+features2_ph = tf.placeholder(tf.float32,[None,N_FEATURES])
+y_ph = tf.placeholder(tf.float32,[None,1])
+z_ph = tf.placeholder(tf.float32,[None,1])
+alpha_ph = tf.placeholder(tf.float32,[None,1])
+
+# weights = tf.Variable(tf.random_normal([N_FEATURES,1], stddev=0.35),name='weights')
+weights = tf.Variable(tf.zeros([N_FEATURES,1]),name='weights')
+
+model_output1 = linear_regression_model(features1_ph,weights,None)
+model_output2 = linear_regression_model(features2_ph,weights,None)
+
+
+
+loss = contrastive_loss_absolute(model_output1,model_output2,y_ph,z_ph,alpha_ph)
+# loss = contrastive_loss(model_output1,model_output2,y_ph,alpha_ph)
+optimize = tf.train.AdamOptimizer(learning_rate=0.01).minimize(loss)
 
 
 ### AGGREGATE ALL ANSWERS
@@ -369,7 +497,6 @@ labels = get_feature_labels(features_to_use)
 #### USE EACH INDIVIDUAL ANSWER AS TRAINING SAMPLE
 
 
-
 for row in answers:
 
     example = row[1]
@@ -399,200 +526,237 @@ notewise2 = np.array(notewise2,dtype=float)
 goldmsi = np.array(goldmsi,dtype=float)
 
 
-N_FEATURES = features1.shape[1]
 
 y=np.zeros_like(ratings)
 z=ratings
 alpha = answers[:,7].astype(float)
 alpha[alpha==1] = 0.5
-alpha[alpha==2] = 0.45
+alpha[alpha==2] = 0.4
 alpha[alpha==3] = 0.3
-alpha[alpha==4] = 0.15
+alpha[alpha==4] = 0.2
 alpha[alpha==5] = 0.1
 
 y = y[:,None]
 z = z[:,None]
 alpha = alpha[:,None]
 
+
+# dataset = pd.DataFrame({'features1':features1,
+#                         "features2":features2,
+#                         "ratings":ratings,
+#                         "notewise1":notewise1,
+#                         "notewise2":notewise2,
+#                         "goldmsi":goldmsi,
+#                         "y":y,
+#                         "z":z,
+#                         "alpha":alpha,})
+
 #### SPLIT DATA
 
-n_examples = len(ratings)
-n_train = int(0.8*n_examples)
-n_valid = int(0.1*n_examples)
+all_results = {}
+
+for fold in range(10):
+
+    all_examples, indices = np.unique(answers[:,1],return_index=True)
+    sort_idx = np.argsort(indices)
+    all_examples = all_examples[sort_idx]
+    example_indices = indices[sort_idx]
 
 
-idx_train = np.argmax(answers[:,1]==answers[n_train,1])
-idx_valid = np.argmax(answers[:,1]==answers[n_train+n_valid,1])
-
-features1_train = features1[:idx_train]
-features2_train = features2[:idx_train]
-y_train = y[:idx_train]
-z_train = z[:idx_train]
-alpha_train = alpha[:idx_train]
-notewise1_train = notewise1[:idx_train]
-notewise2_train = notewise2[:idx_train]
-goldmsi_train = goldmsi[:idx_train]
-
-features1_valid = features1[idx_train:idx_valid]
-features2_valid = features2[idx_train:idx_valid]
-y_valid = y[idx_train:idx_valid]
-z_valid = z[idx_train:idx_valid]
-alpha_valid = alpha[idx_train:idx_valid]
-notewise1_valid = notewise1[idx_train:idx_valid]
-notewise2_valid = notewise2[idx_train:idx_valid]
-
-features1_test = features1[idx_valid:]
-features2_test = features2[idx_valid:]
-y_test = y[idx_valid:]
-z_test = z[idx_valid:]
-alpha_test = alpha[idx_valid:]
-notewise1_test = notewise1[idx_valid:]
-notewise2_test = notewise2[idx_valid:]
+    n_examples = len(all_examples)
+    n_test = int(0.1*n_examples)
+    n_valid = int(0.1*n_examples)
+    ex_idx_test_start = fold*n_test
+    ex_idx_test_end= (fold+1)*n_test
+    if fold == 9:
+        ex_idx_valid_start = 0*n_valid
+        ex_idx_valid_end = 1*n_valid
+    else:
+        ex_idx_valid_start = (fold+1)*n_valid
+        ex_idx_valid_end = (fold+2)*n_valid
 
 
-###### Apply PCA
-# pca = PCA()
-# pca.fit(np.concatenate([features1_train,features2_train],axis=0))
-# total_variance = np.cumsum(pca.explained_variance_ratio_)
-# keep_dims = np.argmax(total_variance>0.99)
-#
-# print "keep_dims", keep_dims
-# # keep_dims = 16
-# pca = PCA(n_components=keep_dims)
-# pca.fit(np.concatenate([features1_train,features2_train],axis=0))
-# pca_matrix = pca.components_
+    idx_test_start = example_indices[ex_idx_test_start]
+    idx_test_end = example_indices[ex_idx_test_end]
+    idx_valid_start = example_indices[ex_idx_valid_start]
+    idx_valid_end = example_indices[ex_idx_valid_end]
 
-#### No PCA:
-pca_matrix= None
-keep_dims = N_FEATURES
+    idx_test = np.zeros([len(answers)],dtype=bool)
+    idx_valid = np.zeros([len(answers)],dtype=bool)
+    idx_train = np.zeros([len(answers)],dtype=bool)
 
-###############################
-### Remove from training set
+    if fold == 9:
+        idx_test[idx_test_start:] = True
+        idx_valid[idx_valid_start:idx_valid_end] = True
+        idx_train[idx_valid_end:idx_test_start] = True
+    else:
+        idx_test[idx_test_start:idx_test_end] = True
+        idx_valid[idx_valid_start:idx_valid_end] = True
+        idx_train[:idx_test_start] = True
+        idx_train[idx_valid_end:] = True
 
-### Any unsure response:
-# to_keep = alpha_train[:,0]>=0.4
-### Any non-musician response:
-# to_keep = goldmsi_train>=np.median(goldmsi_train)
-#
-# features1_train = features1_train[to_keep]
-# features2_train = features2_train[to_keep]
-# y_train = y_train[to_keep]
-# z_train = z_train[to_keep]
-# alpha_train = alpha_train[to_keep]
-# notewise1_train = notewise1_train[to_keep]
-# notewise2_train = notewise2_train[to_keep]
+    features1_train = features1[idx_train]
+    features2_train = features2[idx_train]
+    y_train = y[idx_train]
+    z_train = z[idx_train]
+    alpha_train = alpha[idx_train]
+    notewise1_train = notewise1[idx_train]
+    notewise2_train = notewise2[idx_train]
+    goldmsi_train = goldmsi[idx_train]
 
+    features1_valid = features1[idx_valid]
+    features2_valid = features2[idx_valid]
+    y_valid = y[idx_valid]
+    z_valid = z[idx_valid]
+    alpha_valid = alpha[idx_valid]
+    notewise1_valid = notewise1[idx_valid]
+    notewise2_valid = notewise2[idx_valid]
 
-
-
-features1_ph = tf.placeholder(tf.float32,[None,N_FEATURES])
-features2_ph = tf.placeholder(tf.float32,[None,N_FEATURES])
-y_ph = tf.placeholder(tf.float32,[None,1])
-z_ph = tf.placeholder(tf.float32,[None,1])
-alpha_ph = tf.placeholder(tf.float32,[None,1])
-
-# weights = tf.Variable(tf.random_normal([N_FEATURES,1], stddev=0.35),name='weights')
-weights = tf.Variable(tf.zeros([keep_dims,1]),name='weights')
-
-model_output1 = linear_regression_model(features1_ph,weights,pca_matrix)
-model_output2 = linear_regression_model(features2_ph,weights,pca_matrix)
+    features1_test = features1[idx_test]
+    features2_test = features2[idx_test]
+    y_test = y[idx_test]
+    z_test = z[idx_test]
+    alpha_test = alpha[idx_test]
+    notewise1_test = notewise1[idx_test]
+    notewise2_test = notewise2[idx_test]
 
 
+    ###### Apply PCA
+    # pca = PCA()
+    # pca.fit(np.concatenate([features1_train,features2_train],axis=0))
+    # total_variance = np.cumsum(pca.explained_variance_ratio_)
+    # keep_dims = np.argmax(total_variance>0.99)
+    #
+    # print "keep_dims", keep_dims
+    # # keep_dims = 16
+    # pca = PCA(n_components=keep_dims)
+    # pca.fit(np.concatenate([features1_train,features2_train],axis=0))
+    # pca_matrix = pca.components_
 
-loss = contrastive_loss_absolute(model_output1,model_output2,y_ph,z_ph,alpha_ph)
-# loss = contrastive_loss(model_output1,model_output2,y_ph,alpha_ph)
-optimize = tf.train.AdamOptimizer(learning_rate=0.01).minimize(loss)
+    #### No PCA:
+    # pca_matrix= None
+    # keep_dims = N_FEATURES
 
-valid_costs = []
+    ###############################
+    ### Remove from training set
 
-feed_dict_valid = {
-    features1_ph:features1_valid,
-    features2_ph:features2_valid,
-    y_ph:y_valid,
-    z_ph:z_valid,
-    alpha_ph: alpha_valid,
-    }
+    ### Any unsure response:
+    # to_keep = alpha_train[:,0]>=0.4
+    ### Any non-musician response:
+    # to_keep = goldmsi_train>=np.median(goldmsi_train)
+    ### Any answer that agrees with F-measure (keep only those who disagree):
+    # results_F1 = (notewise1_train < notewise2_train).astype(int)
+    # to_keep = np.not_equal(z_train[:,0],results_F1)
+    #
+    # features1_train = features1_train[to_keep]
+    # features2_train = features2_train[to_keep]
+    # y_train = y_train[to_keep]
+    # z_train = z_train[to_keep]
+    # alpha_train = alpha_train[to_keep]
+    # notewise1_train = notewise1_train[to_keep]
+    # notewise2_train = notewise2_train[to_keep]
 
+    repeat_agreement = []
 
-
-best_valid = None
-best_parameters = None
-
-
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
-
-for i in range(3000):
-
-    features1_batch ,features2_batch,y_batch ,z_batch ,alpha_batch = sample(BATCH_SIZE,features1,features2,y,z,alpha)
-    feed_dict_train = {
-        features1_ph:features1_batch,
-        features2_ph:features2_batch,
-        y_ph:y_batch,
-        z_ph:z_batch,
-        alpha_ph: alpha_batch,
+    feed_dict_valid = {
+        features1_ph:features1_valid,
+        features2_ph:features2_valid,
+        y_ph:y_valid,
+        z_ph:z_valid,
+        alpha_ph: alpha_valid,
         }
 
+    N_REPEATS = 100
 
-    sess.run(optimize, feed_dict=feed_dict_train)
-    valid_cost = sess.run(loss, feed_dict=feed_dict_valid)
+    results_F1 = (notewise1_test < notewise2_test).astype(int)
+    agreement_F1 = np.mean((z_test==results_F1).astype(int))
 
-    #Compute agreement, removing draws:
-    non_draws = y_valid==0
-    z_non_draws = z_valid[non_draws]
-    metrics1,metrics2 = sess.run([model_output1,model_output2],feed_dict_valid)
-    result_metrics = (metrics1<metrics2).astype(int)
-    result_metrics = result_metrics[non_draws]
-    valid_costs += [valid_cost]
+    for i in range(N_REPEATS):
+        print "fold",fold,"repeat",i
 
-    # plt.clf()
-    # plt.scatter(features1_valid[:,5],metrics1,color='tab:blue')
-    # plt.scatter(features2_valid[:,5],metrics2,color='tab:blue')
-    # plt.ylim([0,1])
-    # plt.xlim([0,1])
-    #
-    # plt.pause(0.00000001)
+        valid_costs = []
 
-    print i, valid_cost, np.mean((z_non_draws==result_metrics).astype(int))
-
-    if best_valid is None or valid_cost<best_valid:
-        best_parameters = sess.run(weights)
-
-###### RESULTS
+        best_valid = None
+        best_parameters = None
 
 
-print 'Best parameters:'
-for (label,value) in zip(labels,best_parameters):
-    print label, value
+        sess = tf.Session()
+        sess.run(tf.global_variables_initializer())
+
+        for i in range(3000):
+
+            features1_batch ,features2_batch,y_batch ,z_batch ,alpha_batch = sample(BATCH_SIZE,features1,features2,y,z,alpha)
+            feed_dict_train = {
+                features1_ph:features1_batch,
+                features2_ph:features2_batch,
+                y_ph:y_batch,
+                z_ph:z_batch,
+                alpha_ph: alpha_batch,
+                }
 
 
-feed_dict_test = {
-    features1_ph:features1_test,
-    features2_ph:features2_test,
-    weights: best_parameters
-    }
+            sess.run(optimize, feed_dict=feed_dict_train)
+            valid_cost = sess.run(loss, feed_dict=feed_dict_valid)
 
-## Remove draws:
-non_draws = y_test==0
-z_non_draws = z_test[non_draws]
-metrics1,metrics2 = sess.run([model_output1,model_output2],feed_dict_test)
-for m1,m2 in zip(metrics1,metrics2):
-    print m1,m2
-result_metrics = (metrics1<metrics2).astype(int)
-result_metrics = result_metrics[non_draws]
-results_F1 = (notewise1_test < notewise2_test).astype(int)
-results_F1 = results_F1[non_draws[:,0]]
+            #Compute agreement, removing draws:
+            metrics1,metrics2 = sess.run([model_output1,model_output2],feed_dict_valid)
+            result_metrics = (metrics1<metrics2).astype(int)
+            valid_costs += [valid_cost]
 
-print "average agreement new metric:", np.round(np.mean((z_non_draws==result_metrics).astype(int)),3)
-print "average agreement F-measure:", np.round(np.mean((z_non_draws==results_F1).astype(int)),3)
+            # plt.clf()
+            # plt.scatter(features1_valid[:,5],metrics1,color='tab:blue')
+            # plt.scatter(features2_valid[:,5],metrics2,color='tab:blue')
+            # plt.ylim([0,1])
+            # plt.xlim([0,1])
+            #
+            # plt.pause(0.00000001)
+
+            # print i, valid_cost, np.mean((z_valid==result_metrics).astype(int))
+
+            if best_valid is None or valid_cost<best_valid:
+                best_parameters = sess.run(weights)
+
+        ###### RESULTS
+        #
+        # print 'Best parameters:'
+        # for (label,value) in zip(labels,best_parameters):
+        #     print label, value
 
 
-plt.plot(valid_costs)
-plt.show()
+        feed_dict_test = {
+            features1_ph:features1_test,
+            features2_ph:features2_test,
+            weights: best_parameters
+            }
 
-plt.scatter(notewise1_test,metrics1,color='tab:blue')
-plt.scatter(notewise2_test,metrics2,color='tab:blue')
-plt.ylim([0,1])
-plt.xlim([0,1])
+        ## Remove draws:
+        metrics1,metrics2 = sess.run([model_output1,model_output2],feed_dict_test)
+        result_metrics = (metrics1<metrics2).astype(int)
 
-plt.show()
+        agreement_metric = np.mean((z_test==result_metrics).astype(int))
+        repeat_agreement += [agreement_metric]
+
+        print "average agreement new metric:", np.round(agreement_metric,3)
+        print "average agreement F-measure:", np.round(agreement_F1,3)
+        print repeat_agreement
+
+    results_dict = {'repeat_agreement':repeat_results,
+                    'agreement_F1': agreement_F1}
+    save_path = os.path.join(save_destination,'fold'+str(fold)+'.pkl')
+    pickle.dump(results_dict, open(save_path, 'wb'))
+
+    all_results['fold'+str(fold)]=results_dict
+
+save_path = os.path.join(save_destination,'all_folds.pkl')
+pickle.dump(all_results, open(save_path, 'wb'))
+
+
+# plt.plot(valid_costs)
+# plt.show()
+#
+# plt.scatter(notewise1_test,metrics1,color='tab:blue')
+# plt.scatter(notewise2_test,metrics2,color='tab:blue')
+# plt.ylim([0,1])
+# plt.xlim([0,1])
+#
+# plt.show()
