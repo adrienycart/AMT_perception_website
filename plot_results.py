@@ -1,11 +1,16 @@
 import os
-import cPickle as pickle
+try:
+   import cPickle as pickle
+except:
+   import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rc
-import seaborn as sns
+# import seaborn as sns
 import codecs
 import sklearn
+from statsmodels.stats.inter_rater import fleiss_kappa
+import random
 import tqdm
 
 import warnings
@@ -55,6 +60,15 @@ barWidth = 0.75
 filecp = codecs.open('db_csv/user_data.csv', encoding = 'utf-8')
 users = np.genfromtxt(filecp,dtype=object,delimiter=";")
 users = users[1:,:]
+filecp.close()
+
+###
+change_encoding = lambda x:x.decode('utf-8')
+change_encoding = np.vectorize(change_encoding)
+users = change_encoding(users)
+###
+
+
 n_users = users.shape[0]
 # #### 0         1      2     3    4          5          ....   -1
 # #### user;n_answers;gender;age;disability;gold_msi_avg ....   classical
@@ -176,6 +190,12 @@ n_users = users.shape[0]
 filecp = codecs.open('db_csv/answers_data.csv', encoding = 'utf-8')
 answers = np.genfromtxt(filecp,dtype=object,delimiter=";")
 answers = answers[1:,:]
+filecp.close()
+
+###
+answers = change_encoding(answers)
+###
+
 
 ####       0            1         2          3        4         5        6            7           8        9           10
 #### ['question_id' 'example' 'system1' 'system2' 'user_id' 'answer' 'recognised' 'difficulty' 'time'  'F_syst1' , 'F_syst2']
@@ -198,7 +218,14 @@ for example in np.unique(answers[:,1]):
     example_dir = os.path.join(feature_dir,example)
     results_dict[example] = {}
     for system in systems:
-        results = pickle.load(open(os.path.join(example_dir,system+'.pkl'), "rb"))
+        file_handle = open(os.path.join(example_dir,system+'.pkl'), "rb")
+        try:
+            # Python 2
+            results = pickle.load(file_handle)
+        except:
+            # Python 3
+            results = pickle.load(file_handle, encoding='latin1')
+        file_handle.close()
         results_dict[example][system]=results
 
 pairs_f1 = []
@@ -256,14 +283,14 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 #     data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
 #
 #     result = pairwise_comparison(data)
-#     result_bootstrap = bootstrap(pairwise_comparison,data,with_majority=False,with_difficulty=False)
+#     # result_bootstrap = bootstrap(pairwise_comparison,data,with_majority=False,with_difficulty=False)
 #
 #     dict_stats[str(pair)] = result
 #
 # for key in dict_stats.keys():
 #     print key, dict_stats[key]
 #
-
+#
 #
 #
 # choices = []
@@ -278,9 +305,9 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 # choices = np.array(choices)
 # difficulty = np.array(difficulty)
 # majority = np.array(majority)
-#
-#
-#
+
+
+
 
 
 
@@ -355,22 +382,24 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 # start = np.zeros_like(normalized_difficulty[:,0])
 # for i in range(5):
 #     end = start + normalized_difficulty[:,i]
-#     plt.barh(r, normalized_difficulty[:,i], left=np.sum(normalized_difficulty[:,:i],axis=1), color=np.array([1.0,1,1])-(i+1)/5.0*np.array([0,1,1]), edgecolor='black', height=barWidth)
+#     plt.barh(r, normalized_difficulty[:,i], left=np.sum(normalized_difficulty[:,:i],axis=1), color=np.array([1.0,1,1])-(i+1)/5.0*np.array([0,1,1]), edgecolor='black', height=barWidth,label=i+1)
 #
-
+#
 # for i in range(len(pairs)):
-#     plt.text(-0.05,i+0.15,labels[i],ha='right', va='center')
-#     plt.text(-0.05,i-0.15,'F1s: '+labels_f1[i],ha='right', va='center',fontsize=8)
+#     plt.text(-0.05,i,labels[i],ha='right', va='center',fontsize=17)
+#     # plt.text(-0.05,i-0.15,'F1s: '+labels_f1[i],ha='right', va='center',fontsize=8)
+#
 #
 # frame1 = plt.gca()
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='x')
 # frame1.axes.yaxis.set_visible(False)
 # frame1.set_axisbelow(True)
+# frame1.tick_params(axis='both', which='major', labelsize=15)
 # plt.box(False)
-# plt.tight_layout(rect=[0.2, 0, 1, 0.95])
-#
+# plt.tight_layout(rect=[0.15, 0, 1, 1])
+# plt.legend(bbox_to_anchor=(0.96,0.5))
+
 # plt.title('Proportion of difficulty ratings', x=0.4)
-#
 # plt.show()
 #
 # ### Plot majority
@@ -752,7 +781,7 @@ with_error_bars=True
 
 # ### ONLY FOR VERY CONFIDENT ANSWERS:
 # answers=answers[answers[:,7].astype(int)<3]
-#
+
 # f1_agreement_each,f1_agreement_each_std = bootstrap(agreement_f_measure_answers,answers,n_repeat=100,with_majority=False,average=True)
 # f1_agreement_each = f1_agreement_each[0]
 # f1_agreement_each_std = f1_agreement_each_std[0]
@@ -777,7 +806,8 @@ with_error_bars=True
 # frame1.set_axisbelow(True)
 # plt.box(False)
 # plt.ylim((0.7,0.84))
-# plt.title('Agreement between raters and various F-measures\n(all answers)')
+# # plt.title('Agreement between raters and various F-measures\n(all answers)')
+# plt.ylabel(r'Agreement with ratings',fontsize=15)
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
 
@@ -869,14 +899,57 @@ answers = np.concatenate([answers,F_measures],axis=1)
 
 #### F-measure difference vs disagreement
 
-# F_mes_diffs = []
-# agreements = []
-# for q_id in np.unique(answers[:,0]):
-#     data_q = answers[answers[:,0]==q_id,:]
-#     F_mes_diffs += [abs(float(data_q[0,-1])-float(data_q[0,-2]))]
-#     vote = np.sum(data_q[:,5].astype(int))
-#     agreement = abs(vote-2)
-#     agreements += [agreement]
+F_mes_diffs = []
+inter_rater_agreements = []
+agreements_with_f = []
+agree_disagree = []
+raw_votes = []
+
+# ### ONLY FOR VERY CONFIDENT ANSWERS:
+answers=answers[answers[:,7].astype(int)<3]
+# ### ONLY FOR FULL QUESTIONS:
+q_ids,counts = np.unique(answers[:,0],return_counts=True)
+q_ids_to_keep = q_ids[counts==4]
+# print q_ids_to_keep.shape
+answers_to_keep = np.isin(answers[:,0],q_ids_to_keep)
+answers = answers[answers_to_keep]
+
+
+
+for q_id in np.unique(answers[:,0]):
+    data_q = answers[answers[:,0]==q_id,:]
+    F_mes_diffs += [abs(float(data_q[0,-1])-float(data_q[0,-2]))]
+    vote = np.sum(data_q[:,5].astype(int))
+    agreement = abs(vote-2)
+    inter_rater_agreements += [agreement]
+
+    f_choice = 1-int(float(data_q[0,-2])>float(data_q[0,-1]))
+    agreements_with_f += [vote] if f_choice else [4-vote]
+    # agree_disagree += [[4-vote, vote]] if f_choice else [[vote, 4-vote]]
+    # agree_disagree += [[4-vote, vote]] if random.choice([True, False]) else [[vote, 4-vote]]
+
+    # order = random.choice([True, False])
+    order = f_choice
+    if order:
+        raw_votes += [[np.sum(data_q[:,5].astype(int)==0),np.sum(data_q[:,5].astype(int)==1)]]
+    else:
+        raw_votes += [[np.sum(data_q[:,5].astype(int)==1),np.sum(data_q[:,5].astype(int)==0)]]
+
+F_mes_diffs = np.array(F_mes_diffs)
+agreements_with_f = np.array(agreements_with_f)
+raw_votes = np.array(raw_votes)
+
+
+# print fleiss_kappa(np.array(raw_votes))
+
+# import krippendorff
+# print(krippendorff.alpha(value_counts=raw_votes,level_of_measurement='nominal'))
+
+
+for i in range(5):
+    data = F_mes_diffs[agreements_with_f==i]
+    print i, np.mean((agreements_with_f==i).astype(int)), np.sum((agreements_with_f==i).astype(int)), np.mean(data)
+
 #
 # F_mes_diffs = np.array(F_mes_diffs)
 # agreements = np.array(agreements)
@@ -893,11 +966,17 @@ answers = np.concatenate([answers,F_measures],axis=1)
 # difficulties = answers[:,7]
 #
 # data = [F_mes_diffs[difficulties==str(i)].astype(float) for i in range(1,6)]
-# print data
+#
+# plt.figure(figsize=(7,4))
 # plt.violinplot(data, positions=range(1,6), vert=True, widths=0.3,
 #                        showextrema=True, showmedians=True)
 # plt.xticks(range(1,6),range(1,6))
-# plt.title("Difference in F-measure vs. reported difficulty")
+# plt.grid(color='lightgrey', linestyle='-', linewidth=1,axis='y')
+# plt.box(False)
+# plt.ylabel(r'$F_{n,on}$ difference',fontsize=15)
+# plt.xlabel('Reported difficulty',fontsize=15)
+# # plt.title("Difference in F-measure vs. reported difficulty")
+# plt.tight_layout()
 # plt.show()
 
 #### F-measure chosen option vs disagreement
@@ -927,10 +1006,15 @@ answers = np.concatenate([answers,F_measures],axis=1)
 #
 # data = [F_mes_chosen[difficulties==str(i)].astype(float) for i in range(1,6)]
 #
+# plt.figure(figsize=(7,4))
 # plt.violinplot(data, positions=range(1,6), vert=True, widths=0.3,
 #                        showextrema=True, showmedians=True)
 # plt.xticks(range(1,6),range(1,6))
-# plt.title("F-measure of chosen option vs. reported difficulty")
+# plt.grid(color='lightgrey', linestyle='-', linewidth=1,axis='y')
+# plt.box(False)
+# plt.ylabel(r'Chosen $F_{n,on}$',fontsize=15)
+# plt.xlabel('Reported difficulty',fontsize=15)
+# plt.tight_layout()
 # plt.show()
 
 
@@ -953,7 +1037,9 @@ answers = np.concatenate([answers,F_measures],axis=1)
 # frame1.set_axisbelow(True)
 # plt.box(False)
 # plt.ylim((0,1.05))
-# plt.title('Agreement between raters and F-measure\nfor each reported difficulty')
+# plt.ylabel(r'Agreement between ratings and $F_{n,on}$',fontsize=15)
+# plt.xlabel("Reported difficulty",fontsize=15)
+# # plt.title('Agreement between raters and F-measure\nfor each reported difficulty')
 # plt.tight_layout(rect=[0, 0, 1, 1])
 # plt.show()
 
@@ -984,35 +1070,35 @@ def f_measure_agreement_by_f_measure(data,to_compare):
 
 ######## Agreement vs diff
 
-data,std = bootstrap(f_measure_agreement_by_f_measure,answers,to_compare='chosen')
-plt.bar(np.arange(n_bins)+0.5,data,yerr=std,capsize=2,edgecolor="black",width=1)
-frame1 = plt.gca()
-plt.xticks(range(n_bins+1),[i/float(n_bins) for i in range(n_bins+1)])
-plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
-frame1.set_axisbelow(True)
-plt.box(False)
-plt.ylim((0,1.05))
-# plt.title('Agreement between raters and F-measure\ndepending on the F-measure of the chosen solution ')
-plt.ylabel(r'Agreement between ratings and $F_{n,on}$')
-plt.xlabel(r'$F_{n,on}$ of chosen option')
-# plt.tight_layout(rect=[0, 0, 1, 1])
-plt.show()
+# data,std = bootstrap(f_measure_agreement_by_f_measure,answers,to_compare='chosen')
+# plt.bar(np.arange(n_bins)+0.5,data,yerr=std,capsize=2,edgecolor="black",width=1)
+# frame1 = plt.gca()
+# plt.xticks(range(n_bins+1),[i/float(n_bins) for i in range(n_bins+1)])
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+# frame1.set_axisbelow(True)
+# plt.box(False)
+# plt.ylim((0,1.05))
+# # plt.title('Agreement between raters and F-measure\ndepending on the F-measure of the chosen solution ')
+# plt.ylabel(r'Agreement between ratings and $F_{n,on}$')
+# plt.xlabel(r'$F_{n,on}$ of chosen option')
+# # plt.tight_layout(rect=[0, 0, 1, 1])
+# plt.show()
 
 ######## Agreement vs diff
 
-data,std = bootstrap(f_measure_agreement_by_f_measure,answers,to_compare='diff')
-plt.bar(np.arange(n_bins-1)+0.5,data[:-1],yerr=std[:-1],capsize=2,edgecolor="black",width=1)
-frame1 = plt.gca()
-plt.xticks(range(n_bins),[i/float(n_bins) for i in range(n_bins)])
-plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
-frame1.set_axisbelow(True)
-plt.box(False)
-plt.ylim((0.5,1.05))
-# plt.title('Agreement between raters and F-measure\ndepending on the F-measure of the chosen solution ')
-plt.ylabel(r'Agreement between ratings and $F_{n,on}$')
-plt.xlabel(r'Absolute difference in $F_{n,on}$')
-# plt.tight_layout(rect=[0, 0, 1, 1])
-plt.show()
+# data,std = bootstrap(f_measure_agreement_by_f_measure,answers,to_compare='diff')
+# plt.bar(np.arange(n_bins-1)+0.5,data[:-1],yerr=std[:-1],capsize=2,edgecolor="black",width=1)
+# frame1 = plt.gca()
+# plt.xticks(range(n_bins),[i/float(n_bins) for i in range(n_bins)])
+# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+# frame1.set_axisbelow(True)
+# plt.box(False)
+# plt.ylim((0.5,1.05))
+# # plt.title('Agreement between raters and F-measure\ndepending on the F-measure of the chosen solution ')
+# plt.ylabel(r'Agreement between ratings and $F_{n,on}$')
+# plt.xlabel(r'Absolute difference in $F_{n,on}$')
+# # plt.tight_layout(rect=[0, 0, 1, 1])
+# plt.show()
 
 #### Known vs Unknown pieces
 
