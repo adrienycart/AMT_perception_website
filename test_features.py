@@ -25,7 +25,15 @@ fs = 100
 for example in os.listdir(MIDI_path)[:12]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
+
     target_data = pm.PrettyMIDI(os.path.join(example_path, 'target.mid'))
+    target_pr = (target_data.get_piano_roll(fs)>0).astype(int)
+    notes_target, intervals_target, vel_target = utils.get_notes_intervals(target_data, with_vel=True)
+
+    target_data_no_pedal = pm.PrettyMIDI(os.path.join(example_path, 'target_no_pedal.mid'))
+    target_pr_no_pedal = (target_data_no_pedal.get_piano_roll(fs)>0).astype(int)
+    notes_target_no_pedal, intervals_target_no_pedal, vel_target_no_pedal = utils.get_notes_intervals(target_data_no_pedal, with_vel=True)
+
     # play midi
     # os.system("app\\static\\data\\all_midi_cut\\"+example+"\\target.mid")
     # time.sleep(target_data.get_end_time() + 0.5)
@@ -38,41 +46,40 @@ for example in os.listdir(MIDI_path)[:12]:
             # os.system("app\\static\\data\\all_midi_cut\\"+example+"\\"+system+".mid")
             # time.sleep(system_data.get_end_time() + 0.5)
 
-            # target and system piano rolls
-            target_pr = (target_data.get_piano_roll(fs)>0).astype(int)
             system_pr = (system_data.get_piano_roll(fs)>0).astype(int)
-            target_pr, system_pr = utils.even_up_rolls(target_pr, system_pr)
-
-            # calculate note pitch, intervals and velocities
-            notes_target, intervals_target, vel_target = utils.get_notes_intervals(target_data, with_vel=True)
             notes_system, intervals_system = utils.get_notes_intervals(system_data)
+
+            target_pr, system_pr = utils.even_up_rolls(target_pr, system_pr)
+            target_pr_no_pedal, system_pr_no_pedal = utils.even_up_rolls(target_pr_no_pedal, system_pr)
 
             if len(notes_system) == 0:
                 match_on = []
                 match_onoff = []
+                match_on_no_pedal = []
+                match_onoff_no_pedal = []
             else:
                 # calculate true positives
                 match_on = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_system, notes_system, offset_ratio=None, pitch_tolerance=0.25)
                 match_onoff = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_system, notes_system, offset_ratio=0.2, pitch_tolerance=0.25)
+
+                match_on_no_pedal = mir_eval.transcription.match_notes(intervals_target_no_pedal, notes_target_no_pedal, intervals_system, notes_system, offset_ratio=None, pitch_tolerance=0.25)
+                match_onoff_no_pedal = mir_eval.transcription.match_notes(intervals_target_no_pedal, notes_target_no_pedal, intervals_system, notes_system, offset_ratio=0.2, pitch_tolerance=0.25)
 
             # test features...
 
             # print('test high_low_voice =================================================')
 
             # # high low voice framewise
-            # highest_p, highest_r, highest_f = framewise_highest(system_pr, target_pr)
+            # highest_p, highest_r, highest_f = framewise_highest(system_pr_no_pedal, target_pr_no_pedal)
             # print('highest evaluation: ' + str(highest_p) + ', ' + str(highest_r) + ', ' + str(highest_f))
-            # lowest_p, lowest_r, lowest_f = framewise_lowest(system_pr, target_pr)
+            # lowest_p, lowest_r, lowest_f = framewise_lowest(system_pr_no_pedal, target_pr_no_pedal)
             # print('lowest evaluation: ' + str(lowest_p) + ', ' + str(lowest_r) + ', ' + str(lowest_f))
 
             # # high low voice notewise
-            # highest_p, highest_r, highest_f = notewise_highest(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            # highest_p, highest_r, highest_f = notewise_highest(notes_system, intervals_system, notes_target_no_pedal, intervals_target_no_pedal, match_on_no_pedal)
             # print('highest evaluation: ' + str(highest_p) + ', ' + str(highest_r) + ', ' + str(highest_f))
-            # lowest_p, lowest_r, lowest_f = notewise_lowest(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            # lowest_p, lowest_r, lowest_f = notewise_lowest(notes_system, intervals_system, notes_target_no_pedal, intervals_target_no_pedal, match_on_no_pedal)
             # print('lowest evaluation: ' + str(lowest_p) + ', ' + str(lowest_r) + ', ' + str(lowest_f))
-
-            # # correct highest and lowset note framewise
-            # print(correct_highest_lowest_note_framewise(system_pr, target_pr))
 
             # print('\n test loudness ========================================================')
             # value = false_negative_loudness(match_on, vel_target, intervals_target)
@@ -95,11 +102,11 @@ for example in os.listdir(MIDI_path)[:12]:
             # level = polyphony_level_seq(target_pr)
             # print('polyphony level: ' + str(level))
 
-            print('\n test repeat_merge ===========================================')
+            # print('\n test repeat_merge ===========================================')
             # repeat_ratio = repeated_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
             # print('repeated notes ratios: ' + str(repeat_ratio[0]) + ', ' + str(repeat_ratio[1]))
-            merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
-            print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
+            # merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            # print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
 
             # print('\n test rhythm =====================================================')
             # f1, f2 = rhythm_histogram(intervals_system, intervals_target)
