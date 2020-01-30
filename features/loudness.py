@@ -1,4 +1,5 @@
 import numpy as np
+from statistics import mean
 from .utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls, get_loudness
 
 ########################################
@@ -6,7 +7,8 @@ from .utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_
 ########################################
 
 # TESTED
-def false_negative_loudness(match,vel_target):
+def false_negative_loudness(match, vel_target, intervals_target, dt=0.5):
+    # in moving average, include the notes whose onsets are in the range of [t-dt, t+dt)
 
     if len(match) == 0:
         return 0.0
@@ -14,15 +16,21 @@ def false_negative_loudness(match,vel_target):
         matched_targets, matched_outputs = zip(*match)
         unmatched_targets= list(set(range(len(vel_target)))-set(matched_targets))
 
-        avg_vel = np.mean(vel_target)
-
         if len(unmatched_targets) == 0:
-            avg_unmatched = 0
+            return 0.0
         else:
-            unmatched_vels = vel_target[unmatched_targets]
-            avg_unmatched = np.mean(unmatched_vels)
-
-        return avg_unmatched / float(avg_vel)
+            # unmatched_vels = vel_target[unmatched_targets]
+            # avg_unmatched = np.mean(unmatched_vels)
+            unmatched_intervals = intervals_target[unmatched_targets]
+            unmatched_vels_normed = []
+            for unmatched_idx in unmatched_targets:
+                recent_vels = []
+                for idx in range(len(intervals_target)):
+                    if intervals_target[idx][0] >= intervals_target[unmatched_idx][0] - dt and intervals_target[idx][0] < intervals_target[unmatched_idx][0] + dt:
+                        recent_vels.append(vel_target[idx])
+                unmatched_vels_normed.append(float(vel_target[unmatched_idx]) / mean(recent_vels))
+                
+            return mean(unmatched_vels_normed)
 
 
 # TESTED

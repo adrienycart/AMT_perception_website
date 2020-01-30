@@ -22,7 +22,7 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[:12]:
+for example in os.listdir(MIDI_path)[:]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
     target_data = pm.PrettyMIDI(os.path.join(example_path, 'target.mid'))
@@ -74,11 +74,9 @@ for example in os.listdir(MIDI_path)[:12]:
             # # correct highest and lowset note framewise
             # print(correct_highest_lowest_note_framewise(system_pr, target_pr))
 
-            # print('\n test loudness ========================================================')
-
-            # value = false_negative_loudness(match_on, vel_target)
-            # print('loudness value: ' + str(value))
-
+            print('\n test loudness ========================================================')
+            value = false_negative_loudness(match_on, vel_target, intervals_target)
+            print('loudness value: ' + str(value))
             # ratio = loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match_on)
             # print('loudness ratio: ' + str(ratio))
 
@@ -103,12 +101,12 @@ for example in os.listdir(MIDI_path)[:12]:
             # merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
             # print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
 
-            print('\n test rhythm =====================================================')
+            # print('\n test rhythm =====================================================')
             # f1, f2 = rhythm_histogram(intervals_system, intervals_target)
             # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
             # print("rhythm flatness difference: " + str(f1-f2))
-            stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
-            print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
+            # stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
+            # print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
 
             # print('\n test specific_pitch ==================================================')
 
@@ -129,7 +127,6 @@ for example in os.listdir(MIDI_path)[:12]:
             # print('third_harmonic error: ' + str(r1) + "   " + str(r2))
 
             # print('\n test dynamic features ==================================================')
-
             # consonance_measures(notes_system, intervals_system, notes_target, intervals_target)
 
             # checkup piano rolls...
