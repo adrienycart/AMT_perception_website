@@ -647,6 +647,10 @@ for fold in range(10):
     ### Any answer that agrees with F-measure (keep only those who disagree):
     # results_F1 = (notewise1_train < notewise2_train).astype(int)
     # to_keep = np.not_equal(z_train[:,0],results_F1)
+    ### Any answer that CONFIDENTLY agrees with F-measure (keep only those who disagree):
+    # results_F1 = (notewise1_train < notewise2_train).astype(int)
+    # to_keep = np.logical_and(np.not_equal(z_train[:,0],results_F1),alpha_train[:,0]>=0.4)
+    # print np.sum(to_keep)
     #
     # features1_train = features1_train[to_keep]
     # features2_train = features2_train[to_keep]
@@ -669,10 +673,12 @@ for fold in range(10):
     N_REPEATS = 100
 
     results_F1 = (notewise1_test < notewise2_test).astype(int)
-    agreement_F1 = np.mean((z_test==results_F1).astype(int))
+    agreement_F1 = np.mean((z_test[:,0]==results_F1).astype(int))
+
+
 
     for i in range(N_REPEATS):
-        print "fold",fold,"repeat",i
+        print "fold",fold,"repeat",i, np.mean(repeat_agreement)
 
         valid_costs = []
 
@@ -685,6 +691,7 @@ for fold in range(10):
 
         for i in range(3000):
 
+            ### Batching
             features1_batch ,features2_batch,y_batch ,z_batch ,alpha_batch = sample(BATCH_SIZE,features1,features2,y,z,alpha)
             feed_dict_train = {
                 features1_ph:features1_batch,
@@ -694,6 +701,14 @@ for fold in range(10):
                 alpha_ph: alpha_batch,
                 }
 
+            ### Just take the whole set
+            # feed_dict_train = {
+            #     features1_ph:features1_train,
+            #     features2_ph:features2_train,
+            #     y_ph:y_train,
+            #     z_ph:z_train,
+            #     alpha_ph: alpha_train,
+            #     }
 
             sess.run(optimize, feed_dict=feed_dict_train)
             valid_cost = sess.run(loss, feed_dict=feed_dict_valid)
@@ -738,10 +753,15 @@ for fold in range(10):
 
         print "average agreement new metric:", np.round(agreement_metric,3)
         print "average agreement F-measure:", np.round(agreement_F1,3)
-        print repeat_agreement
+        # print repeat_agreement
 
-    results_dict = {'repeat_agreement':repeat_results,
+
+
+    results_dict = {'repeat_agreement':repeat_agreement,
                     'agreement_F1': agreement_F1}
+
+    # print np.std(repeat_agreement)
+    # print np.mean(repeat_agreement)
     save_path = os.path.join(save_destination,'fold'+str(fold)+'.pkl')
     pickle.dump(results_dict, open(save_path, 'wb'))
 
@@ -749,7 +769,6 @@ for fold in range(10):
 
 save_path = os.path.join(save_destination,'all_folds.pkl')
 pickle.dump(all_results, open(save_path, 'wb'))
-
 
 # plt.plot(valid_costs)
 # plt.show()
