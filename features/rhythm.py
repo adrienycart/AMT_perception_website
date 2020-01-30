@@ -19,11 +19,21 @@ def calculate_stds(data, means):
 	return stds
 
 
+def get_onset(interval):
+    return interval[0]
+
 # TESTED
 def rhythm_histogram(intervals_output, intervals_target):
     # return the logged spectral flatness ratio of the IOIs, where spectral flatness ratio is defined as the ratio of the geometric mean of the histogram over its arithmetic mean.
     # 1. spectral flatness for IOI of the output transcription
     # 2. spectral flatness for IOI of the ground truth music piece
+
+    # order note intervals by onsets
+    intervals_output = [tuple(intervals_output[idx]) for idx in range(len(intervals_output))]
+    intervals_target = [tuple(intervals_target[idx]) for idx in range(len(intervals_target))]
+    intervals_output.sort(key=get_onset)
+    intervals_target.sort(key=get_onset)
+
     ioi_output = [float(intervals_output[idx+1][0] - intervals_output[idx][0]) for idx in range(len(intervals_output)-1)]
     ioi_target = [float(intervals_target[idx+1][0] - intervals_target[idx][0]) for idx in range(len(intervals_target)-1)]
 
@@ -66,6 +76,12 @@ def rhythm_dispersion(intervals_output, intervals_target):
     # 1. change in standard deviations
     # 2. center drift
 
+    # order note intervals by onsets
+    intervals_output = [tuple(intervals_output[idx]) for idx in range(len(intervals_output))]
+    intervals_target = [tuple(intervals_target[idx]) for idx in range(len(intervals_target))]
+    intervals_output.sort(key=get_onset)
+    intervals_target.sort(key=get_onset)
+
     ioi_output = [float(intervals_output[idx+1][0] - intervals_output[idx][0]) for idx in range(len(intervals_output)-1)]
     ioi_target = [float(intervals_target[idx+1][0] - intervals_target[idx][0]) for idx in range(len(intervals_target)-1)]
 
@@ -74,13 +90,10 @@ def rhythm_dispersion(intervals_output, intervals_target):
     bins += [0.1+i*0.2 for i in range(10)]
     histogram_target = np.histogram(ioi_target, bins=bins)[0]
     means = []
-    if histogram_target[0] > histogram_target[1]:
-        means.append(np.mean([bins[0], bins[1]]))
-    for i in range(1, len(histogram_target)-1):
-        if histogram_target[i] > 0 and histogram_target[i] >= histogram_target[i-1] and histogram_target[i] >= histogram_target[i+1]:
+    for i in range(len(histogram_target)):
+        if histogram_target[i] > 0 and (i == 0 or histogram_target[i] > histogram_target[i-1]) and (i == len(histogram_target)-1 or histogram_target[i] >= histogram_target[i+1]):
             means.append(np.mean([bins[i], bins[i+1]]))
-    if histogram_target[len(histogram_target)-1] > histogram_target[len(histogram_target)-2]:
-        means.append(np.mean([bins[len(histogram_target)-1], bins[len(histogram_target)-2]]))
+            print(i)
             
     if len(means) == 0:
         return 0.0, 0.0
@@ -139,19 +152,19 @@ def rhythm_dispersion(intervals_output, intervals_target):
     # cluster centre drift
     drifts = [abs(means[idx] - means_output[idx]) for idx in range(len(means))]
 
-    # test
-    histogram_output = np.histogram(ioi_output, bins=bins)[0]
-    histogram_output = [max(0, histogram_output[idx]) for idx in range(len(histogram_output))]
-    histogram_target = [max(0, histogram_target[idx]) for idx in range(len(histogram_target))]
-    import matplotlib.pyplot as plt
-    plt.subplot(411)
-    plt.bar(np.arange(len(histogram_target)), histogram_target)
-    plt.subplot(412)
-    plt.bar(np.arange(len(histogram_output)), histogram_output)
-    plt.subplot(413)
-    plt.bar(np.arange(len(stds_change)), stds_change)
-    plt.subplot(414)
-    plt.bar(np.arange(len(drifts)), drifts)
-    plt.show()
+    # # test
+    # histogram_output = np.histogram(ioi_output, bins=bins)[0]
+    # histogram_output = [max(0, histogram_output[idx]) for idx in range(len(histogram_output))]
+    # histogram_target = [max(0, histogram_target[idx]) for idx in range(len(histogram_target))]
+    # import matplotlib.pyplot as plt
+    # plt.subplot(411)
+    # plt.bar(np.arange(len(histogram_target)), histogram_target)
+    # plt.subplot(412)
+    # plt.bar(np.arange(len(histogram_output)), histogram_output)
+    # plt.subplot(413)
+    # plt.bar(np.arange(len(stds_change)), stds_change)
+    # plt.subplot(414)
+    # plt.bar(np.arange(len(drifts)), drifts)
+    # plt.show()
 
     return stds_change, drifts

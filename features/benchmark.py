@@ -1,5 +1,5 @@
 import numpy as np
-from utils import precision, recall, Fmeasure
+from .utils import precision, recall, Fmeasure
 
 ##################################################
 ### FRAMEWISE METRICS

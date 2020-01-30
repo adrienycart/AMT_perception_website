@@ -22,30 +22,26 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[8:12]:
+for example in os.listdir(MIDI_path)[:12]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
     target_data = pm.PrettyMIDI(os.path.join(example_path, 'target.mid'))
     # play midi
-    os.system("app\\static\\data\\all_midi_cut\\"+example+"\\target.mid")
-    time.sleep(target_data.get_end_time() + 0.5)
+    # os.system("app\\static\\data\\all_midi_cut\\"+example+"\\target.mid")
+    # time.sleep(target_data.get_end_time() + 0.5)
 
     for system in systems:
-        # if system == 'cheng':
+        if system == 'cheng':
             print('\n' + system)
             system_data = pm.PrettyMIDI(os.path.join(example_path, system + '.mid'))
             # play midi
-            os.system("app\\static\\data\\all_midi_cut\\"+example+"\\"+system+".mid")
-            time.sleep(system_data.get_end_time() + 0.5)
+            # os.system("app\\static\\data\\all_midi_cut\\"+example+"\\"+system+".mid")
+            # time.sleep(system_data.get_end_time() + 0.5)
 
             # target and system piano rolls
-            # print('getting piano roll...')
             target_pr = (target_data.get_piano_roll(fs)>0).astype(int)
             system_pr = (system_data.get_piano_roll(fs)>0).astype(int)
             target_pr, system_pr = utils.even_up_rolls(target_pr, system_pr)
-
-            # utils.plot_piano_roll(target_pr)
-            # utils.plot_piano_roll(system_pr)
 
             # calculate note pitch, intervals and velocities
             notes_target, intervals_target, vel_target = utils.get_notes_intervals(target_data, with_vel=True)
@@ -107,12 +103,12 @@ for example in os.listdir(MIDI_path)[8:12]:
             # merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
             # print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
 
-            # print('\n test rhythm =====================================================')
+            print('\n test rhythm =====================================================')
             # f1, f2 = rhythm_histogram(intervals_system, intervals_target)
             # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
             # print("rhythm flatness difference: " + str(f1-f2))
-            # stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
-            # print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
+            stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
+            print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
 
             # print('\n test specific_pitch ==================================================')
 
@@ -132,5 +128,11 @@ for example in os.listdir(MIDI_path)[8:12]:
             # r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=19)
             # print('third_harmonic error: ' + str(r1) + "   " + str(r2))
 
-            print('\n test dynamic features ==================================================')
+            # print('\n test dynamic features ==================================================')
 
+            # consonance_measures(notes_system, intervals_system, notes_target, intervals_target)
+
+            # checkup piano rolls...
+            
+            # utils.plot_piano_roll(target_pr)
+            # utils.plot_piano_roll(system_pr)

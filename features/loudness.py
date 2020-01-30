@@ -1,5 +1,5 @@
 import numpy as np
-from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls, get_loudness
+from .utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls, get_loudness
 
 ########################################
 ### Loudness

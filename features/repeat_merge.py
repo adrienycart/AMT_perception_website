@@ -1,5 +1,5 @@
 import numpy as np
-from utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls
+from .utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_rolls
 
 
 
@@ -125,7 +125,7 @@ def repeated_notes_WITH_CORRECT_ONSET_ONLY(intervals_target,notes_output,interva
             # keys are pitches, values are the target intervals that have been matched to that pitch
             pitch_dict = {}
 
-            print matched_outputs,unmatched_outputs
+            print((matched_outputs,unmatched_outputs))
             for note in unmatched_notes:
                 if not note in pitch_dict:
                     match_indices = np.where(matched_notes==note)[0]
@@ -148,7 +148,7 @@ def repeated_notes_WITH_CORRECT_ONSET_ONLY(intervals_target,notes_output,interva
                     # print matching_target_intervals, interval_out
                     overlap = (np.minimum(matching_target_intervals[:,1],interval_out[1]) - np.maximum(matching_target_intervals[:,0],interval_out[0]))/(interval_out[1]-interval_out[0])
                     is_repeated = overlap > 0.8
-                    print note, overlap
+                    print((note, overlap))
                     assert sum(is_repeated.astype(int))==1 or sum(is_repeated.astype(int))==0
 
                     if np.any(is_repeated):
@@ -159,6 +159,6 @@ def repeated_notes_WITH_CORRECT_ONSET_ONLY(intervals_target,notes_output,interva
             tot_err = len(unmatched_outputs)
             tot_notes = len(notes_output)
 
-            print n_repeat, tot_err, tot_notes
+            print((n_repeat, tot_err, tot_notes))
 
             return n_repeat/tot_err, n_repeat/tot_notes, repeated
