@@ -8,8 +8,74 @@ from .utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_
 ########################################
 
 
-# TESTED
-def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
+def repeated_notes(notes_output, intervals_output, notes_target, intervals_target, match, tol=0.8):
+    if len(match) == 0:
+        matched_targets, matched_outputs = (), ()
+    else:
+        matched_targets, matched_outputs = zip(*match)
+    unmatched_outputs = list(set(range(len(notes_output))) - set(matched_outputs))
+
+    if len(unmatched_outputs) == 0:
+        return 0.0, 0.0
+
+    # point unmatched outputs to a target note
+    unmatched_outputs_pointer = [-1] * len(unmatched_outputs)
+    for idx in range(len(unmatched_outputs)):
+        pitch = notes_output[unmatched_outputs[idx]]
+        interval = intervals_output[unmatched_outputs[idx]]
+        duration = interval[1] - interval[0]
+        # find overlap note in target
+        for j in range(len(notes_target)):
+            if notes_target[j] == pitch and (min(interval[1], intervals_target[j][1]) - max(interval[0], intervals_target[j][0])) > (0.8 * duration):
+                unmatched_outputs_pointer[idx] = j
+
+    pointed_targets = list(filter(lambda x:x != -1, unmatched_outputs_pointer))
+    n_repeat = len(pointed_targets) - len(set(pointed_targets))
+
+    return float(n_repeat) / len(unmatched_outputs), float(n_repeat) / len(notes_output)
+
+
+def merged_notes(notes_output, intervals_output, notes_target, intervals_target, match, tol=0.8):
+    if len(match) == 0:
+        matched_targets, matched_outputs = (), ()
+    else:
+        matched_targets, matched_outputs = zip(*match)
+    unmatched_targets = list(set(range(len(notes_target))) - set(matched_targets))
+
+    if len(unmatched_targets) == 0:
+        return 0.0, 0.0
+
+    # point unmatched targets to an output note
+    unmatched_targets_pointer = [-1] * len(unmatched_targets)
+    for idx in range(len(unmatched_targets)):
+        pitch = notes_target[unmatched_targets[idx]]
+        interval = intervals_target[unmatched_targets[idx]]
+        duration = interval[1] - interval[0]
+        # find overlap note in output
+        for j in range(len(notes_output)):
+            if notes_output[j] == pitch and (min(interval[1], intervals_output[j][1]) - max(interval[0], intervals_output[j][0])) > (0.8 * duration):
+                unmatched_targets_pointer[idx] = j
+
+    pointed_outputs = list(filter(lambda x:x != -1, unmatched_targets_pointer))
+    # print(pointed_outputs)
+    pointed_outputs_set = set(pointed_outputs)
+    n_merged = 0
+    for output in pointed_outputs_set:
+        if pointed_outputs.count(output) > 1:
+            # print(output)
+            n_merged += 1
+
+    # print(n_merged)
+    return float(n_merged) / len(unmatched_targets), float(n_merged) / len(notes_output)
+
+
+
+######################################################
+# old definition, count starting notes
+######################################################
+
+
+def repeated_notes_old_stuff(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
     # Here, any note that is a false positive an overlaps with a ground truth note for more
     # than tol percent of its duration is considered a repeated note
 
@@ -47,7 +113,6 @@ def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,m
                     if overlap/note_duration > tol:
                         repeated += [idx]
 
-
                 n_repeat = float(len(repeated))
                 tot_err = len(unmatched_outputs)
                 tot_notes = len(notes_output)
@@ -56,7 +121,7 @@ def repeated_notes(notes_output,intervals_output,notes_target,intervals_target,m
 
 
 # TESTED
-def merged_notes(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
+def merged_notes_old_stuff(notes_output,intervals_output,notes_target,intervals_target,match,tol=0.8):
     # Here, any note that is a false positive an overlaps with a ground truth note for more
     # than tol percent of its duration is considered a repeated note
 

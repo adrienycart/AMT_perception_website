@@ -22,7 +22,7 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[:]:
+for example in os.listdir(MIDI_path)[:12]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
     target_data = pm.PrettyMIDI(os.path.join(example_path, 'target.mid'))
@@ -31,7 +31,7 @@ for example in os.listdir(MIDI_path)[:]:
     # time.sleep(target_data.get_end_time() + 0.5)
 
     for system in systems:
-        if system == 'cheng':
+        # if system == 'cheng':
             print('\n' + system)
             system_data = pm.PrettyMIDI(os.path.join(example_path, system + '.mid'))
             # play midi
@@ -74,9 +74,9 @@ for example in os.listdir(MIDI_path)[:]:
             # # correct highest and lowset note framewise
             # print(correct_highest_lowest_note_framewise(system_pr, target_pr))
 
-            print('\n test loudness ========================================================')
-            value = false_negative_loudness(match_on, vel_target, intervals_target)
-            print('loudness value: ' + str(value))
+            # print('\n test loudness ========================================================')
+            # value = false_negative_loudness(match_on, vel_target, intervals_target)
+            # print('loudness value: ' + str(value))
             # ratio = loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match_on)
             # print('loudness ratio: ' + str(ratio))
 
@@ -95,11 +95,11 @@ for example in os.listdir(MIDI_path)[:]:
             # level = polyphony_level_seq(target_pr)
             # print('polyphony level: ' + str(level))
 
-            # print('\n test repeat_merge ===========================================')
+            print('\n test repeat_merge ===========================================')
             # repeat_ratio = repeated_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
             # print('repeated notes ratios: ' + str(repeat_ratio[0]) + ', ' + str(repeat_ratio[1]))
-            # merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
-            # print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
+            merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
+            print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
 
             # print('\n test rhythm =====================================================')
             # f1, f2 = rhythm_histogram(intervals_system, intervals_target)
