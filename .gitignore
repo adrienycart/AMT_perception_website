@@ -9,3 +9,4 @@ app.db_save*
 *plots*
 /db_csv
 /precomputed_features
+/results_metric
