@@ -51,4 +51,21 @@ def consonance_measures(notes_output, intervals_output, notes_target, intervals_
 
 def polyphony_level(notes_output, intervals_output, notes_target, intervals_target):
 
-    return 0.0
+    chords_target, event_times_target = get_event_based_sequence(notes_target, intervals_target)
+    chords_output, event_times_output = get_event_based_sequence(notes_output, intervals_output)
+
+    polyphony_levels_target = [len(chord) for chord in chords_target]
+    polyphony_levels_output = [len(chord) for chord in chords_output]
+    # print(ave_polyphony_level_target)
+    # print(ave_polyphony_level_output)
+
+    ave_polyphony_level_target = np.mean([polyphony_levels_target[idx] * (event_times_target[idx+1] - event_times_target[idx]) for idx in range(len(chords_target))])
+    ave_polyphony_level_output = np.mean([polyphony_levels_output[idx] * (event_times_output[idx+1] - event_times_output[idx]) for idx in range(len(chords_output))])
+
+    # import matplotlib.pyplot as plt
+    # plt.plot(event_times_target, polyphony_levels_target + [0], label='target')
+    # plt.plot(event_times_output, polyphony_levels_output + [0], label='output')
+    # plt.legend()
+    # plt.show()
+
+    return ave_polyphony_level_target, ave_polyphony_level_output, max(polyphony_levels_target), max(polyphony_levels_output), min(polyphony_levels_target), min(polyphony_levels_output)

@@ -2,7 +2,7 @@ import numpy as np
 
 
 ########################################
-### Polyphony
+### Polyphony --- discarded
 ########################################
 
 def polyphony_level_seq(roll):

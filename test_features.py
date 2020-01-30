@@ -8,7 +8,6 @@ import features.utils as utils
 from features.high_low_voice import framewise_highest, framewise_lowest, notewise_highest, notewise_lowest, correct_highest_lowest_note_framewise
 from features.loudness import false_negative_loudness, loudness_ratio_false_negative
 from features.out_key import make_key_mask, out_key_errors, out_key_errors_binary_mask
-from features.polyphony import polyphony_level_seq, false_negative_polyphony_level
 from features.repeat_merge import repeated_notes, merged_notes
 from features.specific_pitch import specific_pitch_framewise, specific_pitch_notewise
 from features.rhythm import rhythm_histogram, rhythm_dispersion
@@ -39,7 +38,7 @@ for example in os.listdir(MIDI_path)[:12]:
     # time.sleep(target_data.get_end_time() + 0.5)
 
     for system in systems:
-        # if system == 'cheng':
+        if system == 'cheng':
             print('\n' + system)
             system_data = pm.PrettyMIDI(os.path.join(example_path, system + '.mid'))
             # play midi
@@ -98,10 +97,6 @@ for example in os.listdir(MIDI_path)[:12]:
             # ratio_1, ratio_2 = out_key_errors_binary_mask(notes_system, match_on, mask)
             # print('ratios: ' + str(ratio_1) + ', ' + str(ratio_2))
 
-            # print('\n test polyphony ==============================================')
-            # level = polyphony_level_seq(target_pr)
-            # print('polyphony level: ' + str(level))
-
             # print('\n test repeat_merge ===========================================')
             # repeat_ratio = repeated_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
             # print('repeated notes ratios: ' + str(repeat_ratio[0]) + ', ' + str(repeat_ratio[1]))
@@ -133,8 +128,11 @@ for example in os.listdir(MIDI_path)[:12]:
             # r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=19)
             # print('third_harmonic error: ' + str(r1) + "   " + str(r2))
 
-            # print('\n test dynamic features ==================================================')
+            print('\n test dynamic features ==================================================')
             # consonance_measures(notes_system, intervals_system, notes_target, intervals_target)
+            print('>> polyphony level in the form of')
+            print('(mean_target, mean_output, max_target, max_output, min_target, min_output):')
+            print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target))
 
             # checkup piano rolls...
             
