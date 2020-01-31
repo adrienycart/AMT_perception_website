@@ -43,7 +43,7 @@ def out_key_errors(notes_output,match,mask):
         if sum(all_weights)==0:
             return 0.0, 0.0
         else:
-            return np.mean(all_weights), sum(unmatched_weights)/sum(all_weights)
+            return np.mean(unmatched_weights), sum(unmatched_weights)/sum(all_weights)
 
 
 # TESTED
