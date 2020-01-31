@@ -7,7 +7,7 @@ from .utils import precision, recall, Fmeasure, make_note_index_matrix, even_up_
 ########################################
 
 # TESTED
-def false_negative_loudness(match, vel_target, intervals_target, dt=0.5):
+def false_negative_loudness(match, vel_target, intervals_target, dt=1):
     # in moving average, include the notes whose onsets are in the range of [t-dt, t+dt)
 
     if len(match) == 0:
@@ -29,7 +29,7 @@ def false_negative_loudness(match, vel_target, intervals_target, dt=0.5):
                     if intervals_target[idx][0] >= intervals_target[unmatched_idx][0] - dt and intervals_target[idx][0] < intervals_target[unmatched_idx][0] + dt:
                         recent_vels.append(vel_target[idx])
                 unmatched_vels_normed.append(float(vel_target[unmatched_idx]) / mean(recent_vels))
-                
+
             return mean(unmatched_vels_normed)
 
 
