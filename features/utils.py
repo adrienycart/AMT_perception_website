@@ -76,3 +76,11 @@ def plot_piano_roll(pr):
     fig = plt.imshow(pr)
     plt.show()
     return
+
+
+def create_folder(folder):
+    try:
+        os.makedirs(directory)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise

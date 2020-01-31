@@ -11,7 +11,7 @@ from features.out_key import make_key_mask, out_key_errors, out_key_errors_binar
 from features.repeat_merge import repeated_notes, merged_notes
 from features.specific_pitch import specific_pitch_framewise, specific_pitch_notewise
 from features.rhythm import rhythm_histogram, rhythm_dispersion
-from features.dynamic import consonance_measures, polyphony_level
+from features.dynamic import chord_dissonance, polyphony_level
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -129,12 +129,13 @@ for example in os.listdir(MIDI_path)[:12]:
             # print('third_harmonic error: ' + str(r1) + "   " + str(r2))
 
             print('\n test dynamic features ==================================================')
-            # consonance_measures(notes_system, intervals_system, notes_target, intervals_target)
-            print('>> polyphony level in the form of')
-            print('(mean_target, mean_output, max_target, max_output, min_target, min_output):')
-            print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target))
+            # print('>> consonance measures')
+            # print(consonance_measures(notes_system, intervals_system, notes_target, intervals_target, example, system))
 
-            # checkup piano rolls...
-            
-            # utils.plot_piano_roll(target_pr)
-            # utils.plot_piano_roll(system_pr)
+            print('>> chord dissonance in the form of')
+            print('(mean_target, mean_output, max_target, max_output, min_target, min_output):')
+            print(chord_dissonance(notes_system, intervals_system, notes_target, intervals_target))
+
+            # print('>> polyphony level in the form of')
+            # print('(mean_target, mean_output, max_target, max_output, min_target, min_output):')
+            # print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target))

@@ -1,4 +1,11 @@
 import numpy as np
+import os
+from .utils import create_folder
+# import rpy2.robjects as robjects
+# from rpy2.robjects.packages import importr
+# from rpy2.robjects import numpy2ri
+# numpy2ri.activate()
+from dissonant import harmonic_tone, dissonance, pitch_to_freq
 
 def get_pitch(full_note):
     return full_note[0]
@@ -42,12 +49,47 @@ def get_event_based_sequence(notes, intervals, dt=0.02):
 
     return chords, event_times
 
-def consonance_measures(notes_output, intervals_output, notes_target, intervals_target):
+# def consonance_measures(notes_output, intervals_output, notes_target, intervals_target, example, system):
+
+#     chords_target, event_times_target = get_event_based_sequence(notes_target, intervals_target)
+#     chords_output, event_times_output = get_event_based_sequence(notes_output, intervals_output)
+
+#     save_sequence = robjects.r("""
+#         function(chords, event_times, event_times, filename) {
+#             saveRDS(sequence, file=paste(filename, "_chord.rds", sep=""))
+#         }
+#     """)
+
+#     chords_target = np.array(chords_target)
+#     event_times_target = np.array(event_times_target)
+
+#     create_folder("features/consonance_values/" + example)
+
+#     save_sequence(chords_target, event_times_target, "features/consonance_values/"+example+"/"+system)
+
+#     return 0.0
+
+
+def chord_dissonance(notes_output, intervals_output, notes_target, intervals_target):
 
     chords_target, event_times_target = get_event_based_sequence(notes_target, intervals_target)
+    chords_output, event_times_output = get_event_based_sequence(notes_output, intervals_output)
 
+    dissonances_target = []
+    for chord in chords_target:
+        freqs, amps = harmonic_tone(pitch_to_freq(chord), n_partials=10)
+        dissonances_target.append(dissonance(freqs, amps, model='sethares1993'))
 
-    return 0.0
+    dissonances_output = []
+    for chord in chords_output:
+        freqs, amps = harmonic_tone(pitch_to_freq(chord), n_partials=10)
+        dissonances_output.append(dissonance(freqs, amps, model='sethares1993'))
+
+    ave_dissonance_target = np.mean([dissonances_target[idx] * (event_times_target[idx+1] - event_times_target[idx]) for idx in range(len(chords_target))])
+    ave_dissonance_output = np.mean([dissonances_output[idx] * (event_times_output[idx+1] - event_times_output[idx]) for idx in range(len(chords_output))])
+
+    return ave_dissonance_target, ave_dissonance_output, max(dissonances_target), max(dissonances_output), min(dissonances_target), min(dissonances_output)
+
 
 def polyphony_level(notes_output, intervals_output, notes_target, intervals_target):
 
