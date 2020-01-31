@@ -85,10 +85,16 @@ def chord_dissonance(notes_output, intervals_output, notes_target, intervals_tar
         freqs, amps = harmonic_tone(pitch_to_freq(chord), n_partials=10)
         dissonances_output.append(dissonance(freqs, amps, model='sethares1993'))
 
-    ave_dissonance_target = np.mean([dissonances_target[idx] * (event_times_target[idx+1] - event_times_target[idx]) for idx in range(len(chords_target))])
-    ave_dissonance_output = np.mean([dissonances_output[idx] * (event_times_output[idx+1] - event_times_output[idx]) for idx in range(len(chords_output))])
+    durations_target = [event_times_target[idx+1] - event_times_target[idx] for idx in range(len(chords_target))]
+    durations_output = [event_times_output[idx+1] - event_times_output[idx] for idx in range(len(chords_output))]
 
-    return ave_dissonance_target, ave_dissonance_output, max(dissonances_target), max(dissonances_output), min(dissonances_target), min(dissonances_output)
+    ave_dissonance_target = sum([dissonances_target[idx] * durations_target[idx] for idx in range(len(chords_target))]) / event_times_target[-1]
+    ave_dissonance_output = sum([dissonances_output[idx] * durations_output[idx] for idx in range(len(chords_output))]) / event_times_output[-1]
+
+    std_dissonance_target = np.sqrt(sum([(dissonances_target[idx] - ave_dissonance_target)**2 * durations_target[idx] for idx in range(len(chords_target))]) / event_times_target[-1])
+    std_dissonance_output = np.sqrt(sum([(dissonances_output[idx] - ave_dissonance_output)**2 * durations_output[idx] for idx in range(len(chords_output))]) / event_times_output[-1])
+
+    return ave_dissonance_target, ave_dissonance_output, std_dissonance_target, std_dissonance_output, max(dissonances_target), max(dissonances_output), min(dissonances_target), min(dissonances_output)
 
 
 def polyphony_level(notes_output, intervals_output, notes_target, intervals_target):
@@ -101,8 +107,14 @@ def polyphony_level(notes_output, intervals_output, notes_target, intervals_targ
     # print(ave_polyphony_level_target)
     # print(ave_polyphony_level_output)
 
-    ave_polyphony_level_target = np.mean([polyphony_levels_target[idx] * (event_times_target[idx+1] - event_times_target[idx]) for idx in range(len(chords_target))])
-    ave_polyphony_level_output = np.mean([polyphony_levels_output[idx] * (event_times_output[idx+1] - event_times_output[idx]) for idx in range(len(chords_output))])
+    durations_target = [event_times_target[idx+1] - event_times_target[idx] for idx in range(len(chords_target))]
+    durations_output = [event_times_output[idx+1] - event_times_output[idx] for idx in range(len(chords_output))]
+
+    ave_polyphony_level_target = sum([polyphony_levels_target[idx] * (event_times_target[idx+1] - event_times_target[idx]) for idx in range(len(chords_target))]) / event_times_target[-1]
+    ave_polyphony_level_output = sum([polyphony_levels_output[idx] * (event_times_output[idx+1] - event_times_output[idx]) for idx in range(len(chords_output))]) / event_times_output[-1]
+
+    std_polyphony_level_target = np.sqrt(sum([(polyphony_levels_target[idx] - ave_polyphony_level_target)**2 * durations_target[idx] for idx in range(len(chords_target))]) / event_times_target[-1])
+    std_polyphony_level_output = np.sqrt(sum([(polyphony_levels_output[idx] - ave_polyphony_level_output)**2 * durations_output[idx] for idx in range(len(chords_output))]) / event_times_output[-1])
 
     # import matplotlib.pyplot as plt
     # plt.plot(event_times_target, polyphony_levels_target + [0], label='target')
@@ -110,4 +122,4 @@ def polyphony_level(notes_output, intervals_output, notes_target, intervals_targ
     # plt.legend()
     # plt.show()
 
-    return ave_polyphony_level_target, ave_polyphony_level_output, max(polyphony_levels_target), max(polyphony_levels_output), min(polyphony_levels_target), min(polyphony_levels_output)
+    return ave_polyphony_level_target, ave_polyphony_level_output, std_polyphony_level_target, std_polyphony_level_output, max(polyphony_levels_target), max(polyphony_levels_output), min(polyphony_levels_target), min(polyphony_levels_output)

@@ -132,10 +132,8 @@ for example in os.listdir(MIDI_path)[:12]:
             # print('>> consonance measures')
             # print(consonance_measures(notes_system, intervals_system, notes_target, intervals_target, example, system))
 
-            print('>> chord dissonance in the form of')
-            print('(mean_target, mean_output, max_target, max_output, min_target, min_output):')
+            print('>> chord dissonance')
             print(chord_dissonance(notes_system, intervals_system, notes_target, intervals_target))
 
-            # print('>> polyphony level in the form of')
-            # print('(mean_target, mean_output, max_target, max_output, min_target, min_output):')
-            # print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target))
+            print('>> polyphony level')
+            print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target))
