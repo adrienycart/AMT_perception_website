@@ -21,7 +21,7 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[:12]:
+for example in os.listdir(MIDI_path)[:]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
 
@@ -38,8 +38,8 @@ for example in os.listdir(MIDI_path)[:12]:
     # time.sleep(target_data.get_end_time() + 0.5)
 
     for system in systems:
-        if system == 'cheng':
-            print('\n' + system)
+        # if system == 'cheng':
+            print(system)
             system_data = pm.PrettyMIDI(os.path.join(example_path, system + '.mid'))
             # play midi
             # os.system("app\\static\\data\\all_midi_cut\\"+example+"\\"+system+".mid")
@@ -128,12 +128,8 @@ for example in os.listdir(MIDI_path)[:12]:
             # r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=19)
             # print('third_harmonic error: ' + str(r1) + "   " + str(r2))
 
-            print('\n test dynamic features ==================================================')
-            # print('>> consonance measures')
-            # print(consonance_measures(notes_system, intervals_system, notes_target, intervals_target, example, system))
+            # print('\n test dynamic features ==================================================')
+            
+            # print(chord_dissonance(notes_system, intervals_system, notes_target, intervals_target, example, system))
 
-            print('>> chord dissonance')
-            print(chord_dissonance(notes_system, intervals_system, notes_target, intervals_target))
-
-            print('>> polyphony level')
-            print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target))
+            print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target, example, system))

@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 def even_up_rolls(roll1,roll2,pad_value=0):
@@ -79,8 +80,8 @@ def plot_piano_roll(pr):
 
 
 def create_folder(folder):
-    try:
-        os.makedirs(directory)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
+    if not os.path.exists(folder):
+        try:
+            os.makedirs(folder)
+        except:
+            print("create folder error")
