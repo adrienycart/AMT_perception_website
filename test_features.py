@@ -21,7 +21,7 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[:]:
+for example in os.listdir(MIDI_path)[:12]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
 
@@ -130,6 +130,6 @@ for example in os.listdir(MIDI_path)[:]:
 
             # print('\n test dynamic features ==================================================')
             
-            # print(chord_dissonance(notes_system, intervals_system, notes_target, intervals_target, example, system))
+            print(chord_dissonance(notes_system, intervals_system, notes_target, intervals_target, example, system))
 
-            print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target, example, system))
+            # print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target, example, system))

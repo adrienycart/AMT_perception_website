@@ -10,6 +10,6 @@ app.db_save*
 /db_csv
 /precomputed_features
 /results_metric
-/features/consonance_values
+/features/consenance_statistics
 /features/chords_and_times
 .Rhistory

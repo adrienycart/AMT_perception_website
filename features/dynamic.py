@@ -1,6 +1,8 @@
 import numpy as np
 import os
 from statistics import stdev
+import pandas as pd
+import csv
 from .utils import create_folder
 from dissonant import harmonic_tone, dissonance, pitch_to_freq
 
@@ -17,30 +19,43 @@ def weighted_std(values, weighted_mean, weights):
     std = np.sqrt(sum([(values[idx] - weighted_mean)**2 * weights[idx] for idx in range(len(values))]) / sum(weights))
     return std
 
-def pad_chords(chords):
+def pad_chords(chords, pad_value=-1):
     max_poly = max(len(chord) for chord in chords)
     for chord in chords:
-        chord.extend([-1] * (max_poly - len(chord)))
-    print(np.array(chords))
+        chord.extend([pad_value] * (max_poly - len(chord)))
     return chords
 
-def unpad_chords(chords):
+def unpad_chords(chords, pad_value=-1):
     unpad = []
     for chord in chords:
-        unpad.append([p for p in chord if p != -1])
+        unpad.append([p for p in chord if p != pad_value])
     return unpad
+
+def save_to_csv(filename, data):
+    with open(filename, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for row in data:
+            try:
+                writer.writerow(row)
+            except:
+                writer.writerow([row])
+
+def read_from_csv(filename, dtype=float):
+    df = pd.read_csv(filename)
+    return df.values.tolist()
 
 def get_event_based_sequence(notes, intervals, example, system, dt=0.05):
 
     folder = "features/chords_and_times/" + example + "/"
 
     # if precalculated, simple load values
-    if os.path.isfile(folder + system + "_chords.npy"):
-        chords = np.load(folder + system + "_chords.npy", allow_pickle=True)
-        chords = [list(chords[i]) for i in range(chords.shape[0])]
+    if os.path.isfile(folder + system + "_chords.csv"):
+        chords = read_from_csv(folder + system + "_chords.csv", dtype=int)
         chords = unpad_chords(chords)
-        event_times = list(np.load(folder + system + "_event_times.npy", allow_pickle=True))
-        durations = list(np.load(folder + system + "_durations.npy", allow_pickle=True))
+        event_times = read_from_csv(folder + system + "_event_times.csv", dtype=float)
+        event_times = [x[0] for x in event_times]
+        durations = read_from_csv(folder + system + "_durations.csv", dtype=float)
+        durations = [x[0] for x in durations]
         return chords, event_times, durations
 
     # if not pre-calculated, calculate chords and event times.
@@ -63,7 +78,7 @@ def get_event_based_sequence(notes, intervals, example, system, dt=0.05):
     for idx in range(len(event_times)-1):
         chord = []
         for note in full_notes:
-            if get_onset(note) < event_times[idx] + dt and get_offset(note) > event_times[idx+1] - dt:
+            if get_onset(note) < event_times[idx] + dt and get_offset(note) >= event_times[idx+1] - dt and not get_pitch(note) in set(chord):
                 chord.append(get_pitch(note))
         chords.append(chord)
 
@@ -76,9 +91,9 @@ def get_event_based_sequence(notes, intervals, example, system, dt=0.05):
     durations = [event_times[idx+1] - event_times[idx] for idx in range(len(chords))]
 
     create_folder(folder)
-    np.save(folder + system + "_chords.npy", np.array(pad_chords(chords)))
-    np.save(folder + system + "_event_times.npy", np.array(event_times))
-    np.save(folder + system + "_durations.npy", np.array(durations))
+    save_to_csv(folder + system + "_chords.csv", pad_chords(chords))
+    save_to_csv(folder + system + "_event_times.csv", event_times)
+    save_to_csv(folder + system + "_durations.csv", durations)
     # print(system + 'saved.')
 
     return chords, event_times, durations
@@ -127,7 +142,6 @@ def polyphony_level(notes_output, intervals_output, notes_target, intervals_targ
 
     chords_target, event_times_target, durations_target = get_event_based_sequence(notes_target, intervals_target, example, "target")
     chords_output, event_times_output, durations_output = get_event_based_sequence(notes_output, intervals_output, example, system)
-    print(chords_target)
 
     polyphony_levels_target = [len(chord) for chord in chords_target]
     polyphony_levels_output = [len(chord) for chord in chords_output]
