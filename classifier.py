@@ -7,11 +7,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
-from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import PCA
-import pandas as pd
 
 from config import MAX_ANSWERS
 
@@ -185,215 +181,22 @@ filecp = codecs.open('db_csv/user_data.csv', encoding = 'utf-8')
 users = np.genfromtxt(filecp,dtype=object,delimiter=";")
 users = users[1:,:]
 
+results_dict = {}
 
-# #################################################
-# ###### Bradley-Terry comparison : DOESN'T WORK
-# #################################################
-#
-# import choix
-# # systems = ['cheng','google',"kelz","lisu"]
-# syst_dict = {'cheng':0,'google':1,"kelz":2,"lisu":3}
-# data = []
-# for row in answers:
-#     choice = int(row[5])
-#     systs=row[2:4]
-#     data += [(syst_dict[systs[choice]],syst_dict[systs[1-choice]])]
-#
-# n_items = 4
-# params = choix.ilsr_pairwise(n_items, data)
-# print params
-# print("ranking (worst to best):", np.argsort(params))
+systems = ['cheng','google',"kelz","lisu"]
+pairs = []
+for i in range(len(systems)):
+    for j in range(i+1,len(systems)):
+        pairs += [[systems[i],systems[j]]]
 
-#################################################@
-####### MIXED EFFECTS MODEL
-#################################################@
+r = np.array(list(range(len(pairs))))
 
-#
-# AQ = pd.read_csv('db_csv/answers_data.csv',delimiter=';')
-#
-# results_dict = {}
-# feature_dir = 'precomputed_features'
-#
-# systems = ['cheng','google',"kelz","lisu"]
-# pairs = []
-# for i in range(len(systems)):
-#     for j in range(i+1,len(systems)):
-#         pairs += [[systems[i],systems[j]]]
-#
-# r = np.array(list(range(len(pairs))))
-#
-# for example in np.unique(answers[:,1]):
-#     example_dir = os.path.join(feature_dir,example)
-#     results_dict[example] = {}
-#     for system in systems:
-#         results = pickle.load(open(os.path.join(example_dir,system+'.pkl'), "rb"))
-#         results_dict[example][system]=results
-#
-# f_syst1 = []
-# f_syst2 = []
-# f_diff = []
-# diff_f_highest = []
-# diff_repeated = []
-# best_highest = []
-# best_repeated = []
-# for row in answers:
-#     f_syst1 += [results_dict[row[1]][row[2]]["notewise_On_50"][-1]]
-#     f_syst2 += [results_dict[row[1]][row[3]]["notewise_On_50"][-1]]
-#     f_diff += [abs(results_dict[row[1]][row[2]]["notewise_On_50"][-1]-results_dict[row[1]][row[3]]["notewise_On_50"][-1])]
-#     if results_dict[row[1]][row[2]]["notewise_On_50"][-1] > results_dict[row[1]][row[3]]["notewise_On_50"][-1]:
-#         best_syst = row[2]
-#         worst_syst = row[3]
-#     else:
-#         best_syst = row[3]
-#         worst_syst = row[3]
-#
-#     diff_f_highest += [results_dict[row[1]][best_syst]["high_n"][-1]-results_dict[row[1]][worst_syst]["high_n"][-1]]
-#     diff_repeated += [results_dict[row[1]][best_syst]["repeat"][-2]-results_dict[row[1]][worst_syst]["repeat"][-2]]
-#     best_highest += [results_dict[row[1]][best_syst]["high_n"][-1]]
-#     best_repeated += [results_dict[row[1]][best_syst]["repeat"][-1]]
-#
-# data = {'f_system1':f_syst1,
-#         'f_system2':f_syst2,
-#         'f_diff':f_diff,
-#         'diff_f_highest':diff_f_highest,
-#         'diff_repeated':diff_repeated,
-#         'best_highest':best_highest,
-#         'best_repeated':best_repeated,}
-# data_f_mes = pd.DataFrame(data)
-#
-#
-#
-# goldmsi = []
-# for row in answers:
-#     user_id = row[4]
-#     goldmsi += [float(users[users[:,0]==user_id,5])]
-# data = {'goldmsi':goldmsi}
-# data_goldmsi = pd.DataFrame(data)
-#
-# AQ_new = pd.concat([AQ, data_f_mes,data_goldmsi],axis=1)
-# reverse_idx = AQ_new['f_system1']>AQ_new['f_system2']
-#
-#
-# system1 = AQ_new["system1"][reverse_idx]
-# f_system1 = AQ_new["f_system1"][reverse_idx]
-# AQ_new.loc[reverse_idx, 'system1']=AQ_new["system2"][reverse_idx]
-# AQ_new.loc[reverse_idx, 'system2']=system1
-# AQ_new.loc[reverse_idx, 'f_system1']=AQ_new["f_system2"][reverse_idx]
-# AQ_new.loc[reverse_idx, 'f_system2']=f_system1
-# AQ_new.loc[reverse_idx, 'answer']=1- AQ_new["answer"][reverse_idx]
-
-###       0            1         2          3        4         5        6            7           8        9           10             11
-### ['question_id' 'example' 'system1' 'system2' 'user_id' 'answer' 'recognised' 'difficulty' 'time'  'f_system1' , 'f_system2', 'goldmsi']
-
-# print AQ_new[['question_id','system1','system2','answer']]
-
-
-
-
-
-# print AQ_new[['question_id','system1','system2','answer']]
-
-### Only confident answers
-# AQ_new = AQ_new[AQ_new['difficulty']<3]
-# print AQ_new
-
-
-### Only kelz vs lisu
-# AQ_new = AQ_new[np.logical_and(np.isin(AQ_new['system1'],['kelz','lisu']),np.isin(AQ_new['system2'],['kelz','lisu']))]
-
-### Only musicians
-# goldmsi_med = np.median(AQ_new['goldmsi'])
-# AQ_new = AQ_new[AQ_new['goldmsi']>goldmsi_med]
-
-## Co-dependent variables: *
-## Random variables: +(var/user_id) --> /user_id
-## Also check multiple regression (simple)
-## Also check multiple logistic regression
-
-## Mixed Effects Model
-# mixed = smf.mixedlm("answer ~ f_diff+f_system2+goldmsi+recognised+difficulty", AQ_new,groups='question_id')
-# mixed_fit = mixed.fit()
-# print(mixed_fit.summary())
-
-### logistic regression
-# feature_columns = ["recognised","difficulty","f_system1","f_system2","goldmsi"]
-# X = AQ_new.loc[:, feature_columns].values
-#
-# y=AQ_new.answer
-# clf = LogisticRegression().fit(X, y)
-# print clf.coef_
-# for c,feat in zip(clf.coef_[0],feature_columns):
-#     print feat, 'coef', c
-
-
-###############################################################
-#### INTER-RATER AGREEMENT
-###############################################################
-
-### Only confident answers
-# AQ_new = AQ_new[AQ_new['difficulty']<3]
-# print AQ_new
-
-### Only keep questions with 4 ratings
-# q_ids,counts = np.unique(AQ_new['question_id'],return_counts=True)
-# q_ids_to_keep = q_ids[counts==4]
-# answers_to_keep = np.isin(AQ_new['question_id'],q_ids_to_keep)
-# AQ_new = AQ_new[answers_to_keep]
-#
-# f_syst1s = []
-# f_syst2s = []
-# F_mes_diffs = []
-# inter_rater_agreements = []
-# agreements_with_f = []
-# avg_gold_msi = []
-# std_gold_msi = []
-# avg_difficulty = []
-# q_ids = []
-#
-# for q_id in np.unique(AQ_new['question_id']):
-#     q_ids += [q_id]
-#     data_q = AQ_new[AQ_new['question_id']==q_id]
-#     f_syst1 = np.mean(data_q['f_system1'])
-#     f_syst2 = np.mean(data_q['f_system2'])
-#     f_syst1s += [f_syst1]
-#     f_syst2s += [f_syst2]
-#     F_mes_diffs += [abs(f_syst1-f_syst2)]
-#     vote = np.sum(data_q["answer"])
-#     agreement = abs(vote-2)
-#     inter_rater_agreements += [agreement]
-#
-#     f_choice = 1-int(f_syst1>f_syst2)
-#     agreements_with_f += [vote] if f_choice else [4-vote]
-#
-#     avg_gold_msi += [np.mean(data_q['goldmsi'])]
-#     std_gold_msi += [np.std(data_q['goldmsi'])]
-#
-#     avg_difficulty += [np.mean(data_q['difficulty'])]
-#
-# q_ids = np.array(q_ids)
-# f_syst1s = np.array(f_syst1s)
-# f_syst2s = np.array(f_syst2s)
-# F_mes_diffs = np.array(F_mes_diffs)
-# inter_rater_agreements = np.array(inter_rater_agreements)
-# agreements_with_f = np.array(agreements_with_f)
-# avg_gold_msi = np.array(avg_gold_msi)
-# std_gold_msi = np.array(std_gold_msi)
-# avg_difficulty = np.array(avg_difficulty)
-#
-# AQ_new = pd.DataFrame({ 'question_id':q_ids,
-#                         'f_system1':f_syst1s,
-#                         'f_system2':f_syst2s,
-#                         'f_diff':f_syst2s-f_syst1s,
-#                         'inter_rater_agreements':inter_rater_agreements,
-#                         'agreements_with_f':agreements_with_f,
-#                         'avg_gold_msi':avg_gold_msi,
-#                         'std_gold_msi':std_gold_msi,
-#                         'avg_difficulty':avg_difficulty,})
-#
-# mixed = smf.mixedlm("agreements_with_f ~ f_diff+f_system2+avg_gold_msi+std_gold_msi+avg_difficulty", AQ_new,groups='question_id')
-# mixed_fit = mixed.fit()
-# print(mixed_fit.summary())
-
+for example in np.unique(answers[:,1]):
+    example_dir = os.path.join(feature_dir,example)
+    results_dict[example] = {}
+    for system in systems:
+        results = pickle.load(open(os.path.join(example_dir,system+'.pkl'), "rb"))
+        results_dict[example][system]=results
 
 
 
@@ -402,13 +205,6 @@ users = users[1:,:]
 ########################################################
 
 
-#### GATHER DATA
-features1=[]
-features2=[]
-ratings=[]
-notewise1 = []
-notewise2 = []
-goldmsi = []
 
 save_destination = 'results_metric/all_features'
 if not os.path.exists(save_destination):
@@ -444,6 +240,7 @@ features_to_use = [
 labels = get_feature_labels(features_to_use)
 N_FEATURES = len(labels)
 
+
 #### Graph definition
 
 features1_ph = tf.placeholder(tf.float32,[None,N_FEATURES])
@@ -464,6 +261,17 @@ loss = contrastive_loss_absolute(model_output1,model_output2,y_ph,z_ph,alpha_ph)
 # loss = contrastive_loss(model_output1,model_output2,y_ph,alpha_ph)
 optimize = tf.train.AdamOptimizer(learning_rate=0.01).minimize(loss)
 
+
+#### GATHER DATA
+features1=[]
+features2=[]
+ratings=[]
+notewise1 = []
+notewise2 = []
+goldmsi = []
+
+
+# answers = answers[answers[:,7].astype(int)<3]
 
 ### AGGREGATE ALL ANSWERS
 # for q_id in np.unique(answers[:,0]):
@@ -496,7 +304,6 @@ optimize = tf.train.AdamOptimizer(learning_rate=0.01).minimize(loss)
 
 #### USE EACH INDIVIDUAL ANSWER AS TRAINING SAMPLE
 
-
 for row in answers:
 
     example = row[1]
@@ -524,32 +331,22 @@ ratings = np.array(ratings,dtype=int)
 notewise1 = np.array(notewise1,dtype=float)
 notewise2 = np.array(notewise2,dtype=float)
 goldmsi = np.array(goldmsi,dtype=float)
-
-
+q_ids = answers[:,0]
+difficulties = answers[:,7].astype(float)
 
 y=np.zeros_like(ratings)
 z=ratings
-alpha = answers[:,7].astype(float)
-alpha[alpha==1] = 0.5
-alpha[alpha==2] = 0.4
-alpha[alpha==3] = 0.3
-alpha[alpha==4] = 0.2
-alpha[alpha==5] = 0.1
+alpha = np.zeros_like(difficulties)
+alpha[difficulties==1] = 0.5
+alpha[difficulties==2] = 0.4
+alpha[difficulties==3] = 0.3
+alpha[difficulties==4] = 0.2
+alpha[difficulties==5] = 0.1
+
 
 y = y[:,None]
 z = z[:,None]
 alpha = alpha[:,None]
-
-
-# dataset = pd.DataFrame({'features1':features1,
-#                         "features2":features2,
-#                         "ratings":ratings,
-#                         "notewise1":notewise1,
-#                         "notewise2":notewise2,
-#                         "goldmsi":goldmsi,
-#                         "y":y,
-#                         "z":z,
-#                         "alpha":alpha,})
 
 #### SPLIT DATA
 
@@ -557,6 +354,9 @@ all_results = {}
 
 for fold in range(10):
 
+    ###### AGGREGATE ANSWERS
+
+    ###### USE EACH INDIVIDUAL ANSWER
     all_examples, indices = np.unique(answers[:,1],return_index=True)
     sort_idx = np.argsort(indices)
     all_examples = all_examples[sort_idx]
@@ -603,6 +403,7 @@ for fold in range(10):
     notewise1_train = notewise1[idx_train]
     notewise2_train = notewise2[idx_train]
     goldmsi_train = goldmsi[idx_train]
+    difficulties_train = difficulties[idx_train]
 
     features1_valid = features1[idx_valid]
     features2_valid = features2[idx_valid]
@@ -619,6 +420,8 @@ for fold in range(10):
     alpha_test = alpha[idx_test]
     notewise1_test = notewise1[idx_test]
     notewise2_test = notewise2[idx_test]
+    q_ids_test = q_ids[idx_test]
+    difficulties_test = difficulties[idx_test]
 
 
     ###### Apply PCA
@@ -641,7 +444,7 @@ for fold in range(10):
     ### Remove from training set
 
     ### Any unsure response:
-    # to_keep = alpha_train[:,0]>=0.4
+    # to_keep = difficulties_train<3
     ### Any non-musician response:
     # to_keep = goldmsi_train>=np.median(goldmsi_train)
     ### Any answer that agrees with F-measure (keep only those who disagree):
@@ -649,7 +452,7 @@ for fold in range(10):
     # to_keep = np.not_equal(z_train[:,0],results_F1)
     ### Any answer that CONFIDENTLY agrees with F-measure (keep only those who disagree):
     # results_F1 = (notewise1_train < notewise2_train).astype(int)
-    # to_keep = np.logical_and(np.not_equal(z_train[:,0],results_F1),alpha_train[:,0]>=0.4)
+    # to_keep = np.logical_and(np.not_equal(z_train[:,0],results_F1),difficulties_train<3)
     # print np.sum(to_keep)
     #
     # features1_train = features1_train[to_keep]
@@ -660,7 +463,49 @@ for fold in range(10):
     # notewise1_train = notewise1_train[to_keep]
     # notewise2_train = notewise2_train[to_keep]
 
+
+    #### AGGREGATE CONFIDENT TEST ANSWERS
+    #### Only keep answers for which there is a clear majority, regardless of the number of confident answers
+    features1_test_agg = []
+    features2_test_agg = []
+    ratings_test_agg = []
+    result_f1_test_agg = []
+    notewise1_test_agg = []
+    notewise2_test_agg = []
+
+    for q_id in np.unique(q_ids_test):
+        idx_id = np.logical_and(q_ids_test == q_id,difficulties_test<3)
+        # Skip questions without confident answers
+        if np.any(idx_id):
+            vote = np.mean(z_test[idx_id])
+            # Skip draw cases
+            if vote != 0.5:
+                features1_test_agg += [features1_test[idx_id][0,:]]
+                features2_test_agg += [features2_test[idx_id][0,:]]
+                ratings_test_agg += [int(vote > 0.5)]
+                notewise1_test_agg += [notewise1_test[idx_id][0]]
+                notewise2_test_agg += [notewise2_test[idx_id][0]]
+                # result_f1_test_agg += [(notewise1_test[idx_id] < notewise2_test[idx_id]).astype(int)[0]]
+            # print answers[idx_test][idx_id]
+            # print vote, int(vote > 0.5)
+            # print notewise1_test[idx_id][0],notewise2_test[idx_id][0],(notewise1_test[idx_id] < notewise2_test[idx_id]).astype(int)[0]
+
+    features1_test_agg = np.array(features1_test_agg)
+    features2_test_agg = np.array(features2_test_agg)
+    ratings_test_agg = np.array(ratings_test_agg)
+    notewise1_test_agg = np.array(notewise1_test_agg)
+    notewise2_test_agg = np.array(notewise2_test_agg)
+    result_f1_test_agg = (notewise1_test_agg<notewise2_test_agg).astype(int)
+
+
+    # print features1_test_agg.shape,features2_test_agg.shape,ratings_test_agg.shape,result_f1_test_agg.shape
+    # print np.mean(ratings_test_agg == result_f1_test_agg)
+
+    #### Run training
     repeat_agreement = []
+    repeat_agreement_agg = []
+    repeat_agreement_conf = []
+    repeat_best_weights = []
 
     feed_dict_valid = {
         features1_ph:features1_valid,
@@ -670,10 +515,12 @@ for fold in range(10):
         alpha_ph: alpha_valid,
         }
 
-    N_REPEATS = 100
+    N_REPEATS = 1
 
     results_F1 = (notewise1_test < notewise2_test).astype(int)
     agreement_F1 = np.mean((z_test[:,0]==results_F1).astype(int))
+    agreement_F1_conf = np.mean((z_test[difficulties_test<3,0]==results_F1[difficulties_test<3]).astype(int))
+    agreement_F1_agg = np.mean(ratings_test_agg == result_f1_test_agg)
 
 
 
@@ -744,21 +591,53 @@ for fold in range(10):
             weights: best_parameters
             }
 
-        ## Remove draws:
+        feed_dict_test_agg = {
+            features1_ph:features1_test_agg,
+            features2_ph:features2_test_agg,
+            weights: best_parameters
+        }
+
+        idx_confident = difficulties_test<3
+        feed_dict_test_conf = {
+            features1_ph:features1_test[idx_confident],
+            features2_ph:features2_test[idx_confident],
+            weights: best_parameters
+        }
+
         metrics1,metrics2 = sess.run([model_output1,model_output2],feed_dict_test)
         result_metrics = (metrics1<metrics2).astype(int)
-
         agreement_metric = np.mean((z_test==result_metrics).astype(int))
         repeat_agreement += [agreement_metric]
 
-        print "average agreement new metric:", np.round(agreement_metric,3)
-        print "average agreement F-measure:", np.round(agreement_F1,3)
+        metrics1_conf,metrics2_conf = sess.run([model_output1,model_output2],feed_dict_test_conf)
+        result_metrics_conf = (metrics1_conf<metrics2_conf).astype(int)
+        agreement_metric_conf = np.mean((z_test[idx_confident]==result_metrics_conf).astype(int))
+        repeat_agreement_conf += [agreement_metric_conf]
+
+        metrics1_agg,metrics2_agg = sess.run([model_output1,model_output2],feed_dict_test_agg)
+        # for m1,m2, r,n1,n2, f1 in zip(metrics1_agg,metrics2_agg,ratings_test_agg,notewise1_test_agg,notewise2_test_agg,result_f1_test_agg):
+        #     print "metrics",m1,m2,int(m1<m2),"notewise",n1,n2, f1, "rating", r, "OK" if int(m1<m2)==r else "BAD"
+        result_metrics_agg = (metrics1_agg<metrics2_agg).astype(int)
+        agreement_metric_agg = np.mean((ratings_test_agg==result_metrics_agg[:,0]))
+        repeat_agreement_agg += [agreement_metric_agg]
+
+        repeat_best_weights += [best_parameters]
+
+
+        print "average agreement new metric:", np.round(agreement_metric,3), "F-measure:", np.round(agreement_F1,3)
+        print "average agreement new metric conf.:", np.round(agreement_metric_conf,3), "F-measure conf.:", np.round(agreement_F1_conf,3)
+        print "average agreement new metric agg.:", np.round(agreement_metric_agg,3), "F-measure agg.:", np.round(agreement_F1_agg,3)
         # print repeat_agreement
 
 
 
     results_dict = {'repeat_agreement':repeat_agreement,
-                    'agreement_F1': agreement_F1}
+                    'repeat_agreement_agg':repeat_agreement_agg,
+                    'repeat_agreement_conf':repeat_agreement_conf,
+                    'agreement_F1': agreement_F1,
+                    'agreement_F1_agg': agreement_F1_agg,
+                    'agreement_F1_conf': agreement_F1_conf,
+                    'repeat_best_weights':repeat_best_weights}
 
     # print np.std(repeat_agreement)
     # print np.mean(repeat_agreement)
