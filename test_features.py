@@ -21,7 +21,7 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[:12]:
+for example in os.listdir(MIDI_path)[:]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
 
@@ -128,8 +128,6 @@ for example in os.listdir(MIDI_path)[:12]:
             # r1, r2 = specific_pitch_notewise(notes_system, intervals_system, notes_target, intervals_target, match_on, n_semitones=19)
             # print('third_harmonic error: ' + str(r1) + "   " + str(r2))
 
-            # print('\n test dynamic features ==================================================')
-            
+            print('\n test dynamic features ==================================================')
             print(chord_dissonance(notes_system, intervals_system, notes_target, intervals_target, example, system))
-
-            # print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target, example, system))
+            print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target, example, system))

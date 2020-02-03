@@ -1,9 +1,10 @@
 import numpy as np
 # from scipy import stats
 from statistics import stdev
+# import random
 
 SMALL_VALUE = 0.00001
-
+# random.seed()
 
 def calculate_stds(data, means):
 	# calculate stds for k-means result
@@ -19,9 +20,6 @@ def calculate_stds(data, means):
 	return stds
 
 
-def get_onset(interval):
-    return interval[0]
-
 # TESTED
 def rhythm_histogram(intervals_output, intervals_target):
     # return the logged spectral flatness ratio of the IOIs, where spectral flatness ratio is defined as the ratio of the geometric mean of the histogram over its arithmetic mean.
@@ -29,13 +27,13 @@ def rhythm_histogram(intervals_output, intervals_target):
     # 2. spectral flatness for IOI of the ground truth music piece
 
     # order note intervals by onsets
-    intervals_output = [tuple(intervals_output[idx]) for idx in range(len(intervals_output))]
-    intervals_target = [tuple(intervals_target[idx]) for idx in range(len(intervals_target))]
-    intervals_output.sort(key=get_onset)
-    intervals_target.sort(key=get_onset)
+    onsets_output = [interval[0] for interval in intervals_output]
+    onsets_target = [interval[0] for interval in intervals_target]
+    onsets_output.sort()
+    onsets_target.sort()
 
-    ioi_output = [float(intervals_output[idx+1][0] - intervals_output[idx][0]) for idx in range(len(intervals_output)-1)]
-    ioi_target = [float(intervals_target[idx+1][0] - intervals_target[idx][0]) for idx in range(len(intervals_target)-1)]
+    ioi_output = [onsets_output[idx+1] - onsets_output[idx] for idx in range(len(onsets_output)-1)]
+    ioi_target = [onsets_target[idx+1] - onsets_target[idx] for idx in range(len(onsets_target)-1)]
 
     # generate bins
     bins = [i*0.01 for i in range(10)]
@@ -77,13 +75,13 @@ def rhythm_dispersion(intervals_output, intervals_target):
     # 2. center drift
 
     # order note intervals by onsets
-    intervals_output = [tuple(intervals_output[idx]) for idx in range(len(intervals_output))]
-    intervals_target = [tuple(intervals_target[idx]) for idx in range(len(intervals_target))]
-    intervals_output.sort(key=get_onset)
-    intervals_target.sort(key=get_onset)
+    onsets_output = [interval[0] for interval in intervals_output]
+    onsets_target = [interval[0] for interval in intervals_target]
+    onsets_output.sort()
+    onsets_target.sort()
 
-    ioi_output = [float(intervals_output[idx+1][0] - intervals_output[idx][0]) for idx in range(len(intervals_output)-1)]
-    ioi_target = [float(intervals_target[idx+1][0] - intervals_target[idx][0]) for idx in range(len(intervals_target)-1)]
+    ioi_output = [onsets_output[idx+1] - onsets_output[idx] for idx in range(len(onsets_output)-1)]
+    ioi_target = [onsets_target[idx+1] - onsets_target[idx] for idx in range(len(onsets_target)-1)]
 
     # initialise cluster
     bins = [i*0.02 for i in range(5)]
@@ -93,7 +91,6 @@ def rhythm_dispersion(intervals_output, intervals_target):
     for i in range(len(histogram_target)):
         if histogram_target[i] > 0 and (i == 0 or histogram_target[i] > histogram_target[i-1]) and (i == len(histogram_target)-1 or histogram_target[i] >= histogram_target[i+1]):
             means.append(np.mean([bins[i], bins[i+1]]))
-            print(i)
             
     if len(means) == 0:
         return 0.0, 0.0
@@ -110,6 +107,8 @@ def rhythm_dispersion(intervals_output, intervals_target):
             if len(indexs) > 0:
                 # only update cluster if there are some points within it, else discard it.
                 new_means.append(np.mean(np.array(ioi_target)[indexs]))
+            else:
+                means.pop(label)
         # calculate centre moving
         moving = np.sum(abs(np.array(new_means) - np.array(means)))
         # update means
@@ -146,13 +145,13 @@ def rhythm_dispersion(intervals_output, intervals_target):
     # calcuate std chage
     stds_change = list(np.array(stds_output) - np.array(stds_target))
 
-    print(stds_target)
-    print(stds_output)
+    # print(stds_target)
+    # print(stds_output)
 
     # cluster centre drift
     drifts = [abs(means[idx] - means_output[idx]) for idx in range(len(means))]
 
-    # # test
+    # # test with graphs
     # histogram_output = np.histogram(ioi_output, bins=bins)[0]
     # histogram_output = [max(0, histogram_output[idx]) for idx in range(len(histogram_output))]
     # histogram_target = [max(0, histogram_target[idx]) for idx in range(len(histogram_target))]
