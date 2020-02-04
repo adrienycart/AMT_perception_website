@@ -52,6 +52,14 @@ for i,example in enumerate(example_paths):
 
         frame = framewise(output,target)
 
+        #### Investigate various frame sizes
+        for f in [0.05,0.1]:
+            times = np.arange(0,max(target_data.get_end_time(),system_data.get_end_time()),f)
+            roll_target = utils.get_roll_from_times(target_data,times)
+            roll_output = utils.get_roll_from_times(system_data,times)
+            result = framewise(roll_target,roll_output)
+            results_dict.update({'framewise_'+str(f): result})
+
         for on_tol in [25,50,75,100,125,150]:
             match_on = mir_eval.transcription.match_notes(intervals_target, notes_target, intervals_output, notes_output, onset_tolerance=on_tol/1000.0, offset_ratio=None, pitch_tolerance=0.25)
             if on_tol == 50:

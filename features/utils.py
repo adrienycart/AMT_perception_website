@@ -3,6 +3,21 @@ import matplotlib.pyplot as plt
 import os
 
 
+def get_roll_from_times(midi_data,times):
+    # quant_piano_roll = midi_data.get_piano_roll(fs=500,times=times)
+    # quant_piano_roll = (quant_piano_roll>=7).astype(int)
+    roll = np.zeros([128,len(times)])
+
+    for instr in midi_data.instruments:
+        for note in instr.notes:
+            start = np.argmin(np.abs(times-note.start))
+            end = np.argmin(np.abs(times-note.end))
+            if start == end:
+                end = start+1
+            roll[note.pitch,start:end]=1
+    return roll
+
+
 def even_up_rolls(roll1,roll2,pad_value=0):
     #Makes roll1 and roll2 of same size.
     len_roll1 = roll1.shape[1]
