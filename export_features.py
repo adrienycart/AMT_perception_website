@@ -53,7 +53,7 @@ for i,example in enumerate(example_paths):
         frame = framewise(output,target)
 
         #### Investigate various frame sizes
-        for f in [0.05,0.1]:
+        for f in [0.05,0.075,0.1,0.15]:
             times = np.arange(0,max(target_data.get_end_time(),system_data.get_end_time()),f)
             roll_target = utils.get_roll_from_times(target_data,times)
             roll_output = utils.get_roll_from_times(system_data,times)
@@ -80,7 +80,7 @@ for i,example in enumerate(example_paths):
         high_n = notewise_highest(notes_output, intervals_output, notes_target, intervals_target, match)
         low_n = notewise_lowest(notes_output, intervals_output, notes_target, intervals_target, match)
 
-        loud_fn = false_negative_loudness(match, vel_target)
+        loud_fn = false_negative_loudness(match, vel_target, intervals_target)
         loud_ratio_fn = loudness_ratio_false_negative(notes_target, intervals_target, vel_target, match)
 
         mask = make_key_mask(target)
