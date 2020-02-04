@@ -102,7 +102,7 @@ for i,example in enumerate(example_paths):
 
 
         results_dict.update({
-                "framewise" : frame,
+                "framewise_0.01" : frame,
 
                 #Notewise have already been added
 
