@@ -236,7 +236,7 @@ def apply_sustain_control_changes(midi):
                 pass
             all_notes[note.pitch] += [note]
 
-    new_instr = pm.Instrument(program=pm.instrument_name_to_program('Acoustic Grand Piano'),name=instr.name)
+    new_instr = pm.Instrument(program=pm.instrument_name_to_program('Acoustic Grand Piano'),name="Piano")
 
     # Then, trim notes so they don't overlap
     for note_list in all_notes:
