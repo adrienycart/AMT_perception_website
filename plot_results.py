@@ -9,7 +9,7 @@ from matplotlib import rc
 # import seaborn as sns
 import codecs
 import sklearn
-from statsmodels.stats.inter_rater import fleiss_kappa
+# from statsmodels.stats.inter_rater import fleiss_kappa
 import random
 import tqdm
 
@@ -32,6 +32,12 @@ def bootstrap(function,data,n_repeat=100,**kwargs):
     all_results = np.array(all_results)
     mean = np.mean(all_results,axis=0)
     std = np.std(all_results,axis=0)
+
+
+    # print all_results.shape
+    # import scipy.stats
+    # print scipy.stats.ttest_ind(all_results[:,0,0],all_results[:,0,1],equal_var=False)
+    # print scipy.stats.ttest_ind(all_results[:,0,0],all_results[:,0,2],equal_var=False)
 
     return mean, std
 
@@ -123,7 +129,7 @@ n_users = users.shape[0]
 # median_goldmsi = np.median(users[:,5].astype(float))
 # std_goldmsi = np.std(users[:,5].astype(float))
 # print "average_goldmsi", average_goldmsi, "median_goldmsi", median_goldmsi, "std_goldmsi", std_goldmsi
-#
+
 # # ### Number of answers distrbution
 # answers_male = male_users[:,1].astype(int)
 # answers_female = female_users[:,1].astype(int)
@@ -205,7 +211,7 @@ results_dict = {}
 feature_dir = 'precomputed_features'
 
 systems = ['cheng','google',"kelz","lisu"]
-system_names = {'cheng': 'NMF', 'google':'SoA', "kelz":'CNN',"lisu":'HF'}
+system_names = {'cheng': 'NMF', 'google':'OAF', "kelz":'CNN',"lisu":'STF'}
 system_colors = {'cheng': 'tab:green', 'google':'tab:red', "kelz":'tab:blue',"lisu":'tab:orange'}
 pairs = []
 for i in range(len(systems)):
@@ -283,7 +289,7 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 #     data = answers[np.logical_and(answers[:,2]==pair[0], answers[:,3]==pair[1])]
 #
 #     result = pairwise_comparison(data)
-#     # result_bootstrap = bootstrap(pairwise_comparison,data,with_majority=False,with_difficulty=False)
+#     result_bootstrap = bootstrap(pairwise_comparison,data,with_majority=False,with_difficulty=False)
 #
 #     dict_stats[str(pair)] = result
 #
@@ -351,19 +357,26 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 # for i in range(len(pairs)):
 #     print pairs[i], 1-choices[i,0]
 #     plt.barh(i, 1-choices[i,0], xerr=stds[i],capsize=2, color='tab:blue', edgecolor='black', height=barWidth)
-#     plt.barh(i, 1-choices[i,1], left=1-choices[i,0], color='tab:red', edgecolor='black', height=barWidth)
-#
-# ### With F-measures
-# # for i in range(len(pairs)):
-# #     plt.text(-0.05,i+0.15,pairs[i][0],ha='right', va='center')
-# #     plt.text(-0.05,i-0.15,'F1: '+pairs_f1[i][0],ha='right', va='center',fontsize=9)
-# #     plt.text(1.05,i+0.15,pairs[i][1],ha='left', va='center')
-# #     plt.text(1.05,i-0.15,'F1: '+pairs_f1[i][1],ha='left', va='center',fontsize=9)
-# ### Without F-measures:
+#     plt.barh(i, 1-choices[i,1], left=1-choices[i,0], color=[1.0,0.5,0.5], edgecolor='black', height=barWidth)
+
+### With F-measures
+# for i in range(len(pairs)):
+#     plt.text(-0.05,i+0.18,system_names[pairs[i][0]],ha='right', va='center',fontsize=18)
+#     plt.text(-0.05,i-0.18,r'$F_{n,On}$: '+pairs_f1[i][0]+r'\%',ha='right', va='center',fontsize=16)
+#     plt.text(1.05,i+0.18,system_names[pairs[i][1]],ha='left', va='center',fontsize=18)
+#     plt.text(1.05,i-0.18,r'$F_{n,On}$: '+pairs_f1[i][1]+r'\%',ha='left', va='center',fontsize=16)
+### With F-measures in parenthesis
+# for i in range(len(pairs)):
+#     plt.text(-0.05,i,system_names[pairs[i][0]]+' ('+pairs_f1[i][0]+r'\%)',ha='right', va='center',fontsize=18)
+#     plt.text(1.05,i,system_names[pairs[i][1]]+' ('+pairs_f1[i][1]+r'\%)',ha='left', va='center',fontsize=18)
+
+
+### Without F-measures:
 # for i in range(len(pairs)):
 #     plt.text(-0.03,i,system_names[pairs[i][0]],ha='right', va='center')
 #     plt.text(1.03,i,system_names[pairs[i][1]],ha='left', va='center')
-#
+
+# plt.figure(figsize=[7,4])
 # frame1 = plt.gca()
 # frame1.axes.yaxis.set_visible(False)
 # plt.grid(color='grey', linestyle='-', linewidth=1,axis='x')
@@ -371,7 +384,7 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 # plt.box(False)
 #
 # # plt.title('Proportion of choices among all answers')
-# plt.tight_layout(rect=[0.1,0,0.9,1])
+# plt.tight_layout(rect=[0.12,0,0.88,1])
 # plt.show()
 
 #
@@ -397,9 +410,9 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 # frame1.tick_params(axis='both', which='major', labelsize=15)
 # plt.box(False)
 # plt.tight_layout(rect=[0.15, 0, 1, 1])
-# plt.legend(bbox_to_anchor=(0.96,0.5))
-
-# plt.title('Proportion of difficulty ratings', x=0.4)
+# # plt.legend(bbox_to_anchor=(0.96,0.5))
+#
+# # plt.title('Proportion of difficulty ratings', x=0.4)
 # plt.show()
 #
 # ### Plot majority
@@ -586,11 +599,21 @@ def pairwise_comparison(data,with_majority=True,with_difficulty=True):
 ##### AGREEMENT F-MEASURE - ANSWERS
 ############################################
 
+f_sizes = [0.01,0.05,0.075,0.1,0.15]
 onset_tolerances = [25,50,75,100,125,150]
 offset_tolerances = [0.1,0.2,0.3,0.4,0.5]
 
-all_measures = ['framewise']+['notewise_On_'+str(on_tol) for on_tol in onset_tolerances]+['notewise_OnOff_'+str(on_tol)+'_'+str(off_tol) for on_tol in onset_tolerances for off_tol in offset_tolerances]
+all_measures = ['framewise_'+str(f) for f in f_sizes]+['notewise_On_'+str(on_tol) for on_tol in onset_tolerances]+['notewise_OnOff_'+str(on_tol)+'_'+str(off_tol) for on_tol in onset_tolerances for off_tol in offset_tolerances]
 
+labels_frame = [r'$F_f$'+'\n'+str(int(f*1000))+'ms' for f in f_sizes]
+labels_on = [r'$F_{n,On}$'+'\n'+str(on_tol)+'ms' for on_tol in onset_tolerances]
+labels_on_off = ['OnOff\n'+str(on_tol)+'ms\n'+str(off_tol*100)+'%' for on_tol in onset_tolerances for off_tol in offset_tolerances]
+labels = labels_frame+labels_on+labels_on_off
+
+colors_frame = [np.array([1.0,1,1])-(i+1)/float(len(f_sizes))*np.array([1,0,1]) for i in range(len(f_sizes))]
+colors_on = [np.array([1.0,1,1])-(i+1)/float(len(labels_on))*np.array([0,1,1]) for i in range(len(labels_on))]
+colors_on_off = [np.array([1.0,1,1])-(i+1)/float(len(labels_on_off))*np.array([1,1,0]) for i in range(len(labels_on_off))]
+colors = colors_frame+colors_on+colors_on_off
 
 def agreement_f_measure_answers(data,measures=all_measures,with_majority=True,average=False):
     f1_agreement_each_all = []
@@ -685,6 +708,9 @@ with_error_bars=True
 # if with_error_bars:
 #     f1_agreement_each_std = np.array(f1_agreement_each_std)
 
+
+
+
 # ######
 # ## ON-NOTEWISE ONLY
 # f1_agreement_each = f1_agreement_each[:,1:5]
@@ -695,11 +721,14 @@ with_error_bars=True
 
 ######
 ## ON-NOTEWISE and FRAMEWISE
-# f1_agreement_each = f1_agreement_each[:,:5]
-# f1_agreement_majority = f1_agreement_majority[:,:5]
-# bar_labels = ['Frame','On\n25ms','On\n50ms','On\n75ms','On\n100ms']
+# f1_agreement_each = f1_agreement_each[:,:len(f_sizes+onset_tolerances)]
+# # f1_agreement_majority = f1_agreement_majority[:,:5]
+# if with_error_bars:
+#     f1_agreement_each_std = f1_agreement_each_std[:,:len(f_sizes+onset_tolerances)]
+#
+# bar_labels = labels_frame+labels_on_off
 # n_bars = f1_agreement_each.shape[1]
-# colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(n_bars)*np.array([0,1,1])for i in range(4)]
+# colors = colors_frame+colors_on_off
 
 
 
@@ -721,9 +750,9 @@ with_error_bars=True
 
 ######
 ## ON-NOTEWISE , ONOFF-notewise and FRAMEWISE
-# f1_agreement_each = f1_agreement_each[:,[0,2,13]]
+# f1_agreement_each = f1_agreement_each[:,[0,2,13]] #### TODO : DOUBLE CHECK IDXS!!!
 # if with_error_bars:
-#     f1_agreement_each_std = f1_agreement_each_std[:,[0,2,13]]
+#     f1_agreement_each_std = f1_agreement_each_std[:,[0,2,13]] #### TODO : DOUBLE CHECK IDXS!!!
 # # f1_agreement_majority = f1_agreement_majority[:,:5]
 # bar_labels = [r'$F_f$',r'$F_{n,On}$',r'$F_{n,OnOff}$']
 # n_bars = f1_agreement_each.shape[1]
@@ -732,10 +761,10 @@ with_error_bars=True
 #
 #
 # single_barWidth = barWidth/n_bars
-#
-#
+
+
 # # # ### Plot for all answers
-#
+
 # if with_error_bars:
 #     for i in range(n_bars):
 #         plt.barh(r-single_barWidth/2+(i-1)*single_barWidth, f1_agreement_each[:,i],
@@ -782,38 +811,32 @@ with_error_bars=True
 # ### ONLY FOR VERY CONFIDENT ANSWERS:
 # answers=answers[answers[:,7].astype(int)<3]
 
-# f1_agreement_each,f1_agreement_each_std = bootstrap(agreement_f_measure_answers,answers,n_repeat=100,with_majority=False,average=True)
-# f1_agreement_each = f1_agreement_each[0]
-# f1_agreement_each_std = f1_agreement_each_std[0]
-#
-# labels_on = [r'$F_{n,On}$'+'\n'+str(on_tol)+'ms' for on_tol in onset_tolerances]
-# labels_on_off = ['OnOff\n'+str(on_tol)+'ms\n'+str(off_tol*100)+'%' for on_tol in onset_tolerances for off_tol in offset_tolerances]
-# labels = [r'$F_f$']+labels_on+labels_on_off
-#
-# colors = ['tab:green']+[np.array([1.0,1,1])-(i+1)/float(len(labels_on))*np.array([0,1,1]) for i in range(len(labels_on))]+[np.array([1.0,1,1])-(i+1)/float(len(labels_on_off))*np.array([1,1,0]) for i in range(len(labels_on_off))]
+f1_agreement_each,f1_agreement_each_std = bootstrap(agreement_f_measure_answers,answers,with_majority=False,average=True)
+f1_agreement_each = f1_agreement_each[0]
+f1_agreement_each_std = f1_agreement_each_std[0]
 
 
 ### Only On-notewise metrics:
-# lab = labels[:len(labels_on)+1]
-# col = colors[:len(labels_on)+1]
-# values = f1_agreement_each[:len(labels_on)+1]
-# stds = f1_agreement_each_std[:len(labels_on)+1]
-#
-# plt.bar(list(range(len(values))), values, yerr=stds,capsize=2,color=col, edgecolor='black', width=barWidth)
-# frame1 = plt.gca()
-# plt.xticks(list(range(len(values))),lab)
-# plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
-# frame1.set_axisbelow(True)
-# plt.box(False)
-# plt.ylim((0.7,0.84))
-# # plt.title('Agreement between raters and various F-measures\n(all answers)')
-# plt.ylabel(r'Agreement with ratings',fontsize=15)
-# plt.tight_layout(rect=[0, 0, 1, 1])
-# plt.show()
+lab = labels_frame+labels_on
+col = colors_frame+colors_on
+values = f1_agreement_each[:len(lab)]
+stds = f1_agreement_each_std[:len(lab)]
+
+plt.bar(list(range(len(values))), values, yerr=stds,capsize=2,color=col, edgecolor='black', width=barWidth)
+frame1 = plt.gca()
+plt.xticks(list(range(len(values))),lab,fontsize=15)
+plt.grid(color='grey', linestyle='-', linewidth=1,axis='y')
+frame1.set_axisbelow(True)
+plt.box(False)
+plt.ylim((0.7,0.84))
+# plt.title('Agreement between raters and various F-measures\n(all answers)')
+plt.ylabel(r'Agreement with ratings',fontsize=18)
+plt.tight_layout(rect=[0, 0, 1, 1])
+plt.show()
 
 ######
 ## ON-notewise , ONOFF-notewise and framewise
-# idxs = [0,2,13]
+# idxs = [0,2,13] #### TODO : DOUBLE CHECK IDXS!!!
 # lab = np.array(labels,dtype=object)[idxs]
 # col = ['tab:green','tab:red','tab:blue']
 # values = np.array(f1_agreement_each,dtype=object)[idxs]
@@ -906,7 +929,7 @@ agree_disagree = []
 raw_votes = []
 
 # ### ONLY FOR VERY CONFIDENT ANSWERS:
-answers=answers[answers[:,7].astype(int)<3]
+# answers=answers[answers[:,7].astype(int)<3]
 # ### ONLY FOR FULL QUESTIONS:
 q_ids,counts = np.unique(answers[:,0],return_counts=True)
 q_ids_to_keep = q_ids[counts==4]
@@ -928,8 +951,8 @@ for q_id in np.unique(answers[:,0]):
     # agree_disagree += [[4-vote, vote]] if f_choice else [[vote, 4-vote]]
     # agree_disagree += [[4-vote, vote]] if random.choice([True, False]) else [[vote, 4-vote]]
 
-    # order = random.choice([True, False])
-    order = f_choice
+    order = random.choice([True, False])
+    # order = f_choice
     if order:
         raw_votes += [[np.sum(data_q[:,5].astype(int)==0),np.sum(data_q[:,5].astype(int)==1)]]
     else:
@@ -946,9 +969,9 @@ raw_votes = np.array(raw_votes)
 # print(krippendorff.alpha(value_counts=raw_votes,level_of_measurement='nominal'))
 
 
-for i in range(5):
-    data = F_mes_diffs[agreements_with_f==i]
-    print i, np.mean((agreements_with_f==i).astype(int)), np.sum((agreements_with_f==i).astype(int)), np.mean(data)
+# for i in range(5):
+#     data = F_mes_diffs[agreements_with_f==i]
+#     print i, np.mean((agreements_with_f==i).astype(int)), np.sum((agreements_with_f==i).astype(int)), np.mean(data)
 
 #
 # F_mes_diffs = np.array(F_mes_diffs)
@@ -961,19 +984,18 @@ for i in range(5):
 # plt.show()
 #
 # #### F-measure difference vs reported difficulty
-#
-# F_mes_diffs = np.abs(answers[:,-1]-answers[:,-2])
+
+# F_mes_diffs = np.abs(answers[:,-1].astype(float)-answers[:,-2].astype(float))
 # difficulties = answers[:,7]
-#
 # data = [F_mes_diffs[difficulties==str(i)].astype(float) for i in range(1,6)]
 #
 # plt.figure(figsize=(7,4))
 # plt.violinplot(data, positions=range(1,6), vert=True, widths=0.3,
-#                        showextrema=True, showmedians=True)
+#                        showextrema=True,showmeans=True)
 # plt.xticks(range(1,6),range(1,6))
 # plt.grid(color='lightgrey', linestyle='-', linewidth=1,axis='y')
 # plt.box(False)
-# plt.ylabel(r'$F_{n,on}$ difference',fontsize=15)
+# plt.ylabel(r'$F_{n,On}$ difference',fontsize=15)
 # plt.xlabel('Reported difficulty',fontsize=15)
 # # plt.title("Difference in F-measure vs. reported difficulty")
 # plt.tight_layout()
