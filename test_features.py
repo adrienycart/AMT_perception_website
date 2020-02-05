@@ -21,7 +21,7 @@ systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
 
-for example in os.listdir(MIDI_path)[:1]:
+for example in os.listdir(MIDI_path)[:10]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
 
@@ -33,14 +33,18 @@ for example in os.listdir(MIDI_path)[:1]:
     target_pr_no_pedal = (target_data_no_pedal.get_piano_roll(fs)>0).astype(int)
     notes_target_no_pedal, intervals_target_no_pedal, vel_target_no_pedal = utils.get_notes_intervals(target_data_no_pedal, with_vel=True)
 
+    # test quantized notes
     target_PPQ = target_data.resolution
+    end_tick = target_data.time_to_tick(target_data.get_end_time())
+    ticks = np.arange(0, end_tick, target_PPQ/4)
+    quarter_times = np.array([target_data.tick_to_time(t) for t in ticks])
 
     # play midi
     # os.system("app\\static\\data\\all_midi_cut\\"+example+"\\target.mid")
     # time.sleep(target_data.get_end_time() + 0.5)
 
     for system in systems:
-        # if system == 'cheng':
+        if system == 'cheng':
             print(system)
             system_data = pm.PrettyMIDI(os.path.join(example_path, system + '.mid'))
             # play midi
@@ -106,9 +110,14 @@ for example in os.listdir(MIDI_path)[:1]:
             # print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
 
             print('\n test rhythm =====================================================')
-            f1, f2 = rhythm_histogram(intervals_system, intervals_target)
-            print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
-            print("rhythm flatness difference: " + str(f1-f2))
+            # f1, f2 = rhythm_histogram(intervals_system, intervals_target, beats=quarter_times)
+            # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
+            # print("rhythm flatness difference: " + str(f1-f2))
+            # f1, f2 = rhythm_histogram(intervals_system, intervals_target)
+            # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
+            # print("rhythm flatness difference: " + str(f1-f2))
+            stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target, beats=quarter_times)
+            print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
             stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
             print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
 
