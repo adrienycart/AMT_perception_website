@@ -5,7 +5,10 @@ import cPickle as pickle
 
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except:
+    print "No matplotlib!"
 
 from sklearn.decomposition import PCA
 
@@ -509,6 +512,10 @@ for fold in range(10):
     std = np.std(all_features_train,axis=0)
     features1_train = (features1_train-mean)/std
     features2_train = (features2_train-mean)/std
+    features1_valid = (features1_valid-mean)/std
+    features2_valid = (features2_valid-mean)/std
+    features1_test = (features1_test-mean)/std
+    features2_test = (features2_test-mean)/std
 
 
     #### AGGREGATE CONFIDENT TEST ANSWERS
@@ -573,7 +580,7 @@ for fold in range(10):
 
 
     for i in range(N_REPEATS):
-        print "fold",fold,"repeat",i, np.mean(repeat_agreement)
+        print save_destination, "fold",fold,"repeat",i, np.mean(repeat_agreement)
 
         valid_costs = []
 
@@ -588,7 +595,7 @@ for fold in range(10):
         for i in range(3000):
 
             ### Batching
-            features1_batch ,features2_batch,y_batch ,z_batch ,alpha_batch = sample(BATCH_SIZE,features1,features2,y,z,alpha)
+            features1_batch ,features2_batch,y_batch ,z_batch ,alpha_batch = sample(BATCH_SIZE,features1_train,features2_train,y_train,z_train,alpha_train)
             feed_dict_train = {
                 features1_ph:features1_batch,
                 features2_ph:features2_batch,
@@ -676,6 +683,9 @@ for fold in range(10):
         repeat_best_weights += [best_weights]
         repeat_best_bias += [best_bias]
 
+        # plt.plot(valid_costs)
+        # plt.show()
+
 
         print "average agreement new metric:", np.round(agreement_metric,3), "F-measure:", np.round(agreement_F1,3)
         print "average agreement new metric conf.:", np.round(agreement_metric_conf,3), "F-measure conf.:", np.round(agreement_F1_conf,3)
@@ -703,8 +713,7 @@ for fold in range(10):
 save_path = os.path.join(save_destination,'all_folds.pkl')
 pickle.dump(all_results, open(save_path, 'wb'))
 
-# plt.plot(valid_costs)
-# plt.show()
+
 #
 # plt.scatter(notewise1_test,metrics1,color='tab:blue')
 # plt.scatter(notewise2_test,metrics2,color='tab:blue')
