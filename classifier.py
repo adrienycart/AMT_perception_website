@@ -18,14 +18,14 @@ BATCH_SIZE = 100
 def get_feature_labels(features_to_use):
 
     def get_feat_names(feat):
-        if feat == 'framewise':
+        if feat == 'framewise_0.01':
             return ["framewise_P","framewise_R","framewise_F"]
         elif 'notewise_On_' in feat:
             return ["notewise_On_P",
             "notewise_On_R",
             "notewise_On_F"]
         elif 'notewise_OnOff_' in feat:
-            return [    "notewise_OnOff_P",
+            return ["notewise_OnOff_P",
                 "notewise_OnOff_R",
                 "notewise_OnOff_F"]
         elif feat == "high_f":
@@ -90,13 +90,13 @@ def get_y_z_alphas(ratings):
 
     return y,z,alphas
 
-def linear_regression_model(features,weights,pca_matrix=None):
+def linear_regression_model(features,weights,bias,pca_matrix=None):
     #features_o and features_t are of shape: [batch_size, n_features]
 
     if pca_matrix is None:
-        output = tf.sigmoid(tf.matmul(features, weights))
+        output = tf.sigmoid(tf.matmul(features, weights)+bias)
     else:
-        output = tf.sigmoid(tf.matmul(tf.matmul(features,tf.cast(pca_matrix,tf.float32),transpose_b=True), weights))
+        output = tf.sigmoid(tf.matmul(tf.matmul(features,tf.cast(pca_matrix,tf.float32),transpose_b=True), weights)+bias)
 
     return output
 
@@ -212,7 +212,7 @@ if not os.path.exists(save_destination):
 
 
 features_to_use = [
-                "framewise",
+                "framewise_0.01",
                 "notewise_On_50",
                 "notewise_OnOff_50_0.2",
                 "high_f",
@@ -251,9 +251,10 @@ alpha_ph = tf.placeholder(tf.float32,[None,1])
 
 # weights = tf.Variable(tf.random_normal([N_FEATURES,1], stddev=0.35),name='weights')
 weights = tf.Variable(tf.zeros([N_FEATURES,1]),name='weights')
+bias = tf.Variable(tf.zeros([]),name='bias')
 
-model_output1 = linear_regression_model(features1_ph,weights,None)
-model_output2 = linear_regression_model(features2_ph,weights,None)
+model_output1 = linear_regression_model(features1_ph,weights,bias,None)
+model_output2 = linear_regression_model(features2_ph,weights,bias,None)
 
 
 
@@ -354,7 +355,6 @@ all_results = {}
 
 for fold in range(10):
 
-    ###### AGGREGATE ANSWERS
 
     ###### USE EACH INDIVIDUAL ANSWER
     all_examples, indices = np.unique(answers[:,1],return_index=True)
@@ -506,6 +506,7 @@ for fold in range(10):
     repeat_agreement_agg = []
     repeat_agreement_conf = []
     repeat_best_weights = []
+    repeat_best_bias = []
 
     feed_dict_valid = {
         features1_ph:features1_valid,
@@ -530,7 +531,8 @@ for fold in range(10):
         valid_costs = []
 
         best_valid = None
-        best_parameters = None
+        best_weights = None
+        best_bias = None
 
 
         sess = tf.Session()
@@ -576,7 +578,7 @@ for fold in range(10):
             # print i, valid_cost, np.mean((z_valid==result_metrics).astype(int))
 
             if best_valid is None or valid_cost<best_valid:
-                best_parameters = sess.run(weights)
+                best_weights,best_bias = sess.run([weights,bias])
 
         ###### RESULTS
         #
@@ -588,20 +590,23 @@ for fold in range(10):
         feed_dict_test = {
             features1_ph:features1_test,
             features2_ph:features2_test,
-            weights: best_parameters
+            weights: best_weights,
+            bias: best_bias
             }
 
         feed_dict_test_agg = {
             features1_ph:features1_test_agg,
             features2_ph:features2_test_agg,
-            weights: best_parameters
+            weights: best_weights,
+            bias: best_bias
         }
 
         idx_confident = difficulties_test<3
         feed_dict_test_conf = {
             features1_ph:features1_test[idx_confident],
             features2_ph:features2_test[idx_confident],
-            weights: best_parameters
+            weights: best_weights,
+            bias: best_bias
         }
 
         metrics1,metrics2 = sess.run([model_output1,model_output2],feed_dict_test)
@@ -621,7 +626,8 @@ for fold in range(10):
         agreement_metric_agg = np.mean((ratings_test_agg==result_metrics_agg[:,0]))
         repeat_agreement_agg += [agreement_metric_agg]
 
-        repeat_best_weights += [best_parameters]
+        repeat_best_weights += [best_weights]
+        repeat_best_bias += [best_bias]
 
 
         print "average agreement new metric:", np.round(agreement_metric,3), "F-measure:", np.round(agreement_F1,3)
@@ -637,7 +643,8 @@ for fold in range(10):
                     'agreement_F1': agreement_F1,
                     'agreement_F1_agg': agreement_F1_agg,
                     'agreement_F1_conf': agreement_F1_conf,
-                    'repeat_best_weights':repeat_best_weights}
+                    'repeat_best_weights':repeat_best_weights,
+                    'repeat_best_bias':repeat_best_bias}
 
     # print np.std(repeat_agreement)
     # print np.mean(repeat_agreement)
