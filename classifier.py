@@ -78,6 +78,27 @@ def get_feature_labels(features_to_use):
         elif feat == "third_harmonic_n":
             return ["third_harmonic_n_fp",
             "third_harmonic_n_all",]
+        elif feat == "poly_diff":
+            return ['poly_diff_mean','poly_diff_std','poly_diff_min','poly_diff_max']
+        elif feat == "rhythm_hist":
+            return ['rhythm_hist_out','rhythm_hist_diff']
+        elif feat == "rhythm_disp_std":
+            return ['rhythm_disp_std_mean','rhythm_disp_std_min','rhythm_disp_std_max']
+        elif feat == "rhythm_disp_drift":
+            return ['rhythm_disp_drift_mean','rhythm_disp_drift_min','rhythm_disp_drift_max']
+        elif feat == 'cons_hut78_output':
+            return ['cons_hut78_output_mean','cons_hut78_output_std','cons_hut78_output_max','cons_hut78_output_min']
+        elif feat == 'cons_har18_output':
+            return ['cons_har18_output_mean','cons_har18_output_std','cons_har18_output_max','cons_har18_output_min']
+        elif feat == 'cons_har19_output':
+            return ['cons_har19_output_mean','cons_har19_output_std','cons_har19_output_max','cons_har19_output_min']
+        elif feat == 'cons_hut78_diff':
+            return ['cons_hut78_diff_mean','cons_hut78_diff_std','cons_hut78_diff_max','cons_hut78_diff_min']
+        elif feat == 'cons_har18_diff':
+            return ['cons_har18_diff_mean','cons_har18_diff_std','cons_har18_diff_max','cons_har18_diff_min']
+        elif feat == 'cons_har19_diff':
+            return ['cons_har19_diff_mean','cons_har19_diff_std','cons_har19_diff_max','cons_har19_diff_min']
+
 
     return sum([get_feat_names(feat) for feat in features_to_use],[])
 
@@ -132,12 +153,15 @@ def import_features(results,features_to_use):
         value = results[feat]
         if type(value) is tuple:
             all_feat += list(value)
+        elif type(value) is list:
+            all_feat += value
         elif type(value) is float:
             all_feat += [np.float64(value)]
         else:
             all_feat += [value]
 
     all_feat = [float(elt) for elt in all_feat]
+
 
     return all_feat
 
@@ -235,6 +259,20 @@ features_to_use = [
                 "semitone_n",
                 "octave_n",
                 "third_harmonic_n",
+
+                "poly_diff",
+
+                "rhythm_hist",
+                "rhythm_disp_std",
+                "rhythm_disp_drift",
+
+                "cons_hut78_output",
+                "cons_har18_output",
+                "cons_har19_output",
+
+                "cons_hut78_diff" ,
+                "cons_har18_diff" ,
+                "cons_har19_diff" ,
                 ]
 
 labels = get_feature_labels(features_to_use)
@@ -464,6 +502,15 @@ for fold in range(10):
     # notewise2_train = notewise2_train[to_keep]
 
 
+    ###############################
+    #### Normalise features
+    all_features_train = np.concatenate([features1_train,features2_train],axis=0)
+    mean = np.mean(all_features_train,axis=0)
+    std = np.std(all_features_train,axis=0)
+    features1_train = (features1_train-mean)/std
+    features2_train = (features2_train-mean)/std
+
+
     #### AGGREGATE CONFIDENT TEST ANSWERS
     #### Only keep answers for which there is a clear majority, regardless of the number of confident answers
     features1_test_agg = []
@@ -516,7 +563,7 @@ for fold in range(10):
         alpha_ph: alpha_valid,
         }
 
-    N_REPEATS = 1
+    N_REPEATS = 100
 
     results_F1 = (notewise1_test < notewise2_test).astype(int)
     agreement_F1 = np.mean((z_test[:,0]==results_F1).astype(int))
@@ -574,7 +621,7 @@ for fold in range(10):
             # plt.xlim([0,1])
             #
             # plt.pause(0.00000001)
-
+            #
             # print i, valid_cost, np.mean((z_valid==result_metrics).astype(int))
 
             if best_valid is None or valid_cost<best_valid:
