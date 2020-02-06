@@ -175,5 +175,10 @@ for i,example in enumerate(example_paths):
 
                 })
 
+        ### Check that there are no NaNs:
+        for key,value in results_dict.items():
+            if np.any(np.isnan(np.array(value))):
+                raise Exception('NaN value in feature '+key+'!!!!')
+
 
         pickle.dump(results_dict, open(os.path.join(dir,system+'.pkl'), 'wb'),protocol=2)
