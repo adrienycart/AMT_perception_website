@@ -177,4 +177,4 @@ def rhythm_dispersion(intervals_output, intervals_target, beats=None, noise=0.0)
     # plt.bar(np.arange(len(drifts)), drifts)
     # plt.show()
 
-    return np.mean(stds_change), np.mean(drifts)
+    return np.mean(stds_change),np.min(stds_change),np.max(stds_change), np.mean(drifts),np.min(drifts),np.max(drifts)
