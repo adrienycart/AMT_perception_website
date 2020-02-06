@@ -5,8 +5,13 @@ import numpy as np
 ### Polyphony --- discarded
 ########################################
 
-def polyphony_level_seq(roll):
-    return np.sum(roll,axis=0)
+def polyphony_level_diff(roll_output,roll_target):
+    poly_output = np.sum(roll_output,axis=0)
+    poly_target = np.sum(roll_target,axis=0)
+
+    poly_diff = np.abs(poly_output-poly_target)
+
+    return np.mean(poly_diff),np.std(poly_diff),np.min(poly_diff),np.max(poly_diff)
 
 
 # discarded
