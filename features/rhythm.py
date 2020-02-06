@@ -70,7 +70,7 @@ def rhythm_histogram(intervals_output, intervals_target, beats=None, noise=0.0):
     # plt.bar(np.arange(len(histogram_output)), histogram_output)
     # plt.show()
 
-    return log_spectral_flatness_output, log_spectral_flatness_target
+    return log_spectral_flatness_output, log_spectral_flatness_output-log_spectral_flatness_target
 
 
 # TESTED
@@ -102,7 +102,7 @@ def rhythm_dispersion(intervals_output, intervals_target, beats=None, noise=0.0)
     for i in range(len(histogram_target)):
         if histogram_target[i] > 0 and (i == 0 or histogram_target[i] > histogram_target[i-1]) and (i == len(histogram_target)-1 or histogram_target[i] >= histogram_target[i+1]):
             means.append(np.mean([bins[i], bins[i+1]]))
-            
+
     if len(means) == 0:
         return 0.0, 0.0
 
@@ -177,4 +177,4 @@ def rhythm_dispersion(intervals_output, intervals_target, beats=None, noise=0.0)
     # plt.bar(np.arange(len(drifts)), drifts)
     # plt.show()
 
-    return stds_change, drifts
+    return np.mean(stds_change), np.mean(drifts)
