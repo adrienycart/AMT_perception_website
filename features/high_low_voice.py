@@ -86,7 +86,7 @@ def notewise_highest(notes_output,intervals_output,notes_target,intervals_target
         # Get the list of highest notes
         target_refs = make_note_index_matrix(notes_target,intervals_target)
         output_refs = make_note_index_matrix(notes_output,intervals_output)
-        target_refs,output_refs = even_up_rolls(target_refs,output_refs,pad_value=-1)
+        target_refs,output_refs = even_up_rolls([target_refs,output_refs],pad_value=-1)
 
         roll_target = (target_refs!=-1).astype(int)
         roll_output = (output_refs!=-1).astype(int)
@@ -138,9 +138,9 @@ def notewise_highest(notes_output,intervals_output,notes_target,intervals_target
         #     display1[notes_target[i],int(intervals_target[i][0]*fs):int(intervals_target[i,1]*fs)] = 1
         # for i in unmatched_outputs_is_higher:
         #     display2[notes_output[i],int(intervals_output[i][0]*fs):int(intervals_output[i,1]*fs)] = 1
-        
+
         # display2[higher_mask]+=3
-        
+
         # ax2.imshow(display1,aspect='auto',origin='lower')
         # ax3.imshow(display2,aspect='auto',origin='lower')
         # plt.show()
@@ -161,7 +161,7 @@ def notewise_lowest(notes_output,intervals_output,notes_target,intervals_target,
         # Get the list of highest notes
         target_refs = make_note_index_matrix(notes_target,intervals_target)
         output_refs = make_note_index_matrix(notes_output,intervals_output)
-        target_refs,output_refs = even_up_rolls(target_refs,output_refs,pad_value=-1)
+        target_refs,output_refs = even_up_rolls([target_refs,output_refs],pad_value=-1)
 
         roll_target = (target_refs!=-1).astype(int)
         roll_output = (output_refs!=-1).astype(int)
@@ -233,4 +233,3 @@ def correct_highest_lowest_note_framewise(output, target):
     correct_lowest_count = correct_lowest_seq.count(1)
 
     return float(correct_highest_count) / len(correct_highest_seq), float(correct_lowest_count) / len(correct_lowest_seq)
-

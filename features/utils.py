@@ -18,15 +18,17 @@ def get_roll_from_times(midi_data,times):
     return roll
 
 
-def even_up_rolls(roll1,roll2,pad_value=0):
+def even_up_rolls(rolls,pad_value=0):
     #Makes roll1 and roll2 of same size.
-    len_roll1 = roll1.shape[1]
-    len_roll2 = roll2.shape[1]
-    if len_roll1 > len_roll2:
-        roll2 = np.concatenate([roll2,pad_value*np.ones([roll2.shape[0],len_roll1-len_roll2])],axis=1)
-    else:
-        roll1 = np.concatenate([roll1,pad_value*np.ones([roll1.shape[0],len_roll2-len_roll1])],axis=1)
-    return roll1,roll2
+    lens = [roll.shape[1] for roll in rolls]
+    max_len = max(lens)
+    output = []
+    for roll in rolls:
+        if roll.shape[1] < max_len:
+            roll = np.concatenate([roll,pad_value*np.ones([roll.shape[0],max_len-roll.shape[1]])],axis=1)
+        output += [roll]
+
+    return output
 
 def get_notes_intervals(midi_data,with_vel=False):
     notes= []

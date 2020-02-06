@@ -31,7 +31,7 @@ for example in os.listdir(MIDI_path)[0:10]:
             target_pr = (target_data.get_piano_roll()>0).astype(int)
             system_pr = (system_data.get_piano_roll()>0).astype(int)
 
-            target_pr,system_pr= utils.even_up_rolls(target_pr,system_pr)
+            target_pr,system_pr= utils.even_up_rolls([target_pr,system_pr])
 
             P_f,R_f,F_f = framewise(system_pr,target_pr)
             print("Frame P,R,F:", P_f,R_f,F_f)

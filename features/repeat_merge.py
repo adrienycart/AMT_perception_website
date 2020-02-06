@@ -98,7 +98,7 @@ def repeated_notes_old_stuff(notes_output,intervals_output,notes_target,interval
 
             target_refs = make_note_index_matrix(notes_target,intervals_target,fs)
             output_refs = make_note_index_matrix(notes_output,intervals_output,fs)
-            target_refs,output_refs = even_up_rolls(target_refs,output_refs,pad_value=-1)
+            target_refs,output_refs = even_up_rolls([target_refs,output_refs],pad_value=-1)
 
             roll_target = (target_refs!=-1).astype(int)
             roll_output = (output_refs!=-1).astype(int)
@@ -143,7 +143,7 @@ def merged_notes_old_stuff(notes_output,intervals_output,notes_target,intervals_
 
             target_refs = make_note_index_matrix(notes_target,intervals_target,fs)
             output_refs = make_note_index_matrix(notes_output,intervals_output,fs)
-            target_refs,output_refs = even_up_rolls(target_refs,output_refs,pad_value=-1)
+            target_refs,output_refs = even_up_rolls([target_refs,output_refs],pad_value=-1)
 
             roll_target = (target_refs!=-1).astype(int)
             roll_output = (output_refs!=-1).astype(int)

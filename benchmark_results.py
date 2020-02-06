@@ -35,7 +35,7 @@ for fold in subfolders:
 
         target = (target_data.get_piano_roll(fs)>0).astype(int)
         output = (system_data.get_piano_roll(fs)>0).astype(int)
-        target, output = utils.even_up_rolls(target, output)
+        target, output = utils.even_up_rolls([target, output])
 
         notes_target, intervals_target, vel_target = utils.get_notes_intervals(target_data, with_vel=True)
         notes_output, intervals_output = utils.get_notes_intervals(system_data)

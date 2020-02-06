@@ -54,8 +54,7 @@ for example in os.listdir(MIDI_path)[:10]:
             system_pr = (system_data.get_piano_roll(fs)>0).astype(int)
             notes_system, intervals_system = utils.get_notes_intervals(system_data)
 
-            target_pr, system_pr = utils.even_up_rolls(target_pr, system_pr)
-            target_pr_no_pedal, system_pr_no_pedal = utils.even_up_rolls(target_pr_no_pedal, system_pr)
+            target_pr,target_pr_no_pedal, system_pr = utils.even_up_rolls([target_pr,target_pr_no_pedal, system_pr])
 
             if len(notes_system) == 0:
                 match_on = []

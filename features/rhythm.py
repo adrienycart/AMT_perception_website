@@ -160,7 +160,7 @@ def rhythm_dispersion(intervals_output, intervals_target, beats=None, noise=0.0)
     # print(stds_output)
 
     # cluster centre drift
-    drifts = [abs(means[idx] - means_output[idx]) for idx in range(len(means))]
+    drifts = [abs(means[idx] - means_output[idx])/means_output[idx] for idx in range(len(means))]
 
     # # test with graphs
     # histogram_output = np.histogram(ioi_output, bins=bins)[0]
@@ -177,4 +177,4 @@ def rhythm_dispersion(intervals_output, intervals_target, beats=None, noise=0.0)
     # plt.bar(np.arange(len(drifts)), drifts)
     # plt.show()
 
-    return np.mean(stds_change),np.min(stds_change),np.max(stds_change), np.mean(drifts),np.min(drifts),np.max(drifts)
+    return [np.mean(stds_change),np.min(stds_change),np.max(stds_change)], [np.mean(drifts),np.min(drifts),np.max(drifts)]
