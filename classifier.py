@@ -12,9 +12,7 @@ except:
 
 from sklearn.decomposition import PCA
 
-from config import MAX_ANSWERS
-
-
+MAX_ANSWERS=4
 BATCH_SIZE = 100
 
 
