@@ -38,6 +38,7 @@ for (folder in folders) {
         har_18_harmonicity <- c()
         har_19_corpus <- c()
         # loop over all the chords
+        empty_chord_indexs <- c()
         for (idx in 1:dim(chords)[1]) {
             chord <- as.vector(t(chords[idx,]))
             chord <- chord[chord!=-1] # unpad
@@ -49,12 +50,16 @@ for (folder in folders) {
                 har_18_harmonicity <- append(har_18_harmonicity, unname(consenance_values[2]))
                 har_19_corpus <- append(har_19_corpus, unname(consenance_values[3]))
             } else {
+                empty_chord_indexs <- append(empty_chord_indexs, idx)
                 # consenance_values <- incon(c(90), models)
                 # hutch_78_roughness <- append(hutch_78_roughness, unname(consenance_values[1]))
                 # har_18_harmonicity <- append(har_18_harmonicity, unname(consenance_values[2]))
                 # har_19_corpus <- append(har_19_corpus, unname(consenance_values[3]))
             }
 
+        }
+        if (length(empty_chord_indexs) > 0) {
+            durations <- durations[-(empty_chord_indexs)]
         }
 
         hutch_78_roughness_weighted_mean <- weighted.mean(hutch_78_roughness, durations)
