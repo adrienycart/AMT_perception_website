@@ -14,4 +14,5 @@ app.db_save*
 /features/consonance_statistics_no_empty_chords
 /features/chords_and_times
 .Rhistory
-/validate_rhythm_features/
+/validate_rhythm_features_plots/
+/validate_rhythm_features_plots_update/
