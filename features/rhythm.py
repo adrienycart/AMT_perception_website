@@ -34,7 +34,6 @@ def rhythm_histogram(intervals_output, intervals_target, beats=None, noise=0.0):
     # test quantized notes
     if beats is not None:
         onsets_output = [beats[np.argmin(np.abs(beats - onset))] for onset in onsets_output]
-        onsets_target = [beats[np.argmin(np.abs(beats - onset))] for onset in onsets_target]
     if noise != 0.0:
         onsets_output = [onset + random.random()*noise*2 - noise for onset in onsets_output]
 
@@ -89,7 +88,6 @@ def rhythm_dispersion(intervals_output, intervals_target, beats=None, noise=0.0)
     # test quantized notes
     if beats is not None:
         onsets_output = [beats[np.argmin(np.abs(beats - onset))] for onset in onsets_output]
-        onsets_target = [beats[np.argmin(np.abs(beats - onset))] for onset in onsets_target]
     if noise != 0.0:
         onsets_output = [onset + random.random()*noise*2 - noise for onset in onsets_output]
 
