@@ -45,13 +45,15 @@ for (folder in folders) {
 
             if (length(chord) > 0) {
                 consenance_values <- incon(chord, models)
+                hutch_78_roughness <- append(hutch_78_roughness, unname(consenance_values[1]))
+                har_18_harmonicity <- append(har_18_harmonicity, unname(consenance_values[2]))
+                har_19_corpus <- append(har_19_corpus, unname(consenance_values[3]))
             } else {
-                consenance_values <- incon(c(90), models)
+                # consenance_values <- incon(c(90), models)
+                # hutch_78_roughness <- append(hutch_78_roughness, unname(consenance_values[1]))
+                # har_18_harmonicity <- append(har_18_harmonicity, unname(consenance_values[2]))
+                # har_19_corpus <- append(har_19_corpus, unname(consenance_values[3]))
             }
-            
-            hutch_78_roughness <- append(hutch_78_roughness, unname(consenance_values[1]))
-            har_18_harmonicity <- append(har_18_harmonicity, unname(consenance_values[2]))
-            har_19_corpus <- append(har_19_corpus, unname(consenance_values[3]))
 
         }
 
@@ -65,15 +67,15 @@ for (folder in folders) {
 
         consenance_statistics <- c(hutch_78_roughness_weighted_mean, har_18_harmonicity_weighted_mean, har_19_corpus_weighted_mean, hutch_78_roughness_weighted_std, har_18_harmonicity_weighted_std, har_19_corpus_weighted_std, max(hutch_78_roughness), max(har_18_harmonicity), max(har_19_corpus), min(hutch_78_roughness), min(har_18_harmonicity), min(har_19_corpus))
 
-        path = paste("features/consonance_statistics/", example, sep="")
-        if (!file.exists("features/consonance_statistics")) {
-            dir.create("features/consonance_statistics")
+        path = paste("features/consonance_statistics_no_empty_chords/", example, sep="")
+        if (!file.exists("features/consonance_statistics_no_empty_chords")) {
+            dir.create("features/consonance_statistics_no_empty_chords")
         }
         if (!file.exists(path)) {
             dir.create(path)
         }
 
-        py_save_object(consenance_statistics, paste("features/consonance_statistics/", example, "/", system, ".pkl", sep=""))
+        py_save_object(consenance_statistics, paste("features/consonance_statistics_no_empty_chords/", example, "/", system, ".pkl", sep=""))
 
     }
 }

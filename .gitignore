@@ -11,6 +11,7 @@ app.db_save*
 /precomputed_features
 /results_metric
 /features/consonance_statistics
+/features/consonance_statistics_no_empty_chords
 /features/chords_and_times
 .Rhistory
 /validate_rhythm_features/
