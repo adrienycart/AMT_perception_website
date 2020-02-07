@@ -23,6 +23,7 @@ N_outputs = len(os.listdir(MIDI_path)) * len(systems)   # number of all outputs
 
 def generate_hist_plots(x1, x2, x3, limits, title, filename, n_bins=100):
 
+    plt.figure()
     plt.subplot(311)
     plt.hist(x1, bins=n_bins, range=limits)
     plt.ylabel("quantized")
@@ -34,11 +35,12 @@ def generate_hist_plots(x1, x2, x3, limits, title, filename, n_bins=100):
     plt.hist(x3, bins=n_bins, range=limits)
     plt.ylabel("noisy")
     plt.savefig(filename)
-    # plt.show()
+    plt.show()
 
 
 def plot_differences(d1, d2, limits, title, filename, n_bins=100):
 
+    plt.figure()
     plt.subplot(211)
     plt.hist(d1, bins=n_bins, range=limits)
     plt.ylabel("original - quantized")
@@ -47,7 +49,7 @@ def plot_differences(d1, d2, limits, title, filename, n_bins=100):
     plt.hist(d2, bins=n_bins, range=limits)
     plt.ylabel("noisy - original")
     plt.savefig(filename)
-    # plt.show()
+    plt.show()
 
 
 def print_line(values, feature_name, feature_index):
