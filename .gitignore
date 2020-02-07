@@ -13,3 +13,4 @@ app.db_save*
 /features/consonance_statistics
 /features/chords_and_times
 .Rhistory
+/validate_rhythm_features/
