@@ -20,8 +20,12 @@ MIDI_path = 'app/static/data/all_midi_cut'
 systems = ['kelz', 'lisu', 'google', 'cheng']
 fs = 100
 
+semitone_result = []
+octave_result = []
+third_harmonic_result = []
 
-for example in os.listdir(MIDI_path)[:10]:
+
+for example in os.listdir(MIDI_path)[:]:
     example_path = os.path.join(MIDI_path, example)  # folder path
     print('\n\npath = ' + example_path)
 
@@ -108,32 +112,35 @@ for example in os.listdir(MIDI_path)[:10]:
             # merge_ratio = merged_notes(notes_system, intervals_system, notes_target, intervals_target, match_on)
             # print('merged notes ratios: ' + str(merge_ratio[0]) + ', ' + str(merge_ratio[1]))
 
-            print('\n test rhythm =====================================================')
-            f1, f2 = rhythm_histogram(intervals_system, intervals_target, beats=quarter_times)
-            print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
-            print("rhythm flatness difference: " + str(f1-f2))
-            f1, f2 = rhythm_histogram(intervals_system, intervals_target)
-            print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
-            print("rhythm flatness difference: " + str(f1-f2))
-            f1, f2 = rhythm_histogram(intervals_system, intervals_target, noise=0.2)
-            print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
-            print("rhythm flatness difference: " + str(f1-f2))
+            # print('\n test rhythm =====================================================')
+            # f1, f2 = rhythm_histogram(intervals_system, intervals_target, beats=quarter_times)
+            # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
+            # print("rhythm flatness difference: " + str(f1-f2))
+            # f1, f2 = rhythm_histogram(intervals_system, intervals_target)
+            # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
+            # print("rhythm flatness difference: " + str(f1-f2))
+            # f1, f2 = rhythm_histogram(intervals_system, intervals_target, noise=0.2)
+            # print("logged spectral flatness: " + str(f1) + "(output)   " + str(f2) + "(target)")
+            # print("rhythm flatness difference: " + str(f1-f2))
 
-            stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target, beats=quarter_times)
-            print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
-            stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
-            print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
-            stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target, noise=0.2)
-            print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
+            # stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target, beats=quarter_times)
+            # print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
+            # stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target)
+            # print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
+            # stds_change, drifts = rhythm_dispersion(intervals_system, intervals_target, noise=0.2)
+            # print("std changes: " + str(stds_change) + "\ndrifts: " + str(drifts))
 
             # print('\n test specific_pitch ==================================================')
 
             # print('\n>>framewise>>')
-            # semitone = specific_pitch_framewise(system_pr, target_pr, fs, 1)
+            semitone = specific_pitch_framewise(system_pr, target_pr, fs, 1)
+            semitone_result.append(semitone)
             # print('semitone error: ' + str(semitone))
-            # octave = specific_pitch_framewise(system_pr, target_pr, fs, 12)
+            octave = specific_pitch_framewise(system_pr, target_pr, fs, 12)
+            octave_result.append(octave)
             # print('octave error: ' + str(octave))
-            # third_harmonic = specific_pitch_framewise(system_pr, target_pr, fs, 19)
+            third_harmonic = specific_pitch_framewise(system_pr, target_pr, fs, 19)
+            third_harmonic_result.append(third_harmonic)
             # print('third_harmonic: ' + str(third_harmonic))
 
             # print('\n>>notewise>>')
@@ -147,3 +154,27 @@ for example in os.listdir(MIDI_path)[:10]:
             # print('\n test dynamic features ==================================================')
             # print(chord_dissonance(notes_system, intervals_system, notes_target, intervals_target, example, system))
             # print(polyphony_level(notes_system, intervals_system, notes_target, intervals_target, example, system))
+
+
+def plot_hist(x1, x2):
+
+    plt.figure()
+    plt.subplot(211)
+    plt.hist(x1, bins=100)
+    plt.subplot(212)
+    plt.hist(x2, bins=100)
+    plt.show()
+
+semitone_result = np.array(semitone_result)
+octave_result = np.array(octave_result)
+third_harmonic_result = np.array(third_harmonic_result)
+# np.save("semitone_result.npy", semitone_result)
+# np.save("octave_result.npy", octave_result)
+# np.save("third_harmonic_result.npy", third_harmonic_result)
+
+print("{} {} {} {} {} {}".format(len(np.nonzero(semitone_result[:,0])), len(np.nonzero(semitone_result[:,1])), len(np.nonzero(octave_result[:,0])), len(np.nonzero(octave_result[:,1])), len(np.nonzero(third_harmonic_result[:,0])), len(np.nonzero(third_harmonic_result[:,1]))))
+
+
+plot_hist([x[0] for x in semitone_result], [x[1] for x in semitone_result])
+plot_hist([x[0] for x in octave_result], [x[1] for x in octave_result])
+plot_hist([x[0] for x in third_harmonic_result], [x[1] for x in third_harmonic_result])

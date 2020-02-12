@@ -9,7 +9,6 @@ app.db_save*
 *plots*
 /db_csv
 /precomputed_features
-/precomputed_features_cons_nozero
 /results_metric
 /features/consonance_statistics
 /features/consonance_statistics_no_empty_chords
@@ -17,3 +16,4 @@ app.db_save*
 .Rhistory
 /validate_rhythm_features_plots/
 /validate_rhythm_features_plots_update/
+/test_outputs
