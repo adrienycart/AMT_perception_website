@@ -1,26 +1,30 @@
 import cPickle as pickle
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import os
 from scipy.stats import ttest_1samp, ttest_ind
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from statsmodels.stats.anova import anova_lm
 import pandas as pd
-from matplotlib import rc
+
 
 plt.rcParams.update({'font.size': 13.5,'font.family' : 'serif'})
-rc('text', usetex=True)
+mpl.rc('text', usetex=True)
 
 # base_folder = "results_metric"
-# base_folder = "results_metric/10_folds"
-base_folder = "results_metric/20_folds_maxdiff4_cons_nozero"
-n_folds = 20
-
+# base_folder = "results_metric/20_folds"
+base_folder = "results_metric/20_folds_maxdiff4_cons_nozero_noconsdiff"
+if '10_folds' in base_folder:
+    n_folds=10
+elif '20_folds' in base_folder:
+    n_folds=20
+# All 81.3 & 87.4
 folders_to_compare = [
                         ["all_features","All"],
-                        # ["all_features_maxdiffic_2","All (Difficuly<5)"],
-                        # ["all_features_maxdiffic_4","All (Difficuly<3)"],
+                        ["all_features_maxdiffic_2","All (Difficuly<5)"],
+                        ["all_features_maxdiffic_4","All (Difficuly<3)"],
                         ["no_benchmark",'NoBench'],
                         ["only_benchmark",'BenchOnly'],
                         ["no_high_low",'NoHighLow'],
@@ -31,9 +35,12 @@ folders_to_compare = [
                         ["no_repeat",'NoRepeat'],
                         ["no_rhythm",'NoRhythm'],
                         ["no_consonance",'NoConsonance'],
+                        # ["no_consonance_diff",'All'],
                         # ["no_consonance_diff",'NoConsDiff'],
                         ["no_specific_consonance",'NoSpecCons'],
+                        # ["no_specific_consonance_out_key",'NoSpecConsOut'],
                         ["no_framewise",'NoFramewise'],
+                        # ["no_consonance_invalid",'NoInvalidCons'],
                         # ["no_useless",'NoUseless'],
 
                         ]
@@ -125,30 +132,59 @@ for i,(folder,name) in enumerate(folders_to_compare):
 
 
 sort_idx = np.argsort(results_avg_conf,)
+
+
+fig = plt.figure()
+gs = mpl.gridspec.GridSpec(1, 2,width_ratios=[10,1])
+ax = plt.subplot(gs[0])
+ax_c = plt.subplot(gs[1])
+
+color_bins = 5
+
 for i,idx in enumerate(sort_idx):
     if folders_to_compare[idx][1] == 'All':
         color = 'black'
     else:
-        color = 'tab:blue'
-    plt.barh(i,results_avg_conf[idx],color=color,edgecolor='black')
+        # color = 'tab:blue'
+        p_val_round = np.ceil(p_values_all[idx]*color_bins)/float(color_bins)
+        color = np.array([1.0,1,1])-(1-p_val_round)*np.array([0,1,1])
+    ax.barh(i,results_avg_conf[idx],color=color,edgecolor='black')
     significance = ''
     if p_values_all[idx] < 0.1:
         significance = '*'
     if p_values_all[idx] < 0.05:
+        # significance = r'\textbf{**}'
         significance = '**'
     if p_values_all[idx] < 0.01:
         significance = '***'
-    # if p_values_all[idx] < 0.01:
-    #     significance = '***'
-    plt.text(results_avg_conf[idx]+0.001,i,significance,verticalalignment='center')
+
+
+    ax.text(results_avg_conf[idx]+0.001,i,significance,verticalalignment='center',color='black',weight='bold')
 
     print os.path.basename(folders_to_compare[i][1]), np.round(results_avg[i]*100,1),"&", np.round(results_avg_conf[i]*100,1)
     # if 'all_features' == os.path.basename(folder):
     #     plt.plot([mean,mean],[0,len(folders_to_compare)],linestyle='--',color='grey')
 
-plt.yticks(range(len(folders_to_compare)),[folders_to_compare[sort_idx[i]][1] for i in range(len(folders_to_compare))])
-plt.plot([np.mean(results_F1_conf),np.mean(results_F1_conf)],[-0.5,len(folders_to_compare)-0.5],linestyle='--',color='black')
-plt.xlim([0.86,0.895])
-plt.xlabel(r'$A_{conf}$')
+ax.set_yticks(range(len(folders_to_compare)))
+ax.set_yticklabels([folders_to_compare[sort_idx[i]][1] for i in range(len(folders_to_compare))])
+ax.plot([np.mean(results_F1_conf),np.mean(results_F1_conf)],[-0.5,len(folders_to_compare)-0.5],linestyle='--',color='black')
+ax.set_xlim([0.86,0.895])
+ax.set_xlabel(r'$A_{conf}$')
+
+ticks = np.arange(0,1.1,1/float(color_bins))
+colors = np.array([1.0,1,1])-(1-ticks[1:,None])*np.array([0,1,1])
+
+cmap = mpl.colors.ListedColormap(colors)
+norm = mpl.colors.BoundaryNorm(ticks, cmap.N)
+cb2 = mpl.colorbar.ColorbarBase(ax_c, cmap=cmap,
+                                norm=norm,
+                                boundaries=ticks,
+                                # extend='both',
+                                ticks=ticks,
+                                spacing='proportional',
+                                # orientation='horizontal'
+                                )
+# cbar.set_ticks([0,0.5,1])
+# cbar.set_ticklabels([0,0.5,1])
 plt.tight_layout()
 plt.show()
