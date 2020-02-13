@@ -11,6 +11,11 @@ import statsmodels.formula.api as smf
 from sklearn.linear_model import LogisticRegression
 import pandas as pd
 
+import pretty_midi as pm
+import mir_eval
+from features.benchmark import notewise
+import features.utils as utils
+
 from config import MAX_ANSWERS
 
 
@@ -20,11 +25,24 @@ from config import MAX_ANSWERS
 ####### MIXED EFFECTS MODEL
 #################################################@
 
+filecp = codecs.open('db_csv/user_data.csv', encoding = 'utf-8')
+users = np.genfromtxt(filecp,dtype=object,delimiter=";")
+users = users[1:,:]
+filecp.close()
+
+
+filecp = codecs.open('db_csv/answers_data.csv', encoding = 'utf-8')
+answers = np.genfromtxt(filecp,dtype=object,delimiter=";")
+answers = answers[1:,:]
+filecp.close()
+
 
 AQ = pd.read_csv('db_csv/answers_data.csv',delimiter=';')
 
 results_dict = {}
 feature_dir = 'precomputed_features'
+
+midi_dir = 'app/static/data/all_midi_cut'
 
 systems = ['cheng','google',"kelz","lisu"]
 pairs = []
@@ -44,6 +62,7 @@ for example in np.unique(answers[:,1]):
 f_syst1 = []
 f_syst2 = []
 f_diff = []
+f_1_2 = []
 diff_f_highest = []
 diff_repeated = []
 best_highest = []
@@ -59,6 +78,19 @@ for row in answers:
         best_syst = row[3]
         worst_syst = row[3]
 
+    # midi_path1 = os.path.join(midi_dir,row[1],row[2]+'.mid')
+    # midi_data1 = pm.PrettyMIDI(midi_path1)
+    # notes1, intervals1 = utils.get_notes_intervals(midi_data1)
+    #
+    # midi_path2 = os.path.join(midi_dir,row[1],row[3]+'.mid')
+    # midi_data2 = pm.PrettyMIDI(midi_path2)
+    # notes2, intervals2 = utils.get_notes_intervals(midi_data2)
+    #
+    # match_on = mir_eval.transcription.match_notes(intervals1, notes1, intervals2, notes2, onset_tolerance=0.05, offset_ratio=None, pitch_tolerance=0.25)
+    # note = notewise(match_on,notes2,notes1)
+    # f_1_2 += [note[-1]]
+
+
     diff_f_highest += [results_dict[row[1]][best_syst]["high_n"][-1]-results_dict[row[1]][worst_syst]["high_n"][-1]]
     diff_repeated += [results_dict[row[1]][best_syst]["repeat"][-2]-results_dict[row[1]][worst_syst]["repeat"][-2]]
     best_highest += [results_dict[row[1]][best_syst]["high_n"][-1]]
@@ -70,7 +102,9 @@ data = {'f_system1':f_syst1,
         'diff_f_highest':diff_f_highest,
         'diff_repeated':diff_repeated,
         'best_highest':best_highest,
-        'best_repeated':best_repeated,}
+        'best_repeated':best_repeated,
+        # 'f_1_2':f_1_2
+        }
 data_f_mes = pd.DataFrame(data)
 
 
@@ -106,8 +140,11 @@ AQ_new.loc[reverse_idx, 'answer']=1- AQ_new["answer"][reverse_idx]
 # print AQ_new[['question_id','system1','system2','answer']]
 
 ### Only confident answers
-AQ_new = AQ_new[AQ_new['difficulty']<3]
+# AQ_new = AQ_new[AQ_new['difficulty']<3]
 # print AQ_new
+
+### Only when the difference in F-measure is small
+# AQ_new = AQ_new[AQ_new['f_diff']<0.1]
 
 
 ### Only kelz vs lisu
@@ -123,7 +160,7 @@ AQ_new = AQ_new[AQ_new['difficulty']<3]
 ## Also check multiple logistic regression
 
 ## Mixed Effects Model
-mixed = smf.mixedlm("answer ~ f_diff+f_system2+goldmsi+recognised+difficulty", AQ_new,groups='question_id')
+mixed = smf.mixedlm("difficulty ~ f_diff+f_system2+f_1_2+goldmsi+recognised+answer", AQ_new,groups='question_id')
 mixed_fit = mixed.fit()
 print(mixed_fit.summary())
 
