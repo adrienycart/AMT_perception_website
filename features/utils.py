@@ -102,3 +102,78 @@ def create_folder(folder):
             os.makedirs(folder)
         except:
             print("create folder error")
+
+
+def get_time(data,bar,beat,sub_beat):
+
+    first_sig = data.time_signature_changes[0]
+    if first_sig.numerator == 1 and first_sig.denominator == 4:
+        bar += 1
+
+    PPQ = data.resolution
+    downbeats = data.get_downbeats()
+    try:
+        bar_t = downbeats[bar]
+    except IndexError as e:
+        if bar == len(downbeats):
+            # Instead of the first beat of the bar after the last one (that doesn't exist),
+            # We take the before-last beat of the last bar
+            bar_t = downbeats[-1]
+            beat = 'last'
+        else:
+            raise e
+
+
+    time_sigs = data.time_signature_changes
+    last_sig = True
+    for i, sig in enumerate(time_sigs):
+        if sig.time > bar_t:
+            last_sig = False
+            break
+
+    if last_sig:
+        current_sig = time_sigs[i]
+    else:
+        current_sig = time_sigs[i-1]
+
+    if beat == 'last':
+        beat = current_sig.numerator - 1
+
+    try:
+        assert beat < current_sig.numerator
+    except AssertionError:
+        print(downbeats)
+        for sig in time_sigs:
+            print(sig)
+        print('-----------')
+        print(bar,beat, bar_t)
+        print(current_sig)
+        raise AssertionError
+
+    beat_ticks = PPQ * 4 / current_sig.denominator
+    tick = data.time_to_tick(bar_t) + beat * beat_ticks + sub_beat*beat_ticks/2
+    if tick != int(tick):
+        print(bar,beat,sub_beat)
+        print(current_sig)
+        print(tick)
+        raise TypeError('Tick is not int!!!')
+    else:
+        tick = int(tick)
+    time =data.tick_to_time(tick)
+
+    return time
+
+    
+def str_to_bar_beat(string):
+    if '.' in string:
+        str_split = string.split('.')
+        bar = int(str_split[0])
+        beat = int(str_split[1])
+        output = [bar,beat,0]
+
+        if len(str_split)>2:
+            sub_beat=int(str_split[2])
+            output[2] = sub_beat
+    else:
+        output = [int(string),0,0]
+    return output
