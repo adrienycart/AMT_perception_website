@@ -598,17 +598,18 @@ def write_sound(sound,filename):
 #                     # "app/static/data/onsets_and_frames_outputs",
 #                     # "app/static/data/kelz_outputs",
 #                     # "app/static/data/lisu_outputs"
-#                     "app/static/data/A-MAPS_1.2"
+#                     # "app/static/data/A-MAPS_1.2"
 #                     ]
 # MIDI_names = [
 #                 # "cheng",
 #                 # "google",
 #                 # "kelz",
 #                 # "lisu",
-#                 "target_no_pedal",
+#                 # "target_no_pedal",
 #                 ]
 # csv_folder = 'app/static/data/cut_points'
 # dest_folder = 'app/static/data/all_midi_cut'
+# cut_points_seconds_folder = 'app/static/data/cut_points_seconds'
 #
 # write_AMAPS = False
 #
@@ -630,6 +631,8 @@ def write_sound(sound,filename):
 #              midi = pm.PrettyMIDI(os.path.join(input_folder,filename))
 #              midis += [midi]
 #
+#         cut_points_seconds = []
+#
 #         for i, (start_str, end_str) in enumerate(cut_points):
 #
 #             save_folder = os.path.join(dest_folder,os.path.splitext(filename)[0]+'_'+str(i))
@@ -643,6 +646,8 @@ def write_sound(sound,filename):
 #
 #             assert start_t < end_t
 #
+#             cut_points_seconds += [[start_t,end_t]]
+#
 #             if write_AMAPS:
 #                 amaps_data_cut = cut_midi(amaps_data,start_t,end_t)
 #                 amaps_data_cut.write(os.path.join(save_folder,'target.mid'))
@@ -654,7 +659,10 @@ def write_sound(sound,filename):
 #             # f= open(os.path.join(save_folder,"duration.txt"),"w+")
 #             # f.write(str(end_t-start_t))
 #             # f.close()
-
+#
+#         cut_points_seconds = np.array(cut_points_seconds)
+#         np.savetxt(os.path.join(cut_points_seconds_folder,filename.replace('.mid','.csv')),cut_points_seconds)
+#
 
 
 # ##############################################################
