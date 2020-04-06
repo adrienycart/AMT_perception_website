@@ -1,11 +1,11 @@
 # Automatic Music Transcription listening tests website
 
 This repository holds the code for the Automatic Music Transcription listening tests website.
-The website uses Flask. The database is manages using SQLAlchemy.
+The website uses Flask. The database is managed using SQLAlchemy.
 
 ## Requirements
 
-This project uses Python 2.7.15. The list of required depencies is available in requirements.txt
+This project uses Python 2.7.15. The list of required dependencies is available in `requirements.txt`
 To install the list of dependencies, run:
 `pip install -r requirements.txt`
 
@@ -23,3 +23,8 @@ Once the environment is set up, create the database with: `flask db init`
 Then, start the website with: `flask run`
 
 You can navigate the website at [http://localhost:5000](http://localhost:5000)
+
+## More info
+
+This website's design was heavily inspired by Miguel Grinberg's [Flask Mega Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world).
+This is a very useful resource to understand Flask in general, and in particular how this specific website was designed.
