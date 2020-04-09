@@ -1,11 +1,23 @@
 # Automatic Music Transcription listening tests website
 
-This repository holds the code for the Automatic Music Transcription listening tests website.
-The website uses Flask. The database is managed using SQLAlchemy.
+This repository holds the code for the website used to run the listening tests described in:
+
+Adrien Ycart, Lele Liu, Emmanouil Benetos and Marcus Pearce. "Investigating the Perceptual Validity of Evaluation Metrics for Automatic Piano Music Transcription", _Transactions of the International Society for Music Information Retrieval (TISMIR)_, Under Review.
+
+```  
+    @article{ycart2019PEAMT,
+       Author = {Ycart, Adrien and Liu, Lele and Benetos, Emmanouil and Pearce, Marcus},    
+       Booktitle = {Transactions of the International Society for Music Information Retrieval (TISMIR)},    
+       Title = {Investigating the Perceptual Validity of Evaluation Metrics for Automatic Piano Music Transcription},       
+    }  
+```
+
+
+
 
 ## Requirements
 
-This project uses Python 2.7.15. The list of required dependencies is available in `requirements.txt`
+This project uses Python 2.7.15. The website is designed using Flask. The database is managed using SQLAlchemy. The list of required dependencies is available in `requirements.txt`
 To install the list of dependencies, run:
 `pip install -r requirements.txt`
 
