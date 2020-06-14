@@ -2,16 +2,19 @@
 
 This repository holds the code for the website used to run the listening tests described in:
 
-Adrien Ycart, Lele Liu, Emmanouil Benetos and Marcus Pearce. "Investigating the Perceptual Validity of Evaluation Metrics for Automatic Piano Music Transcription", _Transactions of the International Society for Music Information Retrieval (TISMIR)_, Accepted.
+Adrien Ycart, Lele Liu, Emmanouil Benetos and Marcus Pearce, 2020. "Investigating the Perceptual Validity of Evaluation Metrics for Automatic Piano Music Transcription", _Transactions of the International Society for Music Information Retrieval (TISMIR)_, 3(1), pp.68–81.
 
 ```  
     @article{ycart2019PEAMT,
        Author = {Ycart, Adrien and Liu, Lele and Benetos, Emmanouil and Pearce, Marcus},    
        Booktitle = {Transactions of the International Society for Music Information Retrieval (TISMIR)},    
-       Title = {Investigating the Perceptual Validity of Evaluation Metrics for Automatic Piano Music Transcription},  
+       Title = {Investigating the Perceptual Validity of Evaluation Metrics for Automatic Piano Music Transcription},       
        Year = {2020},
+       Volume = {3},
+       Issue = {1},
+       Pages = {68--81},
+       DOI = {http://doi.org/10.5334/tismir.57},
     }  
-```
 
 
 
